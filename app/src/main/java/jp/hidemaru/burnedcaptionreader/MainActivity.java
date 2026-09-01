@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,8 +77,22 @@ public final class MainActivity extends Activity {
         root.addView(subtitle);
 
         root.addView(section("使い方"));
-        root.addView(text("1. 「画面共有を開始」を押す\n2. ブラウザでYouTube動画を再生する\n3. 通知の「字幕領域を選択」から字幕を囲む\n4. ブラウザへ戻る", 16,
+        root.addView(text("1. 「画面共有を開始」を押す\n2. ブラウザでYouTube動画を全画面再生する\n3. 字幕位置は自動的に学習されます\n4. 誤検出するときだけ手動範囲を使います", 16,
                 Color.rgb(31, 52, 64)));
+
+        root.addView(section("字幕の検出範囲"));
+        Spinner regionSpinner = new Spinner(this);
+        String[] regionModes = {"自動検出（推奨）", "手動で指定した範囲"};
+        regionSpinner.setAdapter(new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_dropdown_item, regionModes));
+        regionSpinner.setSelection(preferences.isAutoRegion() ? 0 : 1);
+        regionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                preferences.setAutoRegion(position == 0);
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        root.addView(regionSpinner);
 
         startButton = primaryButton("画面共有を開始");
         startButton.setOnClickListener(v -> beginStartFlow());
@@ -87,7 +102,7 @@ public final class MainActivity extends Activity {
         browserButton.setOnClickListener(v -> openBrowser());
         addWithTopMargin(root, browserButton, 8);
 
-        Button roiButton = normalButton("現在の画面から字幕領域を選択");
+        Button roiButton = normalButton("手動で字幕領域を指定（補助）");
         roiButton.setOnClickListener(v -> openRoiEditor());
         addWithTopMargin(root, roiButton, 8);
 
@@ -107,16 +122,30 @@ public final class MainActivity extends Activity {
         TextView modeLabel = text("字幕が続いたとき", 14, Color.rgb(56, 74, 85));
         root.addView(modeLabel);
         Spinner modeSpinner = new Spinner(this);
-        String[] modes = {"連続読み上げ（順番に読む）", "最新字幕優先（途中で切り替える）"};
+        String[] modes = {
+                "追従バランス（今の文を完了し、待機は最新1件）",
+                "最新字幕優先（途中で切り替える）",
+                "完全読み上げ（対応ブラウザを一時停止）"
+        };
         modeSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, modes));
-        modeSpinner.setSelection(AppPreferences.MODE_LATEST.equals(preferences.getSpeechMode()) ? 1 : 0);
+        modeSpinner.setSelection(preferences.isAutoPauseBrowser() ? 2
+                : AppPreferences.MODE_LATEST.equals(preferences.getSpeechMode()) ? 1 : 0);
         modeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                preferences.setSpeechMode(position == 1 ? AppPreferences.MODE_LATEST : AppPreferences.MODE_CONTINUOUS);
+                preferences.setSpeechMode(position == 1
+                        ? AppPreferences.MODE_LATEST : AppPreferences.MODE_BALANCED);
+                preferences.setAutoPauseBrowser(position == 2);
             }
             @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
         root.addView(modeSpinner);
+
+        Button mediaAccessButton = normalButton("ブラウザ自動停止の権限を設定");
+        mediaAccessButton.setOnClickListener(v -> openNotificationAccessSettings());
+        addWithTopMargin(root, mediaAccessButton, 8);
+        TextView mediaNote = text("「完全読み上げ」を使う場合だけ必要です。通知本文は読み取りません。ブラウザの再生・停止権限の取得に使用します。", 13,
+                Color.rgb(82, 99, 108));
+        root.addView(mediaNote);
 
         rateValue = valueText();
         root.addView(labelValue("読み上げ速度", rateValue));
@@ -195,7 +224,10 @@ public final class MainActivity extends Activity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(service);
         else startService(service);
         AppState.setStatus("画面共有を準備しています");
-        Toast.makeText(this, "ブラウザへ移動し、通知から字幕領域を選択してください", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, preferences.isAutoRegion()
+                ? "ブラウザへ移動すると字幕位置を自動検出します"
+                : "ブラウザへ移動し、通知から字幕領域を指定してください",
+                Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -204,7 +236,7 @@ public final class MainActivity extends Activity {
         if (requestCode == REQUEST_NOTIFICATIONS && continueStartAfterNotificationRequest) {
             continueStartAfterNotificationRequest = false;
             if (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "ブラウザ上から字幕領域を選択するため、通知の許可が必要です", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "画面共有の動作状況を表示するため、通知の許可が必要です", Toast.LENGTH_LONG).show();
                 return;
             }
             requestScreenCapture();
@@ -226,6 +258,14 @@ public final class MainActivity extends Activity {
             return;
         }
         startActivity(new Intent(this, RoiEditorActivity.class));
+    }
+
+    private void openNotificationAccessSettings() {
+        try {
+            startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
+        } catch (RuntimeException error) {
+            Toast.makeText(this, "通知へのアクセス設定を開けませんでした", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void stopCapture() {

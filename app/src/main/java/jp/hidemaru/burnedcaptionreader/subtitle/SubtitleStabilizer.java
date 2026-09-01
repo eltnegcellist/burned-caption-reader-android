@@ -13,6 +13,7 @@ public final class SubtitleStabilizer {
         public double similarityThreshold = 0.86;
         public double committedSimilarity = 0.92;
         public int minStableObservations = 2;
+        public long repeatAfterMs = 60_000L;
     }
 
     private static final class Variant {
@@ -32,6 +33,7 @@ public final class SubtitleStabilizer {
     private State state = State.EMPTY;
     private Candidate candidate;
     private SubtitleEvent lastCommitted;
+    private long lastCommittedSeenAt = -1L;
     private long blankSince = -1L;
     private long sequence;
 
@@ -50,7 +52,8 @@ public final class SubtitleStabilizer {
             return null;
         }
 
-        if (lastCommitted != null && matchesCommitted(text)) {
+        if (lastCommitted != null && matchesCommitted(timestamp, text)) {
+            lastCommittedSeenAt = timestamp;
             state = State.WAITING_CHANGE;
             candidate = null;
             return null;
@@ -99,6 +102,7 @@ public final class SubtitleStabilizer {
                 Math.round(meanConfidence * 10.0) / 10.0
         );
         lastCommitted = event;
+        lastCommittedSeenAt = timestamp;
         candidate = null;
         state = State.COMMITTED;
         return event;
@@ -108,8 +112,7 @@ public final class SubtitleStabilizer {
         if (blankSince < 0L) blankSince = timestamp;
         if (timestamp - blankSince >= config.blankResetMs) {
             candidate = null;
-            lastCommitted = null;
-            state = State.EMPTY;
+            state = lastCommitted == null ? State.EMPTY : State.WAITING_CHANGE;
         }
     }
 
@@ -117,6 +120,7 @@ public final class SubtitleStabilizer {
         state = State.EMPTY;
         candidate = null;
         lastCommitted = null;
+        lastCommittedSeenAt = -1L;
         blankSince = -1L;
     }
 
@@ -165,8 +169,21 @@ public final class SubtitleStabilizer {
         return b.startsWith(a) && b.codePointCount(0, b.length()) > a.codePointCount(0, a.length());
     }
 
-    private boolean matchesCommitted(String text) {
-        return Similarity.areEquivalent(text, lastCommitted.getText(), config.committedSimilarity)
-                || Similarity.isPrefixRelation(text, lastCommitted.getText());
+    private boolean matchesCommitted(long timestamp, String text) {
+        if (lastCommittedSeenAt >= 0L
+                && timestamp - lastCommittedSeenAt >= config.repeatAfterMs) {
+            return false;
+        }
+        if (Similarity.areEquivalent(text, lastCommitted.getText(), config.committedSimilarity)) {
+            return true;
+        }
+        String current = SubtitleNormalizer.comparisonKey(text);
+        String committed = SubtitleNormalizer.comparisonKey(lastCommitted.getText());
+        int shortLength = Math.min(current.codePointCount(0, current.length()),
+                committed.codePointCount(0, committed.length()));
+        int longLength = Math.max(current.codePointCount(0, current.length()),
+                committed.codePointCount(0, committed.length()));
+        return longLength > 0 && shortLength >= Math.ceil(longLength * 0.65)
+                && Similarity.isPrefixRelation(text, lastCommitted.getText());
     }
 }

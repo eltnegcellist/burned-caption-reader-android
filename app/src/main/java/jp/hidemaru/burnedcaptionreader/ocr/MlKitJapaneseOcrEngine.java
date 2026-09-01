@@ -21,37 +21,66 @@ public final class MlKitJapaneseOcrEngine implements OcrEngine {
     public void recognize(Bitmap bitmap, Consumer<OcrResult> onSuccess, Consumer<Exception> onError) {
         InputImage image = InputImage.fromBitmap(bitmap, 0);
         recognizer.process(image)
-                .addOnSuccessListener(result -> onSuccess.accept(toResult(result)))
+                .addOnSuccessListener(result -> onSuccess.accept(
+                        toResult(result, bitmap.getWidth(), bitmap.getHeight())))
                 .addOnFailureListener(onError::accept);
     }
 
-    private OcrResult toResult(Text result) {
-        List<Text.Line> lines = new ArrayList<>();
-        for (Text.TextBlock block : result.getTextBlocks()) {
-            lines.addAll(block.getLines());
+    private OcrResult toResult(Text result, int imageWidth, int imageHeight) {
+        final class IndexedLine {
+            final int blockIndex;
+            final Text.Line line;
+            IndexedLine(int blockIndex, Text.Line line) {
+                this.blockIndex = blockIndex;
+                this.line = line;
+            }
+        }
+
+        List<IndexedLine> lines = new ArrayList<>();
+        List<Text.TextBlock> blocks = result.getTextBlocks();
+        for (int blockIndex = 0; blockIndex < blocks.size(); blockIndex++) {
+            for (Text.Line line : blocks.get(blockIndex).getLines()) {
+                lines.add(new IndexedLine(blockIndex, line));
+            }
         }
         lines.sort(Comparator
-                .comparingInt((Text.Line line) -> top(line.getBoundingBox()))
-                .thenComparingInt(line -> left(line.getBoundingBox())));
+                .comparingInt((IndexedLine value) -> top(value.line.getBoundingBox()))
+                .thenComparingInt(value -> left(value.line.getBoundingBox())));
 
         StringBuilder text = new StringBuilder();
         double confidenceTotal = 0.0;
         int confidenceCount = 0;
-        for (Text.Line line : lines) {
+        List<OcrLine> recognizedLines = new ArrayList<>();
+        for (IndexedLine indexed : lines) {
+            Text.Line line = indexed.line;
             String value = line.getText().trim();
             if (value.isEmpty()) continue;
             if (text.length() > 0) text.append('\n');
             text.append(value);
+            double lineConfidenceTotal = 0.0;
+            int lineConfidenceCount = 0;
             for (Text.Element element : line.getElements()) {
                 Float confidence = element.getConfidence();
                 if (confidence != null) {
                     confidenceTotal += confidence * 100.0;
                     confidenceCount++;
+                    lineConfidenceTotal += confidence * 100.0;
+                    lineConfidenceCount++;
                 }
+            }
+            Rect box = line.getBoundingBox();
+            if (box != null) {
+                double lineConfidence = lineConfidenceCount == 0
+                        ? 100.0 : lineConfidenceTotal / lineConfidenceCount;
+                recognizedLines.add(new OcrLine(indexed.blockIndex, value, lineConfidence,
+                        box.left / (float) Math.max(1, imageWidth),
+                        box.top / (float) Math.max(1, imageHeight),
+                        box.right / (float) Math.max(1, imageWidth),
+                        box.bottom / (float) Math.max(1, imageHeight)));
             }
         }
         double confidence = confidenceCount == 0 ? 100.0 : confidenceTotal / confidenceCount;
-        return new OcrResult(text.toString(), confidence);
+        return new OcrResult(text.toString(), confidence, recognizedLines);
     }
 
     private int top(Rect rect) {

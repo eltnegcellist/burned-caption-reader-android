@@ -1,34 +1,28 @@
-# Android MVP 実装状況
+# Android v0.2.0 実装状況
 
 ## 実装済み
 
-- MediaProjectionの許可取得とForeground Service
-- ImageReaderによる約3fpsの画面フレーム取得
-- Android 14以降の1セッション1回の `createVirtualDisplay` 制約に対応
-- 画面回転・共有対象サイズ変更時のVirtualDisplayリサイズ
-- 通知から直前のブラウザ画面を開くROI選択
-- バンドル版ML Kit日本語OCR（交換可能な `OcrEngine`）
-- OCR中の次フレーム破棄、ROIのみのOCR、入力画像サイズ制限
-- 正規化、Levenshtein類似度、prefix成長、安定待ち、重複除去
-- 空白期間後に同じ字幕が再登場するケースへの状態リセット
-- Android標準TTS（交換可能な `SpeechEngine`）
-- 連続読み上げ / 最新字幕優先、読み上げ速度変更
-- OCR結果、確定字幕、内部状態のデバッグ表示
-- Subtitle StabilizerのJUnitテスト
-- GitHub Actionsによるユニットテスト・Debug APK生成
+- MediaProjection / Foreground Service / 画面回転対応
+- バンドル版ML Kit日本語OCR
+- OCR行ごとの文字列、confidence、正規化座標の保持
+- 画面内の位置・大きさ・時間変化による自動字幕帯トラッカー
+- 自動検出と手動ROIの切り替え
+- OCR空白を挟んでも保持されるSubtitle Stabilizer
+- 60秒・最大64件の類似字幕重複除去
+- 現在の発話を完了し、待機は最新1件だけにする追従バランス
+- 最大2件の有界連続キュー、遅延時の発話速度自動補正
+- 最新字幕優先
+- 通知リスナー権限を利用したブラウザMediaSessionの任意停止・再開
+- 自動字幕帯、重複判定、途中字幕、OCR揺れ、発話キューのJUnitテスト
+- GitHub ActionsによるテストとDebug APK生成
 
-## 検証状況
+## v0.2.0実機評価項目
 
-- 既存PC版のロジックテスト: 10件すべて成功
-- Androidの純粋ロジック: PC版テストを移植し、追加ケースを収録
-- Android APK: この作業環境にAndroid SDK・Gradle・Javaコンパイラがないため、ローカルビルドは未実行
+1. 自動検出でROI指定なしに一般的な全画面YouTube字幕を選べるか
+2. ロゴ、ブラウザUI、動画内の商品名を字幕から除外できるか
+3. OCRの瞬間的な空白や揺れで同じ字幕を再読しないか
+4. 追従バランスで発話遅延が増え続けないか
+5. Chrome / Samsung Internetで完全読み上げ時に停止・再開できるか
+6. 10〜20分動作時の発熱・電池消費
 
-APKのコンパイル検証はGitHub Actionsの `Build Android APK` を実行して行います。成功後、artifactの `burned-caption-reader-debug-apk` にインストール用APKが入ります。
-
-## 実機で優先して確認すること
-
-1. Galaxy S25で画面共有許可後もForeground Serviceが継続するか
-2. Chrome / Samsung InternetのYouTube画面が通知経由のROI選択に正しく残るか
-3. 1080p動画でOCR確定から読み上げ開始まで概ね1秒以内か
-4. 白文字・黒縁字幕で同じ字幕を繰り返し読まないか
-5. 10〜20分再生時の発熱、電池消費、TTS遅延
+自動検出の閾値は実動画の失敗例を基に調整します。誤認識が起きた場合は、動画の画面構成、誤って読んだ文字、字幕のおおよその位置が分かるスクリーンショットを記録します。

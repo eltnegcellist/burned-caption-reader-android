@@ -31,6 +31,7 @@ import android.view.WindowManager;
 import jp.hidemaru.burnedcaptionreader.ocr.MlKitJapaneseOcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
+import jp.hidemaru.burnedcaptionreader.subtitle.AutoSubtitleRegionTracker;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleEvent;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleEventManager;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleNormalizer;
@@ -49,15 +50,18 @@ public final class CaptureService extends Service {
 
     private static final String CHANNEL_ID = "caption_reader_capture";
     private static final int NOTIFICATION_ID = 7101;
-    private static final long SAMPLE_INTERVAL_MS = 330L;
+    private static final long MANUAL_SAMPLE_INTERVAL_MS = 330L;
+    private static final long AUTO_SAMPLE_INTERVAL_MS = 480L;
 
     private final AtomicBoolean ocrBusy = new AtomicBoolean(false);
     private final SubtitleStabilizer.Config stabilizerConfig = new SubtitleStabilizer.Config();
-    private final SubtitleEventManager eventManager = new SubtitleEventManager(8_000L);
+    private final SubtitleEventManager eventManager = new SubtitleEventManager(60_000L);
+    private final AutoSubtitleRegionTracker regionTracker = new AutoSubtitleRegionTracker();
 
     private AppPreferences preferences;
     private OcrEngine ocrEngine;
     private SpeechEngine speechEngine;
+    private BrowserMediaController browserMediaController;
     private SubtitleStabilizer stabilizer;
     private HandlerThread captureThread;
     private Handler captureHandler;
@@ -77,6 +81,12 @@ public final class CaptureService extends Service {
         preferences = new AppPreferences(this);
         ocrEngine = new MlKitJapaneseOcrEngine();
         speechEngine = new AndroidTtsSpeaker(this);
+        browserMediaController = new BrowserMediaController(this);
+        speechEngine.setListener(speaking -> {
+            if (!speaking && browserMediaController != null) {
+                browserMediaController.resumeIfPausedByUs();
+            }
+        });
         stabilizerConfig.stableMs = preferences.getStableMs();
         stabilizer = new SubtitleStabilizer(stabilizerConfig);
         captureThread = new HandlerThread("caption-frame-capture");
@@ -149,9 +159,10 @@ public final class CaptureService extends Service {
                 captureHandler
         );
         AppState.setRunning(true);
-        AppState.setStatus(preferences.hasRoi()
-                ? "字幕領域を監視しています"
-                : "ブラウザへ移動し、通知から字幕領域を選択してください");
+        AppState.setStatus(preferences.isAutoRegion()
+                ? "字幕位置を自動検出しています"
+                : preferences.hasRoi() ? "手動字幕領域を監視しています"
+                : "通知から字幕領域を指定してください");
         updateNotification(AppState.getStatus());
     }
 
@@ -167,27 +178,31 @@ public final class CaptureService extends Service {
             image = reader.acquireLatestImage();
             if (image == null) return;
             long now = SystemClock.elapsedRealtime();
-            if (now - lastSampleAt < SAMPLE_INTERVAL_MS) return;
+            boolean automatic = preferences.isAutoRegion();
+            long sampleInterval = automatic ? AUTO_SAMPLE_INTERVAL_MS : MANUAL_SAMPLE_INTERVAL_MS;
+            if (now - lastSampleAt < sampleInterval) return;
             lastSampleAt = now;
 
             Bitmap frame = imageToBitmap(image);
             if (frame == null) return;
             AppState.setLatestFrame(frame);
 
-            if (!preferences.hasRoi()) return;
+            if (!automatic && !preferences.hasRoi()) return;
             int currentRoiVersion = preferences.getRoiVersion();
             if (currentRoiVersion != roiVersion) {
                 roiVersion = currentRoiVersion;
                 stabilizer.reset();
-                eventManager.reset();
+                regionTracker.reset();
             }
             stabilizerConfig.stableMs = preferences.getStableMs();
             if (!ocrBusy.compareAndSet(false, true)) return;
 
-            Bitmap roi = cropRoi(frame, preferences.getRoi());
-            Bitmap prepared = resizeForOcr(roi);
-            if (prepared != roi) roi.recycle();
-            recognize(prepared, now);
+            Bitmap source = automatic
+                    ? cropRoi(frame, new RectF(0.02f, 0.035f, 0.98f, 0.96f))
+                    : cropRoi(frame, preferences.getRoi());
+            Bitmap prepared = resizeForOcr(source, automatic ? 1_100 : 1_800);
+            if (prepared != source) source.recycle();
+            recognize(prepared, now, automatic);
         } catch (RuntimeException error) {
             AppState.setStatus("画面処理エラー: " + safeMessage(error));
             ocrBusy.set(false);
@@ -196,11 +211,11 @@ public final class CaptureService extends Service {
         }
     }
 
-    private void recognize(Bitmap bitmap, long timestamp) {
+    private void recognize(Bitmap bitmap, long timestamp, boolean automatic) {
         ocrEngine.recognize(bitmap,
                 result -> {
                     try {
-                        handleOcrResult(result, timestamp);
+                        handleOcrResult(result, timestamp, automatic);
                     } finally {
                         bitmap.recycle();
                         ocrBusy.set(false);
@@ -213,11 +228,26 @@ public final class CaptureService extends Service {
                 });
     }
 
-    private void handleOcrResult(OcrResult result, long timestamp) {
-        AppState.setLastOcr(result.getText());
-        SubtitleEvent candidate = stabilizer.observe(timestamp, result.getText(), result.getConfidence());
+    private void handleOcrResult(OcrResult result, long timestamp, boolean automatic) {
+        String observedText = result.getText();
+        double confidence = result.getConfidence();
+        String regionStatus = "手動範囲";
+        if (automatic) {
+            AutoSubtitleRegionTracker.Selection selection = regionTracker.select(timestamp, result);
+            if (selection == null) {
+                AppState.setLastOcr(result.getText());
+                stabilizer.observe(timestamp, "", 100.0);
+                AppState.setStatus("自動字幕帯を学習中");
+                return;
+            }
+            observedText = selection.getText();
+            confidence = selection.getConfidence();
+            regionStatus = selection.isLocked() ? "自動字幕帯を追跡中" : "自動字幕候補";
+        }
+        AppState.setLastOcr(observedText);
+        SubtitleEvent candidate = stabilizer.observe(timestamp, observedText, confidence);
         if (candidate == null) {
-            AppState.setStatus("字幕を監視中（" + stateLabel(stabilizer.getState()) + "）");
+            AppState.setStatus(regionStatus + "（" + stateLabel(stabilizer.getState()) + "）");
             return;
         }
         SubtitleEvent accepted = eventManager.accept(candidate);
@@ -226,10 +256,14 @@ public final class CaptureService extends Service {
         String speechText = SubtitleNormalizer.toSpeechText(accepted.getText());
         SpeechEngine.Mode mode = AppPreferences.MODE_LATEST.equals(preferences.getSpeechMode())
                 ? SpeechEngine.Mode.LATEST
-                : SpeechEngine.Mode.CONTINUOUS;
+                : SpeechEngine.Mode.BALANCED;
+        boolean pauseRequested = preferences.isAutoPauseBrowser();
+        boolean paused = pauseRequested && browserMediaController.pauseBrowser();
         speechEngine.speak(speechText, mode, preferences.getSpeechRate());
         AppState.setLastSpoken(accepted.getText());
-        AppState.setStatus("読み上げました");
+        AppState.setStatus(pauseRequested && !paused
+                ? "読み上げ中（ブラウザを自動停止できませんでした）"
+                : "読み上げ中");
         updateNotification("読み上げ: " + oneLine(accepted.getText()));
     }
 
@@ -261,10 +295,10 @@ public final class CaptureService extends Service {
         return output;
     }
 
-    private Bitmap resizeForOcr(Bitmap bitmap) {
+    private Bitmap resizeForOcr(Bitmap bitmap, int maxWidth) {
         int width = bitmap.getWidth();
         float scale = 1f;
-        if (width > 1_800) scale = 1_800f / width;
+        if (width > maxWidth) scale = maxWidth / (float) width;
         else if (width < 700) scale = Math.min(2f, 700f / width);
         if (Math.abs(scale - 1f) < 0.01f) return bitmap;
         return Bitmap.createScaledBitmap(bitmap, Math.round(width * scale),
@@ -305,7 +339,7 @@ public final class CaptureService extends Service {
         }
         AppState.clearFrame();
         stabilizer.reset();
-        eventManager.reset();
+        regionTracker.reset();
     }
 
     private void updateCaptureSize() {
@@ -368,7 +402,7 @@ public final class CaptureService extends Service {
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
                 .setCategory(Notification.CATEGORY_SERVICE)
-                .addAction(new Notification.Action.Builder(null, "字幕領域を選択", selectRoi).build())
+                .addAction(new Notification.Action.Builder(null, "手動で範囲指定", selectRoi).build())
                 .addAction(new Notification.Action.Builder(null, "停止", stop).build())
                 .build();
     }
@@ -402,6 +436,10 @@ public final class CaptureService extends Service {
         AppState.setRunning(false);
         AppState.setStatus("停止中");
         if (speechEngine != null) speechEngine.close();
+        if (browserMediaController != null) {
+            browserMediaController.resumeIfPausedByUs();
+            browserMediaController.release();
+        }
         if (ocrEngine != null) ocrEngine.close();
         if (imageReader != null) {
             imageReader.setOnImageAvailableListener(null, null);

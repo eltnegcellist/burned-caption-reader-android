@@ -61,7 +61,7 @@ public class SubtitleStabilizerTest {
     }
 
     @Test
-    public void sameTextCanReturnAfterBlankGap() {
+    public void intermittentBlankDoesNotCauseDuplicateReading() {
         SubtitleStabilizer stabilizer = create();
         stabilizer.observe(0, "繰り返す字幕", 90);
         stabilizer.observe(150, "繰り返す字幕", 90);
@@ -70,7 +70,24 @@ public class SubtitleStabilizerTest {
         stabilizer.observe(1_200, "", 100);
         stabilizer.observe(1_300, "繰り返す字幕", 90);
         stabilizer.observe(1_500, "繰り返す字幕", 90);
-        assertTrue(stabilizer.observe(1_650, "繰り返す字幕", 90) != null);
+        assertNull(stabilizer.observe(1_650, "繰り返す字幕", 90));
+    }
+
+    @Test
+    public void sameTextMayReturnAfterLongAbsence() {
+        SubtitleStabilizer.Config config = new SubtitleStabilizer.Config();
+        config.stableMs = 300L;
+        config.minStableObservations = 2;
+        config.repeatAfterMs = 1_000L;
+        SubtitleStabilizer stabilizer = new SubtitleStabilizer(config);
+        stabilizer.observe(0, "後で繰り返す字幕", 90);
+        stabilizer.observe(150, "後で繰り返す字幕", 90);
+        assertTrue(stabilizer.observe(350, "後で繰り返す字幕", 90) != null);
+        stabilizer.observe(500, "", 100);
+        stabilizer.observe(1_200, "", 100);
+        stabilizer.observe(1_500, "後で繰り返す字幕", 90);
+        stabilizer.observe(1_700, "後で繰り返す字幕", 90);
+        assertTrue(stabilizer.observe(1_850, "後で繰り返す字幕", 90) != null);
     }
 
     @Test

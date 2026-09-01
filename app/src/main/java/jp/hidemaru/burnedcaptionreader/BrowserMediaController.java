@@ -1,11 +1,11 @@
 package jp.hidemaru.burnedcaptionreader;
 
-import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
+import android.provider.Settings;
 import java.util.List;
 import java.util.Locale;
 
@@ -23,7 +23,16 @@ public final class BrowserMediaController {
     }
 
     public boolean hasNotificationAccess() {
-        return NotificationManager.getEnabledListenerPackages(context).contains(context.getPackageName());
+        String enabled = Settings.Secure.getString(
+                context.getContentResolver(), "enabled_notification_listeners");
+        if (enabled == null || enabled.isEmpty()) return false;
+        for (String value : enabled.split(":")) {
+            ComponentName component = ComponentName.unflattenFromString(value);
+            if (component != null && context.getPackageName().equals(component.getPackageName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public synchronized boolean pauseBrowser() {

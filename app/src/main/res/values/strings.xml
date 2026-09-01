@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">焼き付け字幕リーダー</string>
+    <string name="notification_channel_name">字幕読み上げ</string>
+    <string name="notification_channel_description">画面内の焼き付け字幕を読み上げています</string>
+</resources>

@@ -20,6 +20,9 @@ public class AutoSubtitleRegionTrackerTest {
 
         AutoSubtitleRegionTracker.Selection changed = tracker.select(1_000L,
                 frame("次に債券について説明します"));
+        assertNull(changed);
+        changed = tracker.select(1_500L,
+                frame("次に債券について説明します"));
         assertEquals("次に債券について説明します", changed.getText());
         assertTrue(changed.isLocked());
     }
@@ -78,6 +81,9 @@ public class AutoSubtitleRegionTrackerTest {
 
         AutoSubtitleRegionTracker.Selection changed = tracker.select(1_000L,
                 upperCaptionFrame("字幕の位置を時間変化から学習します"), true);
+        assertNull(changed);
+        changed = tracker.select(1_500L,
+                upperCaptionFrame("字幕の位置を時間変化から学習します"), true);
         assertEquals("字幕の位置を時間変化から学習します", changed.getText());
         assertTrue(changed.isLocked());
     }
@@ -91,6 +97,9 @@ public class AutoSubtitleRegionTrackerTest {
         assertNull(tracker.select(500L, first, true));
 
         AutoSubtitleRegionTracker.Selection changed = tracker.select(1_000L,
+                singleLine("次へ進みます", 0.38f, 0.48f, 0.62f, 0.55f), true);
+        assertNull(changed);
+        changed = tracker.select(1_500L,
                 singleLine("次へ進みます", 0.38f, 0.48f, 0.62f, 0.55f), true);
         assertEquals("次へ進みます", changed.getText());
         assertTrue(changed.isLocked());
@@ -106,6 +115,47 @@ public class AutoSubtitleRegionTrackerTest {
                 singleLine("防水性熊", 0.40f, 0.48f, 0.60f, 0.55f), true));
         assertNull(tracker.select(1_000L,
                 singleLine("防水性能", 0.40f, 0.48f, 0.60f, 0.55f), true));
+    }
+
+    @Test
+    public void movingObjectTextDoesNotTeachSubtitleAnchor() {
+        AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
+
+        assertNull(tracker.select(0L,
+                singleLine("新しい機械式時計を紹介します", 0.08f, 0.32f, 0.82f, 0.39f), true));
+        assertNull(tracker.select(500L,
+                singleLine("新しい機械式時計を紹介します", 0.16f, 0.39f, 0.90f, 0.46f), true));
+        assertNull(tracker.select(1_000L,
+                singleLine("防水性能を詳しく確認します", 0.23f, 0.46f, 0.93f, 0.54f), true));
+        assertNull(tracker.select(1_500L,
+                singleLine("防水性能を詳しく確認します", 0.30f, 0.53f, 0.98f, 0.61f), true));
+    }
+
+    @Test
+    public void sceneCutDoesNotCountObjectReplacementAsCaptionTransition() {
+        AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
+        OcrResult brand = singleLine("製品仕様", 0.40f, 0.48f, 0.60f, 0.55f);
+        OcrResult pressure = singleLine("防水性能", 0.40f, 0.48f, 0.60f, 0.55f);
+
+        assertNull(tracker.select(0L, brand, true, false));
+        assertNull(tracker.select(500L, brand, true, false));
+        assertNull(tracker.select(1_000L, pressure, true, true));
+        assertNull(tracker.select(1_500L, pressure, true, false));
+    }
+
+    @Test
+    public void centeredCaptionCanChangeWidthWithoutLosingAnchor() {
+        AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
+        OcrResult first = singleLine("重要です", 0.38f, 0.48f, 0.62f, 0.55f);
+        OcrResult second = singleLine("次に詳しい内容を説明します", 0.12f, 0.48f, 0.88f, 0.55f);
+
+        assertNull(tracker.select(0L, first, true));
+        assertNull(tracker.select(500L, first, true));
+        assertNull(tracker.select(1_000L, second, true));
+        AutoSubtitleRegionTracker.Selection selected = tracker.select(1_500L, second, true);
+
+        assertEquals("次に詳しい内容を説明します", selected.getText());
+        assertTrue(selected.isLocked());
     }
 
     private OcrResult frame(String subtitle) {

@@ -74,7 +74,12 @@ public final class AutoSubtitleRegionTracker {
     private long lockedLastSeenAt;
 
     public synchronized Selection select(long timestamp, OcrResult result) {
-        List<Candidate> candidates = buildCandidates(result);
+        return select(timestamp, result, false);
+    }
+
+    public synchronized Selection select(long timestamp, OcrResult result,
+                                         boolean portraitVideoViewport) {
+        List<Candidate> candidates = buildCandidates(result, portraitVideoViewport);
         if (candidates.isEmpty()) {
             unlockIfStale(timestamp);
             return null;
@@ -126,11 +131,13 @@ public final class AutoSubtitleRegionTracker {
         lockedLastSeenAt = 0L;
     }
 
-    private List<Candidate> buildCandidates(OcrResult result) {
+    private List<Candidate> buildCandidates(OcrResult result, boolean portraitVideoViewport) {
         Map<Integer, Candidate> grouped = new HashMap<>();
         for (OcrLine line : result.getLines()) {
             String text = SubtitleNormalizer.normalize(line.getText());
             if (text.isEmpty() || line.getConfidence() < 30.0 || line.getHeight() < 0.008f) continue;
+            if (portraitVideoViewport
+                    && (line.getCenterY() < 0.18f || line.getCenterY() > 0.88f)) continue;
             Candidate candidate = grouped.computeIfAbsent(line.getBlockIndex(), ignored -> new Candidate());
             candidate.lines.add(line);
             candidate.left = Math.min(candidate.left, line.getLeft());

@@ -197,12 +197,13 @@ public final class CaptureService extends Service {
             stabilizerConfig.stableMs = preferences.getStableMs();
             if (!ocrBusy.compareAndSet(false, true)) return;
 
+            boolean portraitVideoViewport = automatic && frame.getHeight() > frame.getWidth();
             Bitmap source = automatic
-                    ? cropRoi(frame, new RectF(0.02f, 0.035f, 0.98f, 0.96f))
+                    ? cropRoi(frame, automaticVideoRoi(frame))
                     : cropRoi(frame, preferences.getRoi());
             Bitmap prepared = resizeForOcr(source, automatic ? 1_100 : 1_800);
             if (prepared != source) source.recycle();
-            recognize(prepared, now, automatic);
+            recognize(prepared, now, automatic, portraitVideoViewport);
         } catch (RuntimeException error) {
             AppState.setStatus("画面処理エラー: " + safeMessage(error));
             ocrBusy.set(false);
@@ -211,11 +212,12 @@ public final class CaptureService extends Service {
         }
     }
 
-    private void recognize(Bitmap bitmap, long timestamp, boolean automatic) {
+    private void recognize(Bitmap bitmap, long timestamp, boolean automatic,
+                           boolean portraitVideoViewport) {
         ocrEngine.recognize(bitmap,
                 result -> {
                     try {
-                        handleOcrResult(result, timestamp, automatic);
+                        handleOcrResult(result, timestamp, automatic, portraitVideoViewport);
                     } finally {
                         bitmap.recycle();
                         ocrBusy.set(false);
@@ -228,12 +230,14 @@ public final class CaptureService extends Service {
                 });
     }
 
-    private void handleOcrResult(OcrResult result, long timestamp, boolean automatic) {
+    private void handleOcrResult(OcrResult result, long timestamp, boolean automatic,
+                                 boolean portraitVideoViewport) {
         String observedText = result.getText();
         double confidence = result.getConfidence();
         String regionStatus = "手動範囲";
         if (automatic) {
-            AutoSubtitleRegionTracker.Selection selection = regionTracker.select(timestamp, result);
+            AutoSubtitleRegionTracker.Selection selection = regionTracker.select(
+                    timestamp, result, portraitVideoViewport);
             if (selection == null) {
                 AppState.setLastOcr(result.getText());
                 stabilizer.observe(timestamp, "", 100.0);
@@ -293,6 +297,23 @@ public final class CaptureService extends Service {
         Canvas canvas = new Canvas(output);
         canvas.drawBitmap(source, -left, -top, null);
         return output;
+    }
+
+    /**
+     * In portrait browsers the YouTube title and comments are below the 16:9 player.
+     * Keep OCR around the possible player location instead of scanning the page body.
+     * The extra 18% above/below the nominal player height accommodates Chrome's
+     * address bar and the YouTube player controls without reaching the comments.
+     */
+    private RectF automaticVideoRoi(Bitmap frame) {
+        float width = frame.getWidth();
+        float height = frame.getHeight();
+        if (width >= height) {
+            return new RectF(0.015f, 0.025f, 0.985f, 0.975f);
+        }
+        float nominalPlayerHeight = (width * 9f / 16f) / Math.max(1f, height);
+        float bottom = Math.min(0.68f, Math.max(0.38f, nominalPlayerHeight + 0.18f));
+        return new RectF(0.01f, 0.025f, 0.99f, bottom);
     }
 
     private Bitmap resizeForOcr(Bitmap bitmap, int maxWidth) {

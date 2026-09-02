@@ -34,6 +34,17 @@ public class AutoSubtitleRegionTrackerTest {
         assertNull(tracker.select(500L, frame));
     }
 
+    @Test
+    public void portraitVideoViewportRejectsTitleAndCommentsOutsidePlayer() {
+        AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
+        OcrResult frame = portraitBrowserFrame("字幕だけを読み上げます");
+
+        assertNull(tracker.select(0L, frame, true));
+        AutoSubtitleRegionTracker.Selection selected = tracker.select(500L, frame, true);
+
+        assertEquals("字幕だけを読み上げます", selected.getText());
+    }
+
     private OcrResult frame(String subtitle) {
         OcrLine corner = new OcrLine(0, "番組ロゴ", 90,
                 0.02f, 0.08f, 0.18f, 0.13f);
@@ -41,5 +52,19 @@ public class AutoSubtitleRegionTrackerTest {
                 0.18f, 0.72f, 0.82f, 0.80f);
         return new OcrResult(corner.getText() + "\n" + caption.getText(), 90,
                 Arrays.asList(corner, caption));
+    }
+
+    private OcrResult portraitBrowserFrame(String subtitle) {
+        OcrLine addressBar = new OcrLine(0, "youtube.com", 98,
+                0.20f, 0.04f, 0.80f, 0.10f);
+        OcrLine caption = new OcrLine(1, subtitle, 92,
+                0.16f, 0.64f, 0.84f, 0.74f);
+        OcrLine videoTitle = new OcrLine(2, "知っておきたい投資の基本を完全解説", 98,
+                0.05f, 0.90f, 0.95f, 0.95f);
+        OcrLine comment = new OcrLine(3, "とても参考になりました。ありがとうございます", 98,
+                0.05f, 0.96f, 0.95f, 0.99f);
+        return new OcrResult(addressBar.getText() + "\n" + caption.getText() + "\n"
+                + videoTitle.getText() + "\n" + comment.getText(), 95,
+                Arrays.asList(addressBar, caption, videoTitle, comment));
     }
 }

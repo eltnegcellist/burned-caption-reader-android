@@ -17,6 +17,7 @@ public final class AppPreferences {
     private static final String SPEECH_MODE = "speech_mode";
     private static final String STABLE_MS = "stable_ms";
     private static final String AUTO_PAUSE_BROWSER = "auto_pause_browser";
+    private static final String KEEP_SCREEN_ON = "keep_screen_on";
 
     public static final String REGION_AUTO = "auto";
     public static final String REGION_MANUAL = "manual";
@@ -96,6 +97,14 @@ public final class AppPreferences {
 
     public void setAutoPauseBrowser(boolean enabled) {
         preferences.edit().putBoolean(AUTO_PAUSE_BROWSER, enabled).apply();
+    }
+
+    public boolean isKeepScreenOn() {
+        return preferences.getBoolean(KEEP_SCREEN_ON, true);
+    }
+
+    public void setKeepScreenOn(boolean enabled) {
+        preferences.edit().putBoolean(KEEP_SCREEN_ON, enabled).apply();
     }
 
     public long getStableMs() {

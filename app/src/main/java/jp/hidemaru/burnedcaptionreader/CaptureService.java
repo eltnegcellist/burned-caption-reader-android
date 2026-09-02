@@ -25,6 +25,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
@@ -41,6 +42,13 @@ import jp.hidemaru.burnedcaptionreader.tts.AndroidTtsSpeaker;
 import jp.hidemaru.burnedcaptionreader.tts.SpeechEngine;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class CaptureService extends Service {
@@ -53,12 +61,25 @@ public final class CaptureService extends Service {
     private static final int NOTIFICATION_ID = 7101;
     private static final long MANUAL_SAMPLE_INTERVAL_MS = 330L;
     private static final long AUTO_SAMPLE_INTERVAL_MS = 480L;
+    private static final long AUTO_TRACK_EXPIRES_MS = 10_000L;
+
+    private static final class PositionedEvent {
+        final SubtitleEvent event;
+        final float top;
+
+        PositionedEvent(SubtitleEvent event, float top) {
+            this.event = event;
+            this.top = top;
+        }
+    }
 
     private final AtomicBoolean ocrBusy = new AtomicBoolean(false);
     private final SubtitleStabilizer.Config stabilizerConfig = new SubtitleStabilizer.Config();
     private final SubtitleEventManager eventManager = new SubtitleEventManager(60_000L);
     private final AutoSubtitleRegionTracker regionTracker = new AutoSubtitleRegionTracker();
     private final SceneChangeDetector sceneChangeDetector = new SceneChangeDetector();
+    private final Map<Integer, SubtitleStabilizer> autoStabilizers = new HashMap<>();
+    private final Map<Integer, Long> autoTrackLastSeen = new HashMap<>();
 
     private AppPreferences preferences;
     private OcrEngine ocrEngine;
@@ -76,6 +97,7 @@ public final class CaptureService extends Service {
     private int captureHeight;
     private int captureDensity;
     private boolean shuttingDown;
+    private PowerManager.WakeLock screenWakeLock;
 
     @Override
     public void onCreate() {
@@ -160,6 +182,7 @@ public final class CaptureService extends Service {
                 null,
                 captureHandler
         );
+        updateScreenWakeLock();
         AppState.setRunning(true);
         AppState.setStatus(preferences.isAutoRegion()
                 ? "字幕位置を自動検出しています"
@@ -180,6 +203,7 @@ public final class CaptureService extends Service {
             image = reader.acquireLatestImage();
             if (image == null) return;
             long now = SystemClock.elapsedRealtime();
+            updateScreenWakeLock();
             boolean automatic = preferences.isAutoRegion();
             long sampleInterval = automatic ? AUTO_SAMPLE_INTERVAL_MS : MANUAL_SAMPLE_INTERVAL_MS;
             if (now - lastSampleAt < sampleInterval) return;
@@ -196,6 +220,8 @@ public final class CaptureService extends Service {
                 stabilizer.reset();
                 regionTracker.reset();
                 sceneChangeDetector.reset();
+                autoStabilizers.clear();
+                autoTrackLastSeen.clear();
             }
             stabilizerConfig.stableMs = preferences.getStableMs();
             if (!ocrBusy.compareAndSet(false, true)) return;
@@ -238,43 +264,115 @@ public final class CaptureService extends Service {
 
     private void handleOcrResult(OcrResult result, long timestamp, boolean automatic,
                                  boolean portraitVideoViewport, boolean sceneChanged) {
+        if (automatic) {
+            handleAutomaticOcrResult(result, timestamp, portraitVideoViewport, sceneChanged);
+            return;
+        }
+
         String observedText = result.getText();
         double confidence = result.getConfidence();
-        String regionStatus = "手動範囲";
-        if (automatic) {
-            AutoSubtitleRegionTracker.Selection selection = regionTracker.select(
-                    timestamp, result, portraitVideoViewport, sceneChanged);
-            if (selection == null) {
-                AppState.setLastOcr(result.getText());
-                stabilizer.observe(timestamp, "", 100.0);
-                AppState.setStatus("自動字幕帯を学習中");
-                return;
-            }
-            observedText = selection.getText();
-            confidence = selection.getConfidence();
-            regionStatus = selection.isLocked() ? "自動字幕帯を追跡中" : "自動字幕候補";
-        }
         AppState.setLastOcr(observedText);
         SubtitleEvent candidate = stabilizer.observe(timestamp, observedText, confidence);
         if (candidate == null) {
-            AppState.setStatus(regionStatus + "（" + stateLabel(stabilizer.getState()) + "）");
+            AppState.setStatus("手動範囲（" + stateLabel(stabilizer.getState()) + "）");
             return;
         }
         SubtitleEvent accepted = eventManager.accept(candidate);
         if (accepted == null) return;
 
-        String speechText = SubtitleNormalizer.toSpeechText(accepted.getText());
+        speakAcceptedText(accepted.getText());
+    }
+
+    private void handleAutomaticOcrResult(OcrResult result, long timestamp,
+                                          boolean portraitVideoViewport,
+                                          boolean sceneChanged) {
+        if (sceneChanged) {
+            autoStabilizers.clear();
+            autoTrackLastSeen.clear();
+        }
+        List<AutoSubtitleRegionTracker.Selection> selections = regionTracker.selectAll(
+                timestamp, result, portraitVideoViewport, sceneChanged);
+        if (selections.isEmpty()) {
+            AppState.setLastOcr(result.getText());
+            for (SubtitleStabilizer track : autoStabilizers.values()) {
+                track.observe(timestamp, "", 100.0);
+            }
+            expireAutoTracks(timestamp);
+            AppState.setStatus("自動字幕帯を学習中");
+            return;
+        }
+
+        StringBuilder observed = new StringBuilder();
+        Set<Integer> visibleTracks = new HashSet<>();
+        List<PositionedEvent> committed = new ArrayList<>();
+        boolean allLocked = true;
+        SubtitleStabilizer.State mostActiveState = SubtitleStabilizer.State.EMPTY;
+        for (AutoSubtitleRegionTracker.Selection selection : selections) {
+            if (observed.length() > 0) observed.append('\n');
+            observed.append(selection.getText());
+            allLocked &= selection.isLocked();
+            visibleTracks.add(selection.getTrackId());
+            autoTrackLastSeen.put(selection.getTrackId(), timestamp);
+
+            SubtitleStabilizer track = autoStabilizers.computeIfAbsent(
+                    selection.getTrackId(), ignored -> new SubtitleStabilizer(stabilizerConfig));
+            SubtitleEvent candidate = track.observe(timestamp, selection.getText(),
+                    selection.getConfidence());
+            mostActiveState = track.getState();
+            if (candidate == null) continue;
+            SubtitleEvent accepted = eventManager.accept(candidate);
+            if (accepted != null) committed.add(new PositionedEvent(accepted, selection.getTop()));
+        }
+
+        for (Map.Entry<Integer, SubtitleStabilizer> entry : autoStabilizers.entrySet()) {
+            if (!visibleTracks.contains(entry.getKey())) {
+                entry.getValue().observe(timestamp, "", 100.0);
+            }
+        }
+        expireAutoTracks(timestamp);
+        AppState.setLastOcr(observed.toString());
+        if (committed.isEmpty()) {
+            String label = selections.size() == 1 ? "1本" : selections.size() + "本";
+            AppState.setStatus((allLocked ? "自動字幕帯を追跡中（" : "自動字幕候補（")
+                    + label + "・" + stateLabel(mostActiveState) + "）");
+            return;
+        }
+
+        committed.sort(Comparator.comparingDouble(value -> value.top));
+        StringBuilder speech = new StringBuilder();
+        for (PositionedEvent value : committed) {
+            if (speech.length() > 0) speech.append('\n');
+            speech.append(value.event.getText());
+        }
+        speakAcceptedText(speech.toString());
+    }
+
+    private void expireAutoTracks(long timestamp) {
+        List<Integer> expired = new ArrayList<>();
+        for (Map.Entry<Integer, Long> entry : autoTrackLastSeen.entrySet()) {
+            if (timestamp - entry.getValue() > AUTO_TRACK_EXPIRES_MS) expired.add(entry.getKey());
+        }
+        for (Integer trackId : expired) {
+            autoTrackLastSeen.remove(trackId);
+            autoStabilizers.remove(trackId);
+        }
+    }
+
+    private void speakAcceptedText(String originalText) {
+        String speechText = SubtitleNormalizer.toSpeechText(originalText);
+        if (speechText.isEmpty()) return;
+
         SpeechEngine.Mode mode = AppPreferences.MODE_LATEST.equals(preferences.getSpeechMode())
                 ? SpeechEngine.Mode.LATEST
                 : SpeechEngine.Mode.BALANCED;
         boolean pauseRequested = preferences.isAutoPauseBrowser();
         boolean paused = pauseRequested && browserMediaController.pauseBrowser();
         speechEngine.speak(speechText, mode, preferences.getSpeechRate());
-        AppState.setLastSpoken(accepted.getText());
+        AppState.setLastSpoken(originalText);
         AppState.setStatus(pauseRequested && !paused
                 ? "読み上げ中（ブラウザを自動停止できませんでした）"
                 : "読み上げ中");
-        updateNotification("読み上げ: " + oneLine(accepted.getText()));
+        updateNotification("読み上げ: " + oneLine(originalText));
     }
 
     private Bitmap imageToBitmap(Image image) {
@@ -387,6 +485,8 @@ public final class CaptureService extends Service {
         stabilizer.reset();
         regionTracker.reset();
         sceneChangeDetector.reset();
+        autoStabilizers.clear();
+        autoTrackLastSeen.clear();
     }
 
     private void updateCaptureSize() {
@@ -477,6 +577,28 @@ public final class CaptureService extends Service {
         return error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage();
     }
 
+    @SuppressWarnings("deprecation")
+    private void updateScreenWakeLock() {
+        boolean shouldHold = projection != null && preferences != null
+                && preferences.isKeepScreenOn();
+        if (!shouldHold) {
+            releaseScreenWakeLock();
+            return;
+        }
+        if (screenWakeLock == null) {
+            PowerManager power = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            screenWakeLock = power.newWakeLock(
+                    PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE,
+                    getPackageName() + ":caption-capture-screen");
+            screenWakeLock.setReferenceCounted(false);
+        }
+        if (!screenWakeLock.isHeld()) screenWakeLock.acquire();
+    }
+
+    private void releaseScreenWakeLock() {
+        if (screenWakeLock != null && screenWakeLock.isHeld()) screenWakeLock.release();
+    }
+
     @Override
     public void onDestroy() {
         shuttingDown = true;
@@ -494,6 +616,7 @@ public final class CaptureService extends Service {
         }
         if (virtualDisplay != null) virtualDisplay.release();
         if (projection != null) projection.stop();
+        releaseScreenWakeLock();
         AppState.clearFrame();
         if (captureThread != null) captureThread.quitSafely();
         stopForeground(STOP_FOREGROUND_REMOVE);

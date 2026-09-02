@@ -56,6 +56,58 @@ public class AutoSubtitleRegionTrackerTest {
         assertEquals("比較する時計は最新のムーブメントを搭載しています", selected.getText());
     }
 
+    @Test
+    public void staticJapaneseObjectTextIsNotReadWithoutLaneTransition() {
+        AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
+        OcrResult frame = singleLine("防水性能", 0.40f, 0.48f, 0.60f, 0.55f);
+
+        assertNull(tracker.select(0L, frame, true));
+        assertNull(tracker.select(500L, frame, true));
+        assertNull(tracker.select(1_500L, frame, true));
+        assertNull(tracker.select(3_000L, frame, true));
+    }
+
+    @Test
+    public void learnsUpperCaptionLaneInsteadOfFixedLowerLabel() {
+        AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
+        OcrResult first = upperCaptionFrame("上部に表示される字幕も正しく読み上げます");
+
+        assertNull(tracker.select(0L, first, true));
+        AutoSubtitleRegionTracker.Selection provisional = tracker.select(500L, first, true);
+        assertEquals("上部に表示される字幕も正しく読み上げます", provisional.getText());
+
+        AutoSubtitleRegionTracker.Selection changed = tracker.select(1_000L,
+                upperCaptionFrame("字幕の位置を時間変化から学習します"), true);
+        assertEquals("字幕の位置を時間変化から学習します", changed.getText());
+        assertTrue(changed.isLocked());
+    }
+
+    @Test
+    public void shortMiddleCaptionWaitsUntilLaneChangeBeforeReading() {
+        AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
+        OcrResult first = singleLine("重要です", 0.39f, 0.48f, 0.61f, 0.55f);
+
+        assertNull(tracker.select(0L, first, true));
+        assertNull(tracker.select(500L, first, true));
+
+        AutoSubtitleRegionTracker.Selection changed = tracker.select(1_000L,
+                singleLine("次へ進みます", 0.38f, 0.48f, 0.62f, 0.55f), true);
+        assertEquals("次へ進みます", changed.getText());
+        assertTrue(changed.isLocked());
+    }
+
+    @Test
+    public void ocrJitterOnStaticObjectDoesNotConfirmLane() {
+        AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
+
+        assertNull(tracker.select(0L,
+                singleLine("防水性能", 0.40f, 0.48f, 0.60f, 0.55f), true));
+        assertNull(tracker.select(500L,
+                singleLine("防水性熊", 0.40f, 0.48f, 0.60f, 0.55f), true));
+        assertNull(tracker.select(1_000L,
+                singleLine("防水性能", 0.40f, 0.48f, 0.60f, 0.55f), true));
+    }
+
     private OcrResult frame(String subtitle) {
         OcrLine corner = new OcrLine(0, "番組ロゴ", 90,
                 0.02f, 0.08f, 0.18f, 0.13f);
@@ -86,5 +138,19 @@ public class AutoSubtitleRegionTrackerTest {
         return new OcrResult(brand.getText() + "\n" + specification.getText() + "\n"
                 + pressure.getText() + "\n" + caption.getText(), 94,
                 Arrays.asList(brand, specification, pressure, caption));
+    }
+
+    private OcrResult upperCaptionFrame(String subtitle) {
+        OcrLine caption = new OcrLine(0, subtitle, 92,
+                0.10f, 0.23f, 0.90f, 0.31f);
+        OcrLine fixedLabel = new OcrLine(1, "製品仕様", 98,
+                0.39f, 0.77f, 0.61f, 0.83f);
+        return new OcrResult(caption.getText() + "\n" + fixedLabel.getText(), 95,
+                Arrays.asList(caption, fixedLabel));
+    }
+
+    private OcrResult singleLine(String text, float left, float top, float right, float bottom) {
+        OcrLine line = new OcrLine(0, text, 95, left, top, right, bottom);
+        return new OcrResult(text, 95, Arrays.asList(line));
     }
 }

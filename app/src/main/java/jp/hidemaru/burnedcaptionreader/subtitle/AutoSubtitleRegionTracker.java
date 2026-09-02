@@ -203,7 +203,11 @@ public final class AutoSubtitleRegionTracker {
             state.lane = candidate.lane;
             lanes.put(candidate.lane, state);
         }
-        if (state.lastSeenAt == timestamp) return state;
+        // Timestamp 0 is valid in unit tests and can also occur when a session clock
+        // is measured from capture start.  A newly-created lane must record that
+        // first observation instead of mistaking the default lastSeenAt value for
+        // an already-processed frame.
+        if (state.observations > 0 && state.lastSeenAt == timestamp) return state;
         if (state.observations > 0 && timestamp - state.lastSeenAt <= 5_000L) {
             if (Similarity.areEquivalent(state.lastText, candidate.text, 0.90)) {
                 state.score += 0.38;

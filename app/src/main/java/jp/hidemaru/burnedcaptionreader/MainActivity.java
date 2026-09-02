@@ -21,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -174,6 +175,19 @@ public final class MainActivity extends Activity {
             }
         });
         root.addView(stable);
+
+        Switch keepScreenOn = new Switch(this);
+        keepScreenOn.setText("画面共有中は画面を消灯しない");
+        keepScreenOn.setTextSize(16);
+        keepScreenOn.setTextColor(Color.rgb(31, 52, 64));
+        keepScreenOn.setChecked(preferences.isKeepScreenOn());
+        keepScreenOn.setOnCheckedChangeListener((button, checked) ->
+                preferences.setKeepScreenOn(checked));
+        addWithTopMargin(root, keepScreenOn, 12);
+        TextView keepScreenNote = text(
+                "Android 15以降は端末をロックすると画面共有が終了します。この設定は共有中だけ画面を暗いまま点灯維持します。電池消費は増えます。",
+                13, Color.rgb(82, 99, 108));
+        root.addView(keepScreenNote);
 
         root.addView(section("プライバシー"));
         TextView privacy = text("画面画像と認識結果は端末内だけで処理します。映像をサーバーへ送信しません。DRMなどで保護された画面は取得できない場合があります。", 14,

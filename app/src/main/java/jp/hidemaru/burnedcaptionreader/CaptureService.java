@@ -28,6 +28,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
+import jp.hidemaru.burnedcaptionreader.capture.SceneChangeDetector;
 import jp.hidemaru.burnedcaptionreader.ocr.MlKitJapaneseOcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
@@ -57,6 +58,7 @@ public final class CaptureService extends Service {
     private final SubtitleStabilizer.Config stabilizerConfig = new SubtitleStabilizer.Config();
     private final SubtitleEventManager eventManager = new SubtitleEventManager(60_000L);
     private final AutoSubtitleRegionTracker regionTracker = new AutoSubtitleRegionTracker();
+    private final SceneChangeDetector sceneChangeDetector = new SceneChangeDetector();
 
     private AppPreferences preferences;
     private OcrEngine ocrEngine;
@@ -193,6 +195,7 @@ public final class CaptureService extends Service {
                 roiVersion = currentRoiVersion;
                 stabilizer.reset();
                 regionTracker.reset();
+                sceneChangeDetector.reset();
             }
             stabilizerConfig.stableMs = preferences.getStableMs();
             if (!ocrBusy.compareAndSet(false, true)) return;
@@ -201,9 +204,11 @@ public final class CaptureService extends Service {
             Bitmap source = automatic
                     ? cropRoi(frame, automaticVideoRoi(frame))
                     : cropRoi(frame, preferences.getRoi());
+            boolean sceneChanged = automatic && sceneChangeDetector.observe(
+                    now, sampleLuminance(source, 16, 12));
             Bitmap prepared = resizeForOcr(source, automatic ? 1_100 : 1_800);
             if (prepared != source) source.recycle();
-            recognize(prepared, now, automatic, portraitVideoViewport);
+            recognize(prepared, now, automatic, portraitVideoViewport, sceneChanged);
         } catch (RuntimeException error) {
             AppState.setStatus("画面処理エラー: " + safeMessage(error));
             ocrBusy.set(false);
@@ -213,11 +218,12 @@ public final class CaptureService extends Service {
     }
 
     private void recognize(Bitmap bitmap, long timestamp, boolean automatic,
-                           boolean portraitVideoViewport) {
+                           boolean portraitVideoViewport, boolean sceneChanged) {
         ocrEngine.recognize(bitmap,
                 result -> {
                     try {
-                        handleOcrResult(result, timestamp, automatic, portraitVideoViewport);
+                        handleOcrResult(result, timestamp, automatic, portraitVideoViewport,
+                                sceneChanged);
                     } finally {
                         bitmap.recycle();
                         ocrBusy.set(false);
@@ -231,13 +237,13 @@ public final class CaptureService extends Service {
     }
 
     private void handleOcrResult(OcrResult result, long timestamp, boolean automatic,
-                                 boolean portraitVideoViewport) {
+                                 boolean portraitVideoViewport, boolean sceneChanged) {
         String observedText = result.getText();
         double confidence = result.getConfidence();
         String regionStatus = "手動範囲";
         if (automatic) {
             AutoSubtitleRegionTracker.Selection selection = regionTracker.select(
-                    timestamp, result, portraitVideoViewport);
+                    timestamp, result, portraitVideoViewport, sceneChanged);
             if (selection == null) {
                 AppState.setLastOcr(result.getText());
                 stabilizer.observe(timestamp, "", 100.0);
@@ -326,6 +332,25 @@ public final class CaptureService extends Service {
                 Math.max(1, Math.round(bitmap.getHeight() * scale)), true);
     }
 
+    private int[] sampleLuminance(Bitmap bitmap, int columns, int rows) {
+        int[] output = new int[columns * rows];
+        int width = Math.max(1, bitmap.getWidth());
+        int height = Math.max(1, bitmap.getHeight());
+        for (int row = 0; row < rows; row++) {
+            int y = Math.min(height - 1, Math.round((row + 0.5f) * height / rows));
+            for (int column = 0; column < columns; column++) {
+                int x = Math.min(width - 1,
+                        Math.round((column + 0.5f) * width / columns));
+                int color = bitmap.getPixel(x, y);
+                int red = (color >> 16) & 0xff;
+                int green = (color >> 8) & 0xff;
+                int blue = color & 0xff;
+                output[row * columns + column] = (red * 77 + green * 150 + blue * 29) >> 8;
+            }
+        }
+        return output;
+    }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -361,6 +386,7 @@ public final class CaptureService extends Service {
         AppState.clearFrame();
         stabilizer.reset();
         regionTracker.reset();
+        sceneChangeDetector.reset();
     }
 
     private void updateCaptureSize() {

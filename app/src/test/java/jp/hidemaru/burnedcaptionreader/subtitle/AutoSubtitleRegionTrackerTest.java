@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.List;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrLine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
 import org.junit.Test;
@@ -158,6 +159,35 @@ public class AutoSubtitleRegionTrackerTest {
         assertTrue(selected.isLocked());
     }
 
+    @Test
+    public void tracksUpperAndLowerConversationCaptionsAtTheSameTime() {
+        AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
+        OcrResult first = conversationFrame(
+                "会社員の私には", "縁がない世界だと", "思っていました", "責任はありません");
+
+        assertTrue(tracker.selectAll(0L, first, true).isEmpty());
+        List<AutoSubtitleRegionTracker.Selection> provisional =
+                tracker.selectAll(500L, first, true);
+        assertEquals(1, provisional.size());
+        assertEquals("会社員の私には\n縁がない世界だと\n思っていました",
+                provisional.get(0).getText());
+
+        OcrResult second = conversationFrame(
+                "しかし状況が変わり", "新しい仕事を任され", "考え直しました", "責任を持ちます");
+        assertTrue(tracker.selectAll(1_000L, second, true).isEmpty());
+        List<AutoSubtitleRegionTracker.Selection> selected =
+                tracker.selectAll(1_500L, second, true);
+
+        assertEquals(2, selected.size());
+        assertEquals("しかし状況が変わり\n新しい仕事を任され\n考え直しました",
+                selected.get(0).getText());
+        assertEquals("責任を持ちます", selected.get(1).getText());
+        assertTrue(selected.get(0).isLocked());
+        assertTrue(selected.get(1).isLocked());
+        assertTrue(selected.get(0).getTrackId() != selected.get(1).getTrackId());
+        assertTrue(selected.get(0).getTop() < selected.get(1).getTop());
+    }
+
     private OcrResult frame(String subtitle) {
         OcrLine corner = new OcrLine(0, "番組ロゴ", 90,
                 0.02f, 0.08f, 0.18f, 0.13f);
@@ -197,6 +227,20 @@ public class AutoSubtitleRegionTrackerTest {
                 0.39f, 0.77f, 0.61f, 0.83f);
         return new OcrResult(caption.getText() + "\n" + fixedLabel.getText(), 95,
                 Arrays.asList(caption, fixedLabel));
+    }
+
+    private OcrResult conversationFrame(String upper1, String upper2, String upper3,
+                                        String lower) {
+        OcrLine first = new OcrLine(0, upper1, 93,
+                0.12f, 0.22f, 0.88f, 0.29f);
+        OcrLine second = new OcrLine(0, upper2, 93,
+                0.12f, 0.30f, 0.88f, 0.37f);
+        OcrLine third = new OcrLine(0, upper3, 93,
+                0.12f, 0.38f, 0.88f, 0.45f);
+        OcrLine lowerLine = new OcrLine(1, lower, 93,
+                0.34f, 0.78f, 0.66f, 0.85f);
+        return new OcrResult(upper1 + "\n" + upper2 + "\n" + upper3 + "\n" + lower,
+                93, Arrays.asList(first, second, third, lowerLine));
     }
 
     private OcrResult singleLine(String text, float left, float top, float right, float bottom) {

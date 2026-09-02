@@ -60,11 +60,19 @@ public final class AutoSubtitleRegionTracker {
         int stableObservations;
         int transitions;
         int distinctTexts;
+        int geometrySamples;
         String lastText = "";
+        String pendingTransitionText = "";
+        int pendingTransitionObservations;
         long firstSeenAt;
         long textSince;
         long lastSeenAt;
         double visualTotal;
+        float meanLeft;
+        float meanCenterX;
+        float meanRight;
+        float meanBottom;
+        float meanHeight;
         Candidate current;
         boolean seenThisFrame;
 
@@ -96,6 +104,20 @@ public final class AutoSubtitleRegionTracker {
 
     public synchronized Selection select(long timestamp, OcrResult result,
                                          boolean portraitVideoViewport) {
+        return select(timestamp, result, portraitVideoViewport, false);
+    }
+
+    /**
+     * Selects the most likely subtitle. A scene cut invalidates transition evidence:
+     * unrelated object labels before and after a cut must not teach a subtitle lane.
+     */
+    public synchronized Selection select(long timestamp, OcrResult result,
+                                         boolean portraitVideoViewport,
+                                         boolean sceneChanged) {
+        if (sceneChanged) {
+            lanes.clear();
+            lockedLane = null;
+        }
         List<Candidate> candidates = buildCandidates(result, portraitVideoViewport);
         expireOldLanes(timestamp);
         for (LaneState lane : lanes) {
@@ -220,17 +242,16 @@ public final class AutoSubtitleRegionTracker {
 
     private LaneState assignLane(long timestamp, Candidate candidate) {
         LaneState best = null;
-        int bestDistance = Integer.MAX_VALUE;
+        double bestDistance = Double.POSITIVE_INFINITY;
         for (LaneState state : lanes) {
-            int current = distance(candidate.lane, state.lane);
+            if (state.seenThisFrame || !isGeometryCompatible(state, candidate)) continue;
+            double current = geometryDistance(state, candidate);
             if (current < bestDistance) {
                 best = state;
                 bestDistance = current;
             }
         }
-        if (best != null && bestDistance <= 1) {
-            return best.seenThisFrame ? null : best;
-        }
+        if (best != null) return best;
         LaneState created = new LaneState();
         created.lane = candidate.lane;
         created.firstSeenAt = timestamp;
@@ -243,30 +264,104 @@ public final class AutoSubtitleRegionTracker {
         if (state.observations == 0) {
             state.distinctTexts = 1;
             state.stableObservations = 1;
+            clearPendingTransition(state);
         } else {
             double similarity = Similarity.textSimilarity(state.lastText, candidate.text);
             if (isEquivalentOcr(state.lastText, candidate.text, similarity)) {
                 state.stableObservations++;
+                clearPendingTransition(state);
             } else if (Similarity.isPrefixRelation(state.lastText, candidate.text)) {
                 state.stableObservations++;
                 state.textSince = timestamp;
+                clearPendingTransition(state);
             } else if (isRealTransition(state.lastText, candidate.text, similarity)) {
-                state.transitions++;
-                state.distinctTexts++;
-                state.stableObservations = 1;
-                state.textSince = timestamp;
+                observePendingTransition(timestamp, state, candidate);
             } else {
                 // Ambiguous OCR movement is neither proof of a new subtitle nor a
                 // reason to discard the lane. It must repeat before it can matter.
                 state.stableObservations++;
+                clearPendingTransition(state);
             }
         }
         state.observations++;
-        state.lastText = candidate.text;
+        // Keep the previous accepted text while a possible replacement is being
+        // verified. Otherwise the second observation would look "unchanged" and
+        // a one-frame object/OCR change could never be distinguished correctly.
+        if (state.pendingTransitionObservations == 0) state.lastText = candidate.text;
         state.lastSeenAt = timestamp;
         state.visualTotal += candidate.visualScore;
         state.current = candidate;
         state.seenThisFrame = true;
+        updateGeometry(state, candidate);
+    }
+
+    private void observePendingTransition(long timestamp, LaneState state, Candidate candidate) {
+        double pendingSimilarity = state.pendingTransitionText.isEmpty()
+                ? 0.0
+                : Similarity.textSimilarity(state.pendingTransitionText, candidate.text);
+        if (!state.pendingTransitionText.isEmpty()
+                && isEquivalentOcr(state.pendingTransitionText, candidate.text, pendingSimilarity)) {
+            state.pendingTransitionObservations++;
+        } else {
+            state.pendingTransitionText = candidate.text;
+            state.pendingTransitionObservations = 1;
+        }
+        state.stableObservations = 1;
+        state.textSince = timestamp;
+        if (state.pendingTransitionObservations < 2) return;
+
+        state.transitions++;
+        state.distinctTexts++;
+        state.lastText = candidate.text;
+        clearPendingTransition(state);
+    }
+
+    private void clearPendingTransition(LaneState state) {
+        state.pendingTransitionText = "";
+        state.pendingTransitionObservations = 0;
+    }
+
+    private boolean isGeometryCompatible(LaneState state, Candidate candidate) {
+        if (state.geometrySamples == 0) return distance(candidate.lane, state.lane) <= 1;
+        float baselineTolerance = Math.max(0.030f, state.meanHeight * 0.55f);
+        float heightTolerance = Math.max(0.018f, state.meanHeight * 0.42f);
+        if (Math.abs(candidate.bottom - state.meanBottom) > baselineTolerance) return false;
+        if (Math.abs(candidate.height() - state.meanHeight) > heightTolerance) return false;
+
+        // Caption width changes with sentence length. Match whichever horizontal
+        // anchor remains fixed: left-aligned, centered, or right-aligned.
+        float anchorShift = Math.min(Math.abs(candidate.left - state.meanLeft),
+                Math.min(Math.abs(candidate.centerX() - state.meanCenterX),
+                        Math.abs(candidate.right - state.meanRight)));
+        return anchorShift <= 0.050f;
+    }
+
+    private double geometryDistance(LaneState state, Candidate candidate) {
+        if (state.geometrySamples == 0) return distance(candidate.lane, state.lane);
+        float anchorShift = Math.min(Math.abs(candidate.left - state.meanLeft),
+                Math.min(Math.abs(candidate.centerX() - state.meanCenterX),
+                        Math.abs(candidate.right - state.meanRight)));
+        float heightScale = Math.max(0.02f, state.meanHeight);
+        return Math.abs(candidate.bottom - state.meanBottom) / heightScale
+                + Math.abs(candidate.height() - state.meanHeight) / heightScale
+                + anchorShift / 0.05f;
+    }
+
+    private void updateGeometry(LaneState state, Candidate candidate) {
+        // A bounded running mean preserves the screen anchor instead of following
+        // a slowly moving product label indefinitely.
+        int previousWeight = Math.min(7, state.geometrySamples);
+        int totalWeight = previousWeight + 1;
+        state.meanLeft = weightedMean(state.meanLeft, candidate.left, previousWeight, totalWeight);
+        state.meanCenterX = weightedMean(state.meanCenterX, candidate.centerX(), previousWeight, totalWeight);
+        state.meanRight = weightedMean(state.meanRight, candidate.right, previousWeight, totalWeight);
+        state.meanBottom = weightedMean(state.meanBottom, candidate.bottom, previousWeight, totalWeight);
+        state.meanHeight = weightedMean(state.meanHeight, candidate.height(), previousWeight, totalWeight);
+        state.geometrySamples++;
+    }
+
+    private float weightedMean(float previous, float current, int previousWeight, int totalWeight) {
+        return (previous * previousWeight + current) / totalWeight;
     }
 
     private LaneState bestConfirmedLane(long timestamp) {

@@ -68,6 +68,10 @@ public final class AutoSubtitleRegionTracker {
     private static final Pattern UI_TERMS = Pattern.compile(
             "(youtube|チャンネル登録|高評価|低評価|共有|保存|コメント|返信|回視聴|再生リスト|全画面|広告)",
             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+    private static final Pattern JAPANESE_TEXT = Pattern.compile("[\\u3040-\\u30ff\\u3400-\\u9fff]");
+    private static final Pattern SHORT_TECHNICAL_LABEL = Pattern.compile(
+            "^[\\d\\s.,+-]+(?:bar|atm|mm|cm|km|hz|mah|wh|v|w|gb|tb)$",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
     private final Map<Integer, LaneState> lanes = new HashMap<>();
     private Integer lockedLane;
@@ -136,8 +140,10 @@ public final class AutoSubtitleRegionTracker {
         for (OcrLine line : result.getLines()) {
             String text = SubtitleNormalizer.normalize(line.getText());
             if (text.isEmpty() || line.getConfidence() < 30.0 || line.getHeight() < 0.008f) continue;
-            if (portraitVideoViewport
-                    && (line.getCenterY() < 0.18f || line.getCenterY() > 0.88f)) continue;
+            // The portrait crop ends at the bottom of the 16:9 player. Burned-in
+            // subtitles can therefore sit at y=0.90..1.00; only discard browser
+            // chrome above the player, not the lower edge where captions live.
+            if (portraitVideoViewport && line.getCenterY() < 0.18f) continue;
             Candidate candidate = grouped.computeIfAbsent(line.getBlockIndex(), ignored -> new Candidate());
             candidate.lines.add(line);
             candidate.left = Math.min(candidate.left, line.getLeft());
@@ -179,24 +185,33 @@ public final class AutoSubtitleRegionTracker {
             int length = key.codePointCount(0, key.length());
             if (length < 2 || length > 140 || candidate.height() > 0.34f) continue;
             candidate.lane = laneFor(candidate.centerY());
-            candidate.visualScore = visualScore(candidate, length);
+            candidate.visualScore = visualScore(candidate, length, portraitVideoViewport);
             if (candidate.visualScore >= 1.0) output.add(candidate);
         }
         return output;
     }
 
-    private double visualScore(Candidate candidate, int textLength) {
+    private double visualScore(Candidate candidate, int textLength,
+                               boolean portraitVideoViewport) {
         double confidence = Math.max(0.0, Math.min(1.0, candidate.confidence / 100.0));
         double centered = 1.0 - Math.min(1.0, Math.abs(candidate.centerX() - 0.5f) / 0.5f);
         double usefulWidth = Math.min(1.0, candidate.width() / 0.38f);
         double compactHeight = 1.0 - Math.min(1.0, candidate.height() / 0.28f);
-        double lowerLane = 1.0 - Math.min(1.0, Math.abs(candidate.centerY() - 0.72f) / 0.72f);
+        float expectedY = portraitVideoViewport ? 0.94f : 0.72f;
+        float verticalRange = portraitVideoViewport ? 0.22f : 0.72f;
+        double lowerLane = 1.0 - Math.min(1.0,
+                Math.abs(candidate.centerY() - expectedY) / verticalRange);
         double usefulLength = Math.min(1.0, textLength / 14.0);
         double score = confidence * 1.25 + centered * 1.05 + usefulWidth * 0.65
-                + compactHeight * 0.25 + lowerLane * 0.50 + usefulLength * 0.45;
+                + compactHeight * 0.25
+                + lowerLane * (portraitVideoViewport ? 1.35 : 0.50)
+                + usefulLength * 0.45;
         String text = candidate.text.toLowerCase(Locale.JAPANESE);
         if (ONLY_SYMBOLS_OR_NUMBERS.matcher(text).matches()) score -= 2.0;
         if (UI_TERMS.matcher(text).find()) score -= 2.2;
+        if (portraitVideoViewport && SHORT_TECHNICAL_LABEL.matcher(text).matches()) score -= 1.6;
+        if (portraitVideoViewport && candidate.width() < 0.45f
+                && !JAPANESE_TEXT.matcher(text).find()) score -= 1.0;
         if (candidate.lines.size() > 3) score -= 0.8;
         if (candidate.centerX() < 0.15f || candidate.centerX() > 0.85f) score -= 0.7;
         return score;

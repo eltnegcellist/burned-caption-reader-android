@@ -10,16 +10,19 @@ import java.util.regex.Pattern;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrLine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
 
-/** Selects a recurring, changing, subtitle-like text lane from broad OCR results. */
+/** Selects up to two recurring, changing subtitle-like text lanes from broad OCR results. */
 public final class AutoSubtitleRegionTracker {
     public static final class Selection {
+        private final int trackId;
         private final String text;
         private final double confidence;
         private final float top;
         private final float bottom;
         private final boolean locked;
 
-        Selection(String text, double confidence, float top, float bottom, boolean locked) {
+        Selection(int trackId, String text, double confidence, float top, float bottom,
+                  boolean locked) {
+            this.trackId = trackId;
             this.text = text;
             this.confidence = confidence;
             this.top = top;
@@ -27,6 +30,7 @@ public final class AutoSubtitleRegionTracker {
             this.locked = locked;
         }
 
+        public int getTrackId() { return trackId; }
         public String getText() { return text; }
         public double getConfidence() { return confidence; }
         public float getTop() { return top; }
@@ -55,6 +59,7 @@ public final class AutoSubtitleRegionTracker {
     }
 
     private static final class LaneState {
+        int id;
         int lane;
         int observations;
         int stableObservations;
@@ -82,6 +87,7 @@ public final class AutoSubtitleRegionTracker {
     }
 
     private static final int LANE_COUNT = 24;
+    private static final int MAX_ACTIVE_LANES = 2;
     private static final long LOCK_MISSING_MS = 2_800L;
     private static final long LANE_EXPIRES_MS = 8_000L;
     private static final long PROVISIONAL_MAX_STATIC_MS = 2_500L;
@@ -96,7 +102,8 @@ public final class AutoSubtitleRegionTracker {
             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
     private final List<LaneState> lanes = new ArrayList<>();
-    private LaneState lockedLane;
+    private final List<LaneState> lockedLanes = new ArrayList<>();
+    private int nextTrackId = 1;
 
     public synchronized Selection select(long timestamp, OcrResult result) {
         return select(timestamp, result, false);
@@ -114,9 +121,30 @@ public final class AutoSubtitleRegionTracker {
     public synchronized Selection select(long timestamp, OcrResult result,
                                          boolean portraitVideoViewport,
                                          boolean sceneChanged) {
+        List<Selection> selections = selectAll(timestamp, result,
+                portraitVideoViewport, sceneChanged);
+        return selections.isEmpty() ? null : selections.get(0);
+    }
+
+    public synchronized List<Selection> selectAll(long timestamp, OcrResult result) {
+        return selectAll(timestamp, result, false, false);
+    }
+
+    public synchronized List<Selection> selectAll(long timestamp, OcrResult result,
+                                                  boolean portraitVideoViewport) {
+        return selectAll(timestamp, result, portraitVideoViewport, false);
+    }
+
+    /**
+     * Selects up to two independent screen-anchored subtitle bands. A scene cut
+     * invalidates transition evidence so unrelated object labels are not joined.
+     */
+    public synchronized List<Selection> selectAll(long timestamp, OcrResult result,
+                                                  boolean portraitVideoViewport,
+                                                  boolean sceneChanged) {
         if (sceneChanged) {
             lanes.clear();
-            lockedLane = null;
+            lockedLanes.clear();
         }
         List<Candidate> candidates = buildCandidates(result, portraitVideoViewport);
         expireOldLanes(timestamp);
@@ -133,32 +161,43 @@ public final class AutoSubtitleRegionTracker {
             candidate.finalScore = laneScore(timestamp, lane, candidate);
         }
 
-        if (lockedLane != null) {
-            if (lockedLane.seenThisFrame && lockedLane.current != null) {
-                return asSelection(lockedLane.current, true);
+        lockedLanes.removeIf(lane -> timestamp - lane.lastSeenAt > LOCK_MISSING_MS);
+
+        List<LaneState> confirmed = confirmedLanes(timestamp);
+        confirmed.sort(Comparator.comparingDouble(
+                (LaneState lane) -> laneScore(timestamp, lane, lane.current)).reversed());
+        for (LaneState lane : confirmed) {
+            if (lockedLanes.size() >= MAX_ACTIVE_LANES) break;
+            if (!lockedLanes.contains(lane) && isDistinctFrom(lane, lockedLanes)) {
+                lockedLanes.add(lane);
             }
-            LaneState replacement = bestConfirmedLane(timestamp);
-            if (replacement != null && timestamp - lockedLane.lastSeenAt > 1_200L) {
-                lockedLane = replacement;
-                return asSelection(replacement.current, true);
-            }
-            if (timestamp - lockedLane.lastSeenAt <= LOCK_MISSING_MS) return null;
-            lockedLane = null;
         }
 
-        LaneState confirmed = bestConfirmedLane(timestamp);
-        if (confirmed != null) {
-            lockedLane = confirmed;
-            return asSelection(confirmed.current, true);
+        List<LaneState> selected = new ArrayList<>();
+        for (LaneState lane : lockedLanes) {
+            if (lane.seenThisFrame && lane.current != null && isDistinctFrom(lane, selected)) {
+                selected.add(lane);
+            }
         }
 
-        Candidate provisional = bestProvisionalCandidate(timestamp);
-        return provisional == null ? null : asSelection(provisional, false);
+        for (LaneState lane : provisionalLanes(timestamp)) {
+            if (selected.size() >= MAX_ACTIVE_LANES) break;
+            if (!lockedLanes.contains(lane) && isDistinctFrom(lane, selected)) {
+                selected.add(lane);
+            }
+        }
+
+        selected.sort(Comparator.comparingDouble(lane -> lane.current.top));
+        List<Selection> output = new ArrayList<>();
+        for (LaneState lane : selected) {
+            output.add(asSelection(lane, lockedLanes.contains(lane)));
+        }
+        return output;
     }
 
     public synchronized void reset() {
         lanes.clear();
-        lockedLane = null;
+        lockedLanes.clear();
     }
 
     private List<Candidate> buildCandidates(OcrResult result, boolean portraitVideoViewport) {
@@ -253,6 +292,7 @@ public final class AutoSubtitleRegionTracker {
         }
         if (best != null) return best;
         LaneState created = new LaneState();
+        created.id = nextTrackId++;
         created.lane = candidate.lane;
         created.firstSeenAt = timestamp;
         created.textSince = timestamp;
@@ -364,26 +404,20 @@ public final class AutoSubtitleRegionTracker {
         return (previous * previousWeight + current) / totalWeight;
     }
 
-    private LaneState bestConfirmedLane(long timestamp) {
-        LaneState best = null;
-        double bestScore = Double.NEGATIVE_INFINITY;
+    private List<LaneState> confirmedLanes(long timestamp) {
+        List<LaneState> confirmed = new ArrayList<>();
         for (LaneState lane : lanes) {
             if (!lane.seenThisFrame || lane.current == null || lane.transitions < 1) continue;
             boolean languageOrShapeEvidence = lane.current.japanese
                     || isStrongCaptionShape(lane.current) || lane.transitions >= 2;
             if (!languageOrShapeEvidence || lane.meanVisualScore() < 1.20) continue;
-            double score = laneScore(timestamp, lane, lane.current);
-            if (score > bestScore) {
-                best = lane;
-                bestScore = score;
-            }
+            confirmed.add(lane);
         }
-        return best;
+        return confirmed;
     }
 
-    private Candidate bestProvisionalCandidate(long timestamp) {
-        Candidate best = null;
-        Candidate second = null;
+    private List<LaneState> provisionalLanes(long timestamp) {
+        List<LaneState> provisional = new ArrayList<>();
         for (LaneState lane : lanes) {
             Candidate candidate = lane.current;
             if (!lane.seenThisFrame || candidate == null || lane.transitions > 0) continue;
@@ -392,17 +426,38 @@ public final class AutoSubtitleRegionTracker {
                     || timestamp - lane.firstSeenAt > PROVISIONAL_MAX_STATIC_MS) continue;
             if (!isStrongCaptionShape(candidate)) continue;
             candidate.finalScore = laneScore(timestamp, lane, candidate);
-            if (best == null || candidate.finalScore > best.finalScore) {
-                second = best;
-                best = candidate;
-            } else if (second == null || candidate.finalScore > second.finalScore) {
-                second = candidate;
+            provisional.add(lane);
+        }
+        provisional.sort(Comparator.comparingDouble(
+                (LaneState lane) -> lane.current.finalScore).reversed());
+        return provisional;
+    }
+
+    private boolean isDistinctFrom(LaneState candidate, List<LaneState> selected) {
+        if (candidate.current == null) return false;
+        for (LaneState existing : selected) {
+            if (existing.current != null && isDuplicateCandidate(candidate.current, existing.current)) {
+                return false;
             }
         }
-        if (best == null) return null;
-        if (second != null && best.finalScore - second.finalScore < 0.35
-                && best.finalScore < 3.00) return null;
-        return best;
+        return true;
+    }
+
+    private boolean isDuplicateCandidate(Candidate left, Candidate right) {
+        float verticalOverlap = Math.max(0f,
+                Math.min(left.bottom, right.bottom) - Math.max(left.top, right.top));
+        float horizontalOverlap = Math.max(0f,
+                Math.min(left.right, right.right) - Math.max(left.left, right.left));
+        float verticalRatio = verticalOverlap / Math.max(0.001f,
+                Math.min(left.height(), right.height()));
+        float horizontalRatio = horizontalOverlap / Math.max(0.001f,
+                Math.min(left.width(), right.width()));
+        if (verticalRatio < 0.55f || horizontalRatio < 0.55f) return false;
+
+        String a = SubtitleNormalizer.comparisonKey(left.text);
+        String b = SubtitleNormalizer.comparisonKey(right.text);
+        return a.contains(b) || b.contains(a)
+                || Similarity.areEquivalent(left.text, right.text, 0.84);
     }
 
     private boolean isStrongCaptionShape(Candidate candidate) {
@@ -441,16 +496,13 @@ public final class AutoSubtitleRegionTracker {
     }
 
     private void expireOldLanes(long timestamp) {
-        lanes.removeIf(lane -> lane != lockedLane
-                && timestamp - lane.lastSeenAt > LANE_EXPIRES_MS);
-        if (lockedLane != null && timestamp - lockedLane.lastSeenAt > LANE_EXPIRES_MS) {
-            lanes.remove(lockedLane);
-            lockedLane = null;
-        }
+        lockedLanes.removeIf(lane -> timestamp - lane.lastSeenAt > LANE_EXPIRES_MS);
+        lanes.removeIf(lane -> timestamp - lane.lastSeenAt > LANE_EXPIRES_MS);
     }
 
-    private Selection asSelection(Candidate candidate, boolean locked) {
-        return new Selection(candidate.text, candidate.confidence,
+    private Selection asSelection(LaneState lane, boolean locked) {
+        Candidate candidate = lane.current;
+        return new Selection(lane.id, candidate.text, candidate.confidence,
                 candidate.top, candidate.bottom, locked);
     }
 

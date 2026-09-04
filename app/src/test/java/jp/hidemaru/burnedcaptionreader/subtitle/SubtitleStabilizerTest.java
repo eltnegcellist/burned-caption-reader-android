@@ -96,4 +96,52 @@ public class SubtitleStabilizerTest {
         assertEquals("これは非常に重要です\nなぜなら〜だからです", normalized);
         assertEquals("これは非常に重要です、なぜなら〜だからです", SubtitleNormalizer.toSpeechText(normalized));
     }
+
+    @Test
+    public void transientMissingTopRowKeepsCompleteThreeLineCaption() {
+        SubtitleStabilizer stabilizer = create();
+        String complete = "会社員の私には\n縁がない世界だと\n思っていました";
+        String missingTop = "縁がない世界だと\n思っていました";
+
+        assertNull(stabilizer.observe(0L, complete, 90));
+        assertNull(stabilizer.observe(150L, missingTop, 92));
+        SubtitleEvent event = stabilizer.observe(350L, missingTop, 92);
+
+        assertEquals(complete, event.getText());
+        assertNull(stabilizer.observe(500L, missingTop, 92));
+        assertNull(stabilizer.observe(850L, missingTop, 92));
+        assertNull(stabilizer.observe(1_200L, complete, 90));
+    }
+
+    @Test
+    public void higherConfidencePartialDoesNotWinATieAgainstCompleteCaption() {
+        SubtitleStabilizer stabilizer = create();
+        String complete = "会社員の私には\n縁がない世界だと\n思っていました";
+        stabilizer.observe(0L, complete, 85);
+        SubtitleEvent event = stabilizer.observe(350L, "縁がない世界だと\n思っていました", 95);
+        assertEquals(complete, event.getText());
+    }
+
+    @Test
+    public void growingMultilineCaptionRestartsTheStabilityTimer() {
+        SubtitleStabilizer stabilizer = create();
+        String partial = "会社員の私には\n縁がない世界だと";
+        String complete = partial + "\n思っていました";
+        assertNull(stabilizer.observe(0L, partial, 90));
+        assertNull(stabilizer.observe(200L, partial, 90));
+        assertNull(stabilizer.observe(350L, complete, 90));
+        assertNull(stabilizer.observe(500L, complete, 90));
+        assertEquals(complete, stabilizer.observe(700L, complete, 90).getText());
+    }
+
+    @Test
+    public void changingTopRowStillProducesANewSubtitle() {
+        SubtitleStabilizer stabilizer = create();
+        String first = "これは最初の長い説明になります\n条件を確認して\n判断してください";
+        String second = "明日は別の場所に全員集合します\n条件を確認して\n判断してください";
+        stabilizer.observe(0L, first, 90);
+        assertEquals(first, stabilizer.observe(350L, first, 90).getText());
+        assertNull(stabilizer.observe(500L, second, 90));
+        assertEquals(second, stabilizer.observe(850L, second, 90).getText());
+    }
 }

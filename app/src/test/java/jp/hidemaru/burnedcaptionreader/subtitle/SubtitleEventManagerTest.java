@@ -7,6 +7,13 @@ import org.junit.Test;
 
 public class SubtitleEventManagerTest {
     @Test
+    public void droppedTopRowIsNotReadAgainWhenTrackIdChanges() {
+        SubtitleEventManager manager = new SubtitleEventManager(60_000L);
+        assertNotNull(manager.accept(event("1", "会社員の私には\n縁がない世界だと\n思っていました", 1_000L)));
+        assertNull(manager.accept(event("2", "縁がない世界だと\n思っていました", 2_000L)));
+    }
+
+    @Test
     public void suppressesOcrVariantWithinHistoryWindow() {
         SubtitleEventManager manager = new SubtitleEventManager(60_000L);
         assertNotNull(manager.accept(event("1", "今日は投資について説明します", 1_000L)));

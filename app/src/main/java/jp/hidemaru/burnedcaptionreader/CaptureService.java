@@ -96,7 +96,8 @@ public final class CaptureService extends Service {
     private int captureWidth;
     private int captureHeight;
     private int captureDensity;
-    private boolean shuttingDown;
+    private volatile boolean shuttingDown;
+    private volatile boolean projectionEnded;
     private PowerManager.WakeLock screenWakeLock;
 
     @Override
@@ -157,8 +158,10 @@ public final class CaptureService extends Service {
         projection.registerCallback(new MediaProjection.Callback() {
             @Override
             public void onStop() {
-                AppState.setStatus("画面共有が終了しました");
-                if (!shuttingDown) stopSelf();
+                if (shuttingDown) return;
+                projectionEnded = true;
+                AppState.setStatus("画面共有が終了しました（ロック後は再開始が必要です）");
+                stopSelf();
             }
 
             @Override
@@ -264,6 +267,7 @@ public final class CaptureService extends Service {
 
     private void handleOcrResult(OcrResult result, long timestamp, boolean automatic,
                                  boolean portraitVideoViewport, boolean sceneChanged) {
+        if (shuttingDown || projectionEnded) return;
         if (automatic) {
             handleAutomaticOcrResult(result, timestamp, portraitVideoViewport, sceneChanged);
             return;
@@ -579,7 +583,8 @@ public final class CaptureService extends Service {
 
     @SuppressWarnings("deprecation")
     private void updateScreenWakeLock() {
-        boolean shouldHold = projection != null && preferences != null
+        boolean shouldHold = !shuttingDown && !projectionEnded
+                && projection != null && preferences != null
                 && preferences.isKeepScreenOn();
         if (!shouldHold) {
             releaseScreenWakeLock();
@@ -603,7 +608,7 @@ public final class CaptureService extends Service {
     public void onDestroy() {
         shuttingDown = true;
         AppState.setRunning(false);
-        AppState.setStatus("停止中");
+        if (!projectionEnded) AppState.setStatus("停止中");
         if (speechEngine != null) speechEngine.close();
         if (browserMediaController != null) {
             browserMediaController.resumeIfPausedByUs();

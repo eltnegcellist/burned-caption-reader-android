@@ -43,6 +43,41 @@ public final class Similarity {
         return shortLength >= 2 && (a.startsWith(b) || b.startsWith(a));
     }
 
+    /**
+     * Returns true when OCR temporarily drops one complete edge row from a multiline
+     * caption. Requiring both variants to remain multiline avoids treating an
+     * ordinary one-line subtitle which happens to share a phrase as OCR wobble.
+     */
+    public static boolean isMultilineVariant(String left, String right, double minCoverage) {
+        String normalizedLeft = SubtitleNormalizer.normalize(left);
+        String normalizedRight = SubtitleNormalizer.normalize(right);
+        if (!normalizedLeft.contains("\n") || !normalizedRight.contains("\n")) return false;
+
+        String[] a = normalizedLeft.split("\n");
+        String[] b = normalizedRight.split("\n");
+        String[] shorterRows = a.length < b.length ? a : b;
+        String[] longerRows = a.length < b.length ? b : a;
+        if (longerRows.length != shorterRows.length + 1) return false;
+        boolean matchingRows = false;
+        for (int offset = 0; offset <= 1; offset++) {
+            boolean match = true;
+            for (int row = 0; row < shorterRows.length; row++) {
+                if (!SubtitleNormalizer.comparisonKey(shorterRows[row]).equals(
+                        SubtitleNormalizer.comparisonKey(longerRows[row + offset]))) {
+                    match = false;
+                    break;
+                }
+            }
+            matchingRows |= match;
+        }
+        if (!matchingRows) return false;
+        String shorter = SubtitleNormalizer.comparisonKey(String.join("\n", shorterRows));
+        String longer = SubtitleNormalizer.comparisonKey(String.join("\n", longerRows));
+        int shortLength = shorter.codePointCount(0, shorter.length());
+        int longLength = longer.codePointCount(0, longer.length());
+        return longLength > 0 && shortLength >= Math.ceil(longLength * minCoverage);
+    }
+
     public static boolean areEquivalent(String left, String right, double threshold) {
         return textSimilarity(left, right) >= threshold;
     }

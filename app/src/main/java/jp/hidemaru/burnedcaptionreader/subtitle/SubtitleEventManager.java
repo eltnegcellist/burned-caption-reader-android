@@ -38,6 +38,8 @@ public final class SubtitleEventManager {
 
     private boolean isNearDuplicate(String left, String right) {
         if (Similarity.areEquivalent(left, right, 0.86)) return true;
+        if (left.length() <= right.length()
+                && Similarity.isMultilineVariant(left, right, 0.50)) return true;
         String a = SubtitleNormalizer.comparisonKey(left);
         String b = SubtitleNormalizer.comparisonKey(right);
         int shortLength = Math.min(a.codePointCount(0, a.length()), b.codePointCount(0, b.length()));

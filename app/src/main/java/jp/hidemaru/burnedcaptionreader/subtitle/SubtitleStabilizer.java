@@ -69,6 +69,19 @@ public final class SubtitleStabilizer {
             recordVariant(text, confidence);
             candidate.observations++;
             state = State.STABILIZING;
+        } else if (Similarity.isMultilineVariant(current, text, 0.50)) {
+            // ML Kit can omit the first row of a three-line caption for one or
+            // more frames. Keep it as the same candidate and retain the most
+            // complete recognized variant for speech.
+            if (text.length() > current.length()) {
+                // A new row can also be a typewriter animation; wait again
+                // before committing the now longer caption.
+                startCandidate(text, confidence, timestamp, candidate.detectedAt);
+                return null;
+            }
+            recordVariant(text, confidence);
+            candidate.observations++;
+            state = State.STABILIZING;
         } else if (Similarity.isPrefixRelation(current, text)) {
             if (isGrowth(current, text)) {
                 long detectedAt = candidate.detectedAt;
@@ -153,9 +166,17 @@ public final class SubtitleStabilizer {
             double bestMean = bestStats.confidenceTotal / bestStats.count;
             int length = entry.getKey().codePointCount(0, entry.getKey().length());
             int bestLength = best.codePointCount(0, best.length());
-            if (stats.count > bestStats.count
-                    || (stats.count == bestStats.count && mean > bestMean)
-                    || (stats.count == bestStats.count && mean == bestMean && length > bestLength)) {
+            boolean sameMultilineCaption = Similarity.isMultilineVariant(
+                    entry.getKey(), best, 0.50);
+            boolean choose;
+            if (sameMultilineCaption) {
+                choose = length > bestLength ? mean >= bestMean - 20.0 : mean > bestMean + 20.0;
+            } else {
+                choose = stats.count > bestStats.count
+                        || (stats.count == bestStats.count && mean > bestMean)
+                        || (stats.count == bestStats.count && mean == bestMean && length > bestLength);
+            }
+            if (choose) {
                 best = entry.getKey();
                 bestStats = stats;
             }
@@ -175,6 +196,10 @@ public final class SubtitleStabilizer {
             return false;
         }
         if (Similarity.areEquivalent(text, lastCommitted.getText(), config.committedSimilarity)) {
+            return true;
+        }
+        if (text.length() <= lastCommitted.getText().length()
+                && Similarity.isMultilineVariant(text, lastCommitted.getText(), 0.50)) {
             return true;
         }
         String current = SubtitleNormalizer.comparisonKey(text);

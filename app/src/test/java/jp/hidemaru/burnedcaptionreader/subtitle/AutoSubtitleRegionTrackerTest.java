@@ -188,6 +188,53 @@ public class AutoSubtitleRegionTrackerTest {
         assertTrue(selected.get(0).getTop() < selected.get(1).getTop());
     }
 
+    @Test
+    public void fullThreeLineGroupWinsEvenWhenIndividualRowsScoreHigher() {
+        AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
+        OcrLine top = new OcrLine(0, "ところが", 78, 0.34f, 0.23f, 0.66f, 0.30f);
+        OcrLine middle = new OcrLine(1, "私にも責任のある仕事が任されました", 99,
+                0.08f, 0.31f, 0.92f, 0.38f);
+        OcrLine bottom = new OcrLine(2, "自分の判断で行動する必要があります", 99,
+                0.08f, 0.39f, 0.92f, 0.46f);
+        String complete = top.getText() + "\n" + middle.getText() + "\n" + bottom.getText();
+        OcrResult result = new OcrResult(complete, 92, Arrays.asList(bottom, top, middle));
+        tracker.selectAll(0L, result, true);
+        List<AutoSubtitleRegionTracker.Selection> selected = tracker.selectAll(500L, result, true);
+        assertEquals(1, selected.size());
+        assertEquals(complete, selected.get(0).getText());
+    }
+
+    @Test
+    public void substantiallyDifferentTextSizesAreNotMerged() {
+        AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
+        OcrLine large = new OcrLine(0, "ここには大きな字幕があります", 95,
+                0.10f, 0.30f, 0.90f, 0.39f);
+        OcrLine small = new OcrLine(1, "こちらは別の小さな字幕です", 95,
+                0.10f, 0.41f, 0.90f, 0.44f);
+        OcrResult result = new OcrResult("", 95, Arrays.asList(large, small));
+        tracker.selectAll(0L, result, true);
+        List<AutoSubtitleRegionTracker.Selection> selected = tracker.selectAll(500L, result, true);
+        assertEquals(2, selected.size());
+    }
+
+    @Test
+    public void blockIdsCanChangeWithoutSplittingTheCaptionTrack() {
+        AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
+        OcrResult separateBlocks = conversationFrame("会社員の私には", "縁がない世界だと",
+                "思っていました", "責任はありません");
+        tracker.selectAll(0L, separateBlocks, true);
+        AutoSubtitleRegionTracker.Selection first = tracker.selectAll(500L, separateBlocks, true).get(0);
+        List<OcrLine> mergedLines = new java.util.ArrayList<>();
+        for (OcrLine line : separateBlocks.getLines()) {
+            mergedLines.add(new OcrLine(line.getTop() < 0.60f ? 0 : 1, line.getText(),
+                    line.getConfidence(), line.getLeft(), line.getTop(), line.getRight(), line.getBottom()));
+        }
+        AutoSubtitleRegionTracker.Selection second = tracker.selectAll(1_000L,
+                new OcrResult(separateBlocks.getText(), 93, mergedLines), true).get(0);
+        assertEquals(first.getTrackId(), second.getTrackId());
+        assertEquals(first.getText(), second.getText());
+    }
+
     private OcrResult frame(String subtitle) {
         OcrLine corner = new OcrLine(0, "番組ロゴ", 90,
                 0.02f, 0.08f, 0.18f, 0.13f);
@@ -231,13 +278,15 @@ public class AutoSubtitleRegionTrackerTest {
 
     private OcrResult conversationFrame(String upper1, String upper2, String upper3,
                                         String lower) {
-        OcrLine first = new OcrLine(0, upper1, 93,
+        // Reproduce ML Kit splitting each outlined caption row into a separate
+        // Text.Block. The tracker must reconstruct one three-line caption.
+        OcrLine first = new OcrLine(10, upper1, 93,
                 0.12f, 0.22f, 0.88f, 0.29f);
-        OcrLine second = new OcrLine(0, upper2, 93,
+        OcrLine second = new OcrLine(11, upper2, 93,
                 0.12f, 0.30f, 0.88f, 0.37f);
-        OcrLine third = new OcrLine(0, upper3, 93,
+        OcrLine third = new OcrLine(12, upper3, 93,
                 0.12f, 0.38f, 0.88f, 0.45f);
-        OcrLine lowerLine = new OcrLine(1, lower, 93,
+        OcrLine lowerLine = new OcrLine(20, lower, 93,
                 0.34f, 0.78f, 0.66f, 0.85f);
         return new OcrResult(upper1 + "\n" + upper2 + "\n" + upper3 + "\n" + lower,
                 93, Arrays.asList(first, second, third, lowerLine));

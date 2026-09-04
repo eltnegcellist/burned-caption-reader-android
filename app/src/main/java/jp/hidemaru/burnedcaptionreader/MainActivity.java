@@ -177,7 +177,7 @@ public final class MainActivity extends Activity {
         root.addView(stable);
 
         Switch keepScreenOn = new Switch(this);
-        keepScreenOn.setText("画面共有中は画面を消灯しない");
+        keepScreenOn.setText("画面共有中の自動消灯を防ぐ");
         keepScreenOn.setTextSize(16);
         keepScreenOn.setTextColor(Color.rgb(31, 52, 64));
         keepScreenOn.setChecked(preferences.isKeepScreenOn());
@@ -185,7 +185,7 @@ public final class MainActivity extends Activity {
                 preferences.setKeepScreenOn(checked));
         addWithTopMargin(root, keepScreenOn, 12);
         TextView keepScreenNote = text(
-                "Android 15以降は端末をロックすると画面共有が終了します。この設定は共有中だけ画面を暗いまま点灯維持します。電池消費は増えます。",
+                "画面タイムアウトによる自動消灯だけを防ぎます。ロックボタンには対応していません。Android 15 QPR1以降はロックすると共有が終了し、再び「画面共有を開始」する必要があります。電池消費は増えます。",
                 13, Color.rgb(82, 99, 108));
         root.addView(keepScreenNote);
 

@@ -49,6 +49,7 @@ public final class AutoSubtitleRegionTracker {
         int lane;
         int textLength;
         boolean japanese;
+        boolean spatialGroup;
         double visualScore;
         double finalScore;
 
@@ -202,6 +203,7 @@ public final class AutoSubtitleRegionTracker {
 
     private List<Candidate> buildCandidates(OcrResult result, boolean portraitVideoViewport) {
         Map<Integer, Candidate> grouped = new HashMap<>();
+        List<OcrLine> eligibleLines = new ArrayList<>();
         for (OcrLine line : result.getLines()) {
             String text = SubtitleNormalizer.normalize(line.getText());
             if (text.isEmpty() || line.getConfidence() < 30.0 || line.getHeight() < 0.008f) continue;
@@ -209,25 +211,28 @@ public final class AutoSubtitleRegionTracker {
             // subtitles can therefore sit at y=0.90..1.00; only discard browser
             // chrome above the player, not the lower edge where captions live.
             if (portraitVideoViewport && line.getCenterY() < 0.18f) continue;
+            eligibleLines.add(line);
             Candidate candidate = grouped.computeIfAbsent(line.getBlockIndex(), ignored -> new Candidate());
-            candidate.lines.add(line);
-            candidate.left = Math.min(candidate.left, line.getLeft());
-            candidate.top = Math.min(candidate.top, line.getTop());
-            candidate.right = Math.max(candidate.right, line.getRight());
-            candidate.bottom = Math.max(candidate.bottom, line.getBottom());
+            addLine(candidate, line);
         }
 
-        List<Candidate> candidates = new ArrayList<>(grouped.values());
+        List<Candidate> candidates = new ArrayList<>();
+        // ML Kit often assigns each row of outlined YouTube text to a different
+        // Text.Block. Rebuild a spatial 2-3 line caption before considering the
+        // individual OCR blocks, otherwise a three-line caption consumes three
+        // tracks and the first row loses to the two-track limit.
+        for (Candidate spatialGroup : buildSpatialLineGroups(eligibleLines)) {
+            addCandidateIfNew(candidates, spatialGroup);
+        }
+        for (Candidate groupedCandidate : grouped.values()) {
+            addCandidateIfNew(candidates, groupedCandidate);
+        }
         for (Candidate groupedCandidate : grouped.values()) {
             if (groupedCandidate.lines.size() <= 1) continue;
             for (OcrLine line : groupedCandidate.lines) {
                 Candidate singleLine = new Candidate();
-                singleLine.lines.add(line);
-                singleLine.left = line.getLeft();
-                singleLine.top = line.getTop();
-                singleLine.right = line.getRight();
-                singleLine.bottom = line.getBottom();
-                candidates.add(singleLine);
+                addLine(singleLine, line);
+                addCandidateIfNew(candidates, singleLine);
             }
         }
 
@@ -255,7 +260,101 @@ public final class AutoSubtitleRegionTracker {
             candidate.visualScore = visualScore(candidate, length);
             if (candidate.visualScore >= 0.50) output.add(candidate);
         }
+        List<Candidate> wholeCaptions = new ArrayList<>();
+        for (Candidate candidate : output) {
+            boolean fragment = false;
+            for (Candidate parent : output) {
+                if (parent.spatialGroup && isStrongCaptionShape(parent)
+                        && parent.lines.size() > candidate.lines.size()
+                        && parent.lines.containsAll(candidate.lines)) {
+                    fragment = true;
+                    break;
+                }
+            }
+            if (!fragment) wholeCaptions.add(candidate);
+        }
+        return wholeCaptions;
+    }
+
+    private List<Candidate> buildSpatialLineGroups(List<OcrLine> eligibleLines) {
+        List<OcrLine> japaneseLines = new ArrayList<>();
+        for (OcrLine line : eligibleLines) {
+            if (JAPANESE_TEXT.matcher(SubtitleNormalizer.normalize(line.getText())).find()) {
+                japaneseLines.add(line);
+            }
+        }
+        japaneseLines.sort(Comparator.comparingDouble(OcrLine::getTop)
+                .thenComparingDouble(OcrLine::getLeft));
+
+        List<Candidate> output = new ArrayList<>();
+        List<OcrLine> cluster = new ArrayList<>();
+        for (OcrLine line : japaneseLines) {
+            if (cluster.isEmpty()) {
+                cluster.add(line);
+                continue;
+            }
+            if (cluster.size() < 3 && canJoinSpatialGroup(cluster, line)) {
+                cluster.add(line);
+                continue;
+            }
+            addSpatialGroup(output, cluster);
+            cluster.clear();
+            cluster.add(line);
+        }
+        addSpatialGroup(output, cluster);
         return output;
+    }
+
+    private boolean canJoinSpatialGroup(List<OcrLine> cluster, OcrLine next) {
+        OcrLine previous = cluster.get(cluster.size() - 1);
+        float referenceHeight = Math.max(previous.getHeight(), next.getHeight());
+        if (Math.min(previous.getHeight(), next.getHeight()) < referenceHeight * 0.55f) {
+            return false;
+        }
+        float verticalGap = next.getTop() - previous.getBottom();
+        if (verticalGap < -referenceHeight * 0.45f
+                || verticalGap > Math.max(0.040f, referenceHeight * 0.90f)) {
+            return false;
+        }
+
+        float groupTop = cluster.get(0).getTop();
+        if (next.getBottom() - groupTop > 0.34f) return false;
+
+        float horizontalOverlap = Math.max(0f,
+                Math.min(previous.getRight(), next.getRight())
+                        - Math.max(previous.getLeft(), next.getLeft()));
+        float overlapRatio = horizontalOverlap / Math.max(0.001f,
+                Math.min(previous.getWidth(), next.getWidth()));
+        float alignmentShift = Math.min(Math.abs(previous.getLeft() - next.getLeft()),
+                Math.min(Math.abs(previous.getCenterX() - next.getCenterX()),
+                        Math.abs(previous.getRight() - next.getRight())));
+        return overlapRatio >= 0.25f || alignmentShift <= 0.09f;
+    }
+
+    private void addSpatialGroup(List<Candidate> output, List<OcrLine> lines) {
+        if (lines.size() < 2) return;
+        Candidate candidate = new Candidate();
+        candidate.spatialGroup = true;
+        for (OcrLine line : lines) addLine(candidate, line);
+        output.add(candidate);
+    }
+
+    private void addLine(Candidate candidate, OcrLine line) {
+        candidate.lines.add(line);
+        candidate.left = Math.min(candidate.left, line.getLeft());
+        candidate.top = Math.min(candidate.top, line.getTop());
+        candidate.right = Math.max(candidate.right, line.getRight());
+        candidate.bottom = Math.max(candidate.bottom, line.getBottom());
+    }
+
+    private void addCandidateIfNew(List<Candidate> candidates, Candidate candidate) {
+        for (Candidate existing : candidates) {
+            if (existing.lines.size() == candidate.lines.size()
+                    && existing.lines.containsAll(candidate.lines)) {
+                return;
+            }
+        }
+        candidates.add(candidate);
     }
 
     private double visualScore(Candidate candidate, int textLength) {
@@ -481,7 +580,8 @@ public final class AutoSubtitleRegionTracker {
     private boolean isEquivalentOcr(String previous, String current, double similarity) {
         int longest = Math.max(codePointLength(previous), codePointLength(current));
         double threshold = longest <= 6 ? 0.66 : longest <= 12 ? 0.76 : 0.84;
-        return similarity >= threshold;
+        return similarity >= threshold
+                || Similarity.isMultilineVariant(previous, current, 0.50);
     }
 
     private boolean isRealTransition(String previous, String current, double similarity) {

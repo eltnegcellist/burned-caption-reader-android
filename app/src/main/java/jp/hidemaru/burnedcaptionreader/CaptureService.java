@@ -32,12 +32,15 @@ import android.view.WindowManager;
 import jp.hidemaru.burnedcaptionreader.capture.SceneChangeDetector;
 import jp.hidemaru.burnedcaptionreader.ocr.MlKitJapaneseOcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrEngine;
+import jp.hidemaru.burnedcaptionreader.ocr.OcrLine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
 import jp.hidemaru.burnedcaptionreader.subtitle.AutoSubtitleRegionTracker;
+import jp.hidemaru.burnedcaptionreader.subtitle.Similarity;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleEvent;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleEventManager;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleNormalizer;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleStabilizer;
+import jp.hidemaru.burnedcaptionreader.subtitle.TemporalOcrConsensus;
 import jp.hidemaru.burnedcaptionreader.tts.AndroidTtsSpeaker;
 import jp.hidemaru.burnedcaptionreader.tts.SpeechEngine;
 
@@ -50,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public final class CaptureService extends Service {
     public static final String ACTION_START = "jp.hidemaru.burnedcaptionreader.START";
@@ -62,6 +66,9 @@ public final class CaptureService extends Service {
     private static final long MANUAL_SAMPLE_INTERVAL_MS = 330L;
     private static final long AUTO_SAMPLE_INTERVAL_MS = 480L;
     private static final long AUTO_TRACK_EXPIRES_MS = 10_000L;
+    private static final int AUTO_DETECTION_MAX_WIDTH = 1_100;
+    private static final int AUTO_REFINEMENT_MAX_WIDTH = 2_000;
+    private static final int AUTO_REFINEMENT_MIN_HEIGHT = 180;
 
     private static final class PositionedEvent {
         final SubtitleEvent event;
@@ -73,12 +80,26 @@ public final class CaptureService extends Service {
         }
     }
 
+    private static final class RefinedSelection {
+        final AutoSubtitleRegionTracker.Selection selection;
+        final String text;
+        final double confidence;
+
+        RefinedSelection(AutoSubtitleRegionTracker.Selection selection,
+                         String text, double confidence) {
+            this.selection = selection;
+            this.text = text;
+            this.confidence = confidence;
+        }
+    }
+
     private final AtomicBoolean ocrBusy = new AtomicBoolean(false);
     private final SubtitleStabilizer.Config stabilizerConfig = new SubtitleStabilizer.Config();
     private final SubtitleEventManager eventManager = new SubtitleEventManager(60_000L);
     private final AutoSubtitleRegionTracker regionTracker = new AutoSubtitleRegionTracker();
     private final SceneChangeDetector sceneChangeDetector = new SceneChangeDetector();
     private final Map<Integer, SubtitleStabilizer> autoStabilizers = new HashMap<>();
+    private final Map<Integer, TemporalOcrConsensus> autoConsensus = new HashMap<>();
     private final Map<Integer, Long> autoTrackLastSeen = new HashMap<>();
 
     private AppPreferences preferences;
@@ -224,20 +245,26 @@ public final class CaptureService extends Service {
                 regionTracker.reset();
                 sceneChangeDetector.reset();
                 autoStabilizers.clear();
+                autoConsensus.clear();
                 autoTrackLastSeen.clear();
             }
             stabilizerConfig.stableMs = preferences.getStableMs();
             if (!ocrBusy.compareAndSet(false, true)) return;
 
-            boolean portraitVideoViewport = automatic && frame.getHeight() > frame.getWidth();
             Bitmap source = automatic
                     ? cropRoi(frame, automaticVideoRoi(frame))
                     : cropRoi(frame, preferences.getRoi());
             boolean sceneChanged = automatic && sceneChangeDetector.observe(
                     now, sampleLuminance(source, 16, 12));
-            Bitmap prepared = resizeForOcr(source, automatic ? 1_100 : 1_800);
-            if (prepared != source) source.recycle();
-            recognize(prepared, now, automatic, portraitVideoViewport, sceneChanged);
+            Bitmap prepared = resizeForOcr(source,
+                    automatic ? AUTO_DETECTION_MAX_WIDTH : 1_800);
+            if (automatic) {
+                // Keep the original-resolution video ROI alive for a second OCR pass.
+                recognize(prepared, source, now, true, sceneChanged);
+            } else {
+                if (prepared != source) source.recycle();
+                recognize(prepared, null, now, false, false);
+            }
         } catch (RuntimeException error) {
             AppState.setStatus("画面処理エラー: " + safeMessage(error));
             ocrBusy.set(false);
@@ -246,33 +273,29 @@ public final class CaptureService extends Service {
         }
     }
 
-    private void recognize(Bitmap bitmap, long timestamp, boolean automatic,
-                           boolean portraitVideoViewport, boolean sceneChanged) {
-        ocrEngine.recognize(bitmap,
+    private void recognize(Bitmap detectionBitmap, Bitmap highResSource,
+                           long timestamp, boolean automatic, boolean sceneChanged) {
+        ocrEngine.recognize(detectionBitmap,
                 result -> {
+                    if (automatic) {
+                        handleAutomaticOcrResult(result, timestamp, sceneChanged, highResSource,
+                                () -> finishOcrPass(detectionBitmap, highResSource));
+                        return;
+                    }
                     try {
-                        handleOcrResult(result, timestamp, automatic, portraitVideoViewport,
-                                sceneChanged);
+                        handleManualOcrResult(result, timestamp);
                     } finally {
-                        bitmap.recycle();
-                        ocrBusy.set(false);
+                        finishOcrPass(detectionBitmap, null);
                     }
                 },
                 error -> {
-                    bitmap.recycle();
-                    ocrBusy.set(false);
+                    finishOcrPass(detectionBitmap, highResSource);
                     AppState.setStatus("OCRエラー: " + safeMessage(error));
                 });
     }
 
-    private void handleOcrResult(OcrResult result, long timestamp, boolean automatic,
-                                 boolean portraitVideoViewport, boolean sceneChanged) {
+    private void handleManualOcrResult(OcrResult result, long timestamp) {
         if (shuttingDown || projectionEnded) return;
-        if (automatic) {
-            handleAutomaticOcrResult(result, timestamp, portraitVideoViewport, sceneChanged);
-            return;
-        }
-
         String observedText = result.getText();
         double confidence = result.getConfidence();
         AppState.setLastOcr(observedText);
@@ -288,16 +311,145 @@ public final class CaptureService extends Service {
     }
 
     private void handleAutomaticOcrResult(OcrResult result, long timestamp,
-                                          boolean portraitVideoViewport,
-                                          boolean sceneChanged) {
+                                          boolean sceneChanged, Bitmap highResSource,
+                                          Runnable completion) {
+        if (shuttingDown || projectionEnded) {
+            completion.run();
+            return;
+        }
         if (sceneChanged) {
             autoStabilizers.clear();
+            autoConsensus.clear();
             autoTrackLastSeen.clear();
         }
+
+        // The video ROI already excludes most browser/page content. Do not discard
+        // the upper 18% of that ROI: real burned-in captions can live there.
         List<AutoSubtitleRegionTracker.Selection> selections = regionTracker.selectAll(
-                timestamp, result, portraitVideoViewport, sceneChanged);
+                timestamp, result, false, sceneChanged);
         if (selections.isEmpty()) {
-            AppState.setLastOcr(result.getText());
+            processAutomaticSelections(result, timestamp, new ArrayList<>());
+            completion.run();
+            return;
+        }
+
+        refineSelections(highResSource, selections, 0, new ArrayList<>(), refined -> {
+            try {
+                processAutomaticSelections(result, timestamp, refined);
+            } finally {
+                completion.run();
+            }
+        });
+    }
+
+    private void refineSelections(Bitmap highResSource,
+                                  List<AutoSubtitleRegionTracker.Selection> selections,
+                                  int index, List<RefinedSelection> output,
+                                  Consumer<List<RefinedSelection>> completion) {
+        if (index >= selections.size() || highResSource == null || highResSource.isRecycled()) {
+            if (index < selections.size()) {
+                for (int i = index; i < selections.size(); i++) {
+                    AutoSubtitleRegionTracker.Selection selection = selections.get(i);
+                    output.add(new RefinedSelection(selection, selection.getText(),
+                            selection.getConfidence()));
+                }
+            }
+            completion.accept(output);
+            return;
+        }
+
+        AutoSubtitleRegionTracker.Selection selection = selections.get(index);
+        Bitmap band = cropRefinementBand(highResSource, selection.getTop(), selection.getBottom());
+        Bitmap prepared = resizeForRefinement(band);
+        if (prepared != band) band.recycle();
+
+        ocrEngine.recognize(prepared,
+                refinedResult -> {
+                    try {
+                        output.add(selectBestRefinement(selection, refinedResult));
+                    } finally {
+                        prepared.recycle();
+                    }
+                    refineSelections(highResSource, selections, index + 1, output, completion);
+                },
+                error -> {
+                    prepared.recycle();
+                    output.add(new RefinedSelection(selection, selection.getText(),
+                            selection.getConfidence()));
+                    refineSelections(highResSource, selections, index + 1, output, completion);
+                });
+    }
+
+    private RefinedSelection selectBestRefinement(AutoSubtitleRegionTracker.Selection selection,
+                                                  OcrResult refinedResult) {
+        String original = SubtitleNormalizer.normalize(selection.getText());
+        String bestText = original;
+        double bestConfidence = selection.getConfidence();
+        double bestScore = refinementScore(original, original, bestConfidence);
+
+        List<OcrLine> lines = refinedResult.getLines();
+        for (int start = 0; start < lines.size(); start++) {
+            StringBuilder text = new StringBuilder();
+            double confidenceTotal = 0.0;
+            for (int end = start; end < lines.size() && end < start + 3; end++) {
+                OcrLine line = lines.get(end);
+                if (text.length() > 0) text.append('\n');
+                text.append(line.getText());
+                confidenceTotal += line.getConfidence();
+                String candidate = SubtitleNormalizer.normalize(text.toString());
+                double meanConfidence = confidenceTotal / (end - start + 1);
+                if (!isUsableRefinement(original, candidate)) continue;
+                double score = refinementScore(original, candidate, meanConfidence);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestText = candidate;
+                    bestConfidence = meanConfidence;
+                }
+            }
+        }
+
+        String whole = SubtitleNormalizer.normalize(refinedResult.getText());
+        if (!whole.isEmpty() && isUsableRefinement(original, whole)) {
+            double score = refinementScore(original, whole, refinedResult.getConfidence());
+            if (score > bestScore) {
+                bestText = whole;
+                bestConfidence = refinedResult.getConfidence();
+            }
+        }
+        return new RefinedSelection(selection, bestText, bestConfidence);
+    }
+
+    private boolean isUsableRefinement(String original, String candidate) {
+        if (candidate.isEmpty()) return false;
+        double similarity = Similarity.textSimilarity(original, candidate);
+        if (similarity >= 0.45
+                || Similarity.isPrefixRelation(original, candidate)
+                || Similarity.isMultilineVariant(original, candidate, 0.45)) {
+            return true;
+        }
+        String a = SubtitleNormalizer.comparisonKey(original);
+        String b = SubtitleNormalizer.comparisonKey(candidate);
+        if (a.isEmpty() || b.isEmpty() || (!a.contains(b) && !b.contains(a))) return false;
+        int shortLength = Math.min(a.codePointCount(0, a.length()), b.codePointCount(0, b.length()));
+        int longLength = Math.max(a.codePointCount(0, a.length()), b.codePointCount(0, b.length()));
+        return shortLength >= Math.ceil(longLength * 0.40);
+    }
+
+    private double refinementScore(String original, String candidate, double confidence) {
+        double similarity = Similarity.textSimilarity(original, candidate);
+        String key = SubtitleNormalizer.comparisonKey(candidate);
+        int length = key.codePointCount(0, key.length());
+        double lengthBonus = Math.min(1.0, length / 28.0) * 0.10;
+        double confidenceBonus = Math.max(0.0, Math.min(100.0, confidence)) / 100.0 * 0.25;
+        boolean containsOriginal = !SubtitleNormalizer.comparisonKey(original).isEmpty()
+                && key.contains(SubtitleNormalizer.comparisonKey(original));
+        return similarity * 2.0 + confidenceBonus + lengthBonus + (containsOriginal ? 0.12 : 0.0);
+    }
+
+    private void processAutomaticSelections(OcrResult rawResult, long timestamp,
+                                            List<RefinedSelection> selections) {
+        if (selections.isEmpty()) {
+            AppState.setLastOcr(rawResult.getText());
             for (SubtitleStabilizer track : autoStabilizers.values()) {
                 track.observe(timestamp, "", 100.0);
             }
@@ -311,17 +463,23 @@ public final class CaptureService extends Service {
         List<PositionedEvent> committed = new ArrayList<>();
         boolean allLocked = true;
         SubtitleStabilizer.State mostActiveState = SubtitleStabilizer.State.EMPTY;
-        for (AutoSubtitleRegionTracker.Selection selection : selections) {
-            if (observed.length() > 0) observed.append('\n');
-            observed.append(selection.getText());
+        for (RefinedSelection refined : selections) {
+            AutoSubtitleRegionTracker.Selection selection = refined.selection;
+            int trackId = selection.getTrackId();
+            visibleTracks.add(trackId);
+            autoTrackLastSeen.put(trackId, timestamp);
             allLocked &= selection.isLocked();
-            visibleTracks.add(selection.getTrackId());
-            autoTrackLastSeen.put(selection.getTrackId(), timestamp);
+
+            TemporalOcrConsensus.Result consensus = autoConsensus.computeIfAbsent(
+                    trackId, ignored -> new TemporalOcrConsensus())
+                    .observe(timestamp, refined.text, refined.confidence);
+            if (observed.length() > 0) observed.append('\n');
+            observed.append(consensus.getText());
 
             SubtitleStabilizer track = autoStabilizers.computeIfAbsent(
-                    selection.getTrackId(), ignored -> new SubtitleStabilizer(stabilizerConfig));
-            SubtitleEvent candidate = track.observe(timestamp, selection.getText(),
-                    selection.getConfidence());
+                    trackId, ignored -> new SubtitleStabilizer(stabilizerConfig));
+            SubtitleEvent candidate = track.observe(timestamp, consensus.getText(),
+                    consensus.getConfidence());
             mostActiveState = track.getState();
             if (candidate == null) continue;
             SubtitleEvent accepted = eventManager.accept(candidate);
@@ -359,6 +517,7 @@ public final class CaptureService extends Service {
         for (Integer trackId : expired) {
             autoTrackLastSeen.remove(trackId);
             autoStabilizers.remove(trackId);
+            autoConsensus.remove(trackId);
         }
     }
 
@@ -377,6 +536,15 @@ public final class CaptureService extends Service {
                 ? "読み上げ中（ブラウザを自動停止できませんでした）"
                 : "読み上げ中");
         updateNotification("読み上げ: " + oneLine(originalText));
+    }
+
+    private void finishOcrPass(Bitmap detectionBitmap, Bitmap highResSource) {
+        if (detectionBitmap != null && !detectionBitmap.isRecycled()) detectionBitmap.recycle();
+        if (highResSource != null && highResSource != detectionBitmap
+                && !highResSource.isRecycled()) {
+            highResSource.recycle();
+        }
+        ocrBusy.set(false);
     }
 
     private Bitmap imageToBitmap(Image image) {
@@ -407,6 +575,18 @@ public final class CaptureService extends Service {
         return output;
     }
 
+    private Bitmap cropRefinementBand(Bitmap source, float normalizedTop, float normalizedBottom) {
+        float bandHeight = Math.max(0.02f, normalizedBottom - normalizedTop);
+        float margin = Math.max(0.025f, bandHeight * 0.65f);
+        RectF band = new RectF(
+                0.01f,
+                Math.max(0f, normalizedTop - margin),
+                0.99f,
+                Math.min(1f, normalizedBottom + margin)
+        );
+        return cropRoi(source, band);
+    }
+
     /**
      * In portrait browsers the YouTube title and comments are below the 16:9 player.
      * Keep OCR around the possible player location instead of scanning the page body.
@@ -432,6 +612,22 @@ public final class CaptureService extends Service {
         if (Math.abs(scale - 1f) < 0.01f) return bitmap;
         return Bitmap.createScaledBitmap(bitmap, Math.round(width * scale),
                 Math.max(1, Math.round(bitmap.getHeight() * scale)), true);
+    }
+
+    private Bitmap resizeForRefinement(Bitmap bitmap) {
+        int width = Math.max(1, bitmap.getWidth());
+        int height = Math.max(1, bitmap.getHeight());
+        float scale = 1f;
+        if (height < AUTO_REFINEMENT_MIN_HEIGHT) {
+            scale = Math.min(2.5f, AUTO_REFINEMENT_MIN_HEIGHT / (float) height);
+        }
+        if (width * scale > AUTO_REFINEMENT_MAX_WIDTH) {
+            scale = AUTO_REFINEMENT_MAX_WIDTH / (float) width;
+        }
+        if (Math.abs(scale - 1f) < 0.01f) return bitmap;
+        return Bitmap.createScaledBitmap(bitmap,
+                Math.max(1, Math.round(width * scale)),
+                Math.max(1, Math.round(height * scale)), true);
     }
 
     private int[] sampleLuminance(Bitmap bitmap, int columns, int rows) {
@@ -490,6 +686,7 @@ public final class CaptureService extends Service {
         regionTracker.reset();
         sceneChangeDetector.reset();
         autoStabilizers.clear();
+        autoConsensus.clear();
         autoTrackLastSeen.clear();
     }
 

@@ -259,7 +259,6 @@ public final class CaptureService extends Service {
             Bitmap prepared = resizeForOcr(source,
                     automatic ? AUTO_DETECTION_MAX_WIDTH : 1_800);
             if (automatic) {
-                // Keep the original-resolution video ROI alive for a second OCR pass.
                 recognize(prepared, source, now, true, sceneChanged);
             } else {
                 if (prepared != source) source.recycle();
@@ -383,9 +382,9 @@ public final class CaptureService extends Service {
     private RefinedSelection selectBestRefinement(AutoSubtitleRegionTracker.Selection selection,
                                                   OcrResult refinedResult) {
         String original = SubtitleNormalizer.normalize(selection.getText());
-        String bestText = original;
+        String bestText = null;
         double bestConfidence = selection.getConfidence();
-        double bestScore = refinementScore(original, original, bestConfidence);
+        double bestScore = Double.NEGATIVE_INFINITY;
 
         List<OcrLine> lines = refinedResult.getLines();
         for (int start = 0; start < lines.size(); start++) {
@@ -416,13 +415,16 @@ public final class CaptureService extends Service {
                 bestConfidence = refinedResult.getConfidence();
             }
         }
+        if (bestText == null) {
+            return new RefinedSelection(selection, original, selection.getConfidence());
+        }
         return new RefinedSelection(selection, bestText, bestConfidence);
     }
 
     private boolean isUsableRefinement(String original, String candidate) {
         if (candidate.isEmpty()) return false;
         double similarity = Similarity.textSimilarity(original, candidate);
-        if (similarity >= 0.45
+        if (similarity >= 0.55
                 || Similarity.isPrefixRelation(original, candidate)
                 || Similarity.isMultilineVariant(original, candidate, 0.45)) {
             return true;
@@ -432,7 +434,7 @@ public final class CaptureService extends Service {
         if (a.isEmpty() || b.isEmpty() || (!a.contains(b) && !b.contains(a))) return false;
         int shortLength = Math.min(a.codePointCount(0, a.length()), b.codePointCount(0, b.length()));
         int longLength = Math.max(a.codePointCount(0, a.length()), b.codePointCount(0, b.length()));
-        return shortLength >= Math.ceil(longLength * 0.40);
+        return shortLength >= Math.ceil(longLength * 0.45);
     }
 
     private double refinementScore(String original, String candidate, double confidence) {

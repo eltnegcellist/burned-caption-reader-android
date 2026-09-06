@@ -1,12 +1,15 @@
 package jp.hidemaru.burnedcaptionreader.tts;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.AudioAttributes;
+import android.os.Bundle;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import java.util.Locale;
 import java.util.UUID;
+import jp.hidemaru.burnedcaptionreader.AppPreferences;
 
 public final class AndroidTtsSpeaker implements SpeechEngine {
     private static final class PendingSpeech {
@@ -24,6 +27,7 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
     }
 
     private final BoundedSpeechQueue<PendingSpeech> pending = new BoundedSpeechQueue<>(2);
+    private final SharedPreferences preferences;
     private TextToSpeech textToSpeech;
     private Listener listener;
     private String activeUtteranceId;
@@ -31,7 +35,10 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
     private boolean closed;
 
     public AndroidTtsSpeaker(Context context) {
-        textToSpeech = new TextToSpeech(context.getApplicationContext(), status -> {
+        Context appContext = context.getApplicationContext();
+        preferences = appContext.getSharedPreferences(
+                AppPreferences.PREFERENCES_FILE, Context.MODE_PRIVATE);
+        textToSpeech = new TextToSpeech(appContext, status -> {
             if (closed || status != TextToSpeech.SUCCESS) return;
             textToSpeech.setLanguage(Locale.JAPAN);
             textToSpeech.setAudioAttributes(new AudioAttributes.Builder()
@@ -85,11 +92,21 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
     private void speakNow(PendingSpeech speech) {
         if (closed || !ready || textToSpeech == null) return;
         long waitingMs = Math.max(0L, SystemClock.elapsedRealtime() - speech.queuedAt);
-        float catchUp = Math.min(0.45f, (waitingMs / 4_000f) * 0.15f + pending.size() * 0.15f);
+        // Once speech falls behind the video, catch up more aggressively. The user
+        // selected base rate still dominates when there is no queue delay.
+        float catchUp = Math.min(0.60f,
+                (waitingMs / 3_000f) * 0.18f + pending.size() * 0.18f);
         textToSpeech.setSpeechRate(Math.min(2.0f, speech.rate * (1.0f + catchUp)));
+
+        Bundle params = new Bundle();
+        float volume = preferences.getFloat(AppPreferences.SPEECH_VOLUME, 1.0f);
+        params.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME,
+                Math.max(0.0f, Math.min(1.0f, volume)));
+
         String utteranceId = UUID.randomUUID().toString();
         activeUtteranceId = utteranceId;
-        int result = textToSpeech.speak(speech.text, TextToSpeech.QUEUE_FLUSH, null, utteranceId);
+        int result = textToSpeech.speak(
+                speech.text, TextToSpeech.QUEUE_FLUSH, params, utteranceId);
         if (result == TextToSpeech.ERROR) finishUtterance(utteranceId);
     }
 

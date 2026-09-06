@@ -18,6 +18,16 @@ public final class TemporalOcrConsensusTest {
     }
 
     @Test
+    public void characterVoteCanRecoverTextEvenWhenEveryFrameHasDifferentError() {
+        TemporalOcrConsensus consensus = new TemporalOcrConsensus();
+        consensus.observe(0L, "今日ほ天気がいい", 72.0);
+        consensus.observe(450L, "今日は天汽がいい", 74.0);
+        TemporalOcrConsensus.Result result = consensus.observe(900L, "今日は天気がいぃ", 76.0);
+
+        assertEquals("今日は天気がいい", result.getText());
+    }
+
+    @Test
     public void resetsForClearlyDifferentSubtitle() {
         TemporalOcrConsensus consensus = new TemporalOcrConsensus();
         consensus.observe(0L, "今日は天気がいい", 80.0);

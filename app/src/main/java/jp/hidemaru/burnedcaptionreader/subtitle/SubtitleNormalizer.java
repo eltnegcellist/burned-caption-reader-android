@@ -16,6 +16,9 @@ public final class SubtitleNormalizer {
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFKC)
                 .replace("\r\n", "\n")
                 .replace('\r', '\n')
+                .replace('⋯', '…')
+                .replace('‥', '…')
+                .replace('︙', '…')
                 .replaceAll("[\\u200B-\\u200D\\uFEFF]", "");
 
         List<String> lines = new ArrayList<>();
@@ -24,6 +27,10 @@ public final class SubtitleNormalizer {
                     .replaceAll("[\\t \\u3000]+", "")
                     .replaceAll("[~～]+", "〜")
                     .replaceAll("^[|｜]+|[|｜]+$", "")
+                    // ML Kit can alternate between …, ..., ・・・ and similar dot leaders.
+                    // Collapse runs to a single semantic ellipsis before comparison/TTS.
+                    .replaceAll("[.．・･·…]{2,}", "…")
+                    .replaceAll("…{2,}", "…")
                     .replaceAll("。{2,}", "。")
                     .replaceAll("、{2,}", "、")
                     .trim();
@@ -37,11 +44,17 @@ public final class SubtitleNormalizer {
     public static String comparisonKey(String input) {
         return normalize(input)
                 .replace("\n", "")
-                .replaceAll("[、。,.，．・:：;；!?！？「」『』（）()\\[\\]【】]", "")
+                // Punctuation, including ellipsis, must not make the same subtitle
+                // look different just because OCR emitted a different dot form.
+                .replaceAll("[、。,.，．・…⋯‥︙:：;；!?！？「」『』（）()\\[\\]【】]", "")
                 .toLowerCase(Locale.JAPANESE);
     }
 
     public static String toSpeechText(String input) {
-        return normalize(input).replaceAll("\n+", "、");
+        // Treat ellipsis as a pause. Some TTS engines otherwise verbalize dot-like
+        // OCR artifacts, which sounds like a recognition error to the listener.
+        return normalize(input)
+                .replaceAll("…+", "、")
+                .replaceAll("\n+", "、");
     }
 }

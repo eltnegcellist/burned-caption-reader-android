@@ -44,6 +44,7 @@ public final class MainActivity extends Activity {
     private TextView ocrValue;
     private TextView spokenValue;
     private TextView rateValue;
+    private TextView volumeValue;
     private TextView stableValue;
     private Button startButton;
     private Button stopButton;
@@ -161,6 +162,20 @@ public final class MainActivity extends Activity {
             }
         });
         root.addView(rate);
+
+        volumeValue = valueText();
+        root.addView(labelValue("読み上げ音量", volumeValue));
+        SeekBar volume = new SeekBar(this);
+        volume.setMax(100);
+        volume.setProgress(Math.round(preferences.getSpeechVolume() * 100));
+        volume.setOnSeekBarChangeListener(new SimpleSeekListener() {
+            @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float value = progress / 100f;
+                preferences.setSpeechVolume(value);
+                volumeValue.setText(progress + "%");
+            }
+        });
+        root.addView(volume);
 
         stableValue = valueText();
         root.addView(labelValue("字幕の安定待ち時間", stableValue));
@@ -295,6 +310,7 @@ public final class MainActivity extends Activity {
         ocrValue.setText(AppState.getLastOcr());
         spokenValue.setText(AppState.getLastSpoken());
         rateValue.setText(String.format(Locale.JAPAN, "%.2f倍", preferences.getSpeechRate()));
+        volumeValue.setText(Math.round(preferences.getSpeechVolume() * 100) + "%");
         stableValue.setText(preferences.getStableMs() + " ms");
         startButton.setEnabled(!AppState.isRunning());
         stopButton.setEnabled(AppState.isRunning());

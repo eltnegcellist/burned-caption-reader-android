@@ -5,7 +5,9 @@ import android.content.SharedPreferences;
 import android.graphics.RectF;
 
 public final class AppPreferences {
-    private static final String FILE = "burned_caption_reader";
+    public static final String PREFERENCES_FILE = "burned_caption_reader";
+    public static final String SPEECH_VOLUME = "speech_volume";
+
     private static final String ROI_SET = "roi_set";
     private static final String ROI_LEFT = "roi_left";
     private static final String ROI_TOP = "roi_top";
@@ -28,7 +30,7 @@ public final class AppPreferences {
     private final SharedPreferences preferences;
 
     public AppPreferences(Context context) {
-        preferences = context.getSharedPreferences(FILE, Context.MODE_PRIVATE);
+        preferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
     }
 
     public boolean hasRoi() {
@@ -75,11 +77,19 @@ public final class AppPreferences {
     }
 
     public float getSpeechRate() {
-        return preferences.getFloat(SPEECH_RATE, 1.0f);
+        return preferences.getFloat(SPEECH_RATE, 1.25f);
     }
 
     public void setSpeechRate(float rate) {
         preferences.edit().putFloat(SPEECH_RATE, Math.max(0.5f, Math.min(2.0f, rate))).apply();
+    }
+
+    public float getSpeechVolume() {
+        return preferences.getFloat(SPEECH_VOLUME, 1.0f);
+    }
+
+    public void setSpeechVolume(float volume) {
+        preferences.edit().putFloat(SPEECH_VOLUME, Math.max(0.0f, Math.min(1.0f, volume))).apply();
     }
 
     public String getSpeechMode() {
@@ -108,7 +118,7 @@ public final class AppPreferences {
     }
 
     public long getStableMs() {
-        return preferences.getLong(STABLE_MS, 450L);
+        return preferences.getLong(STABLE_MS, 300L);
     }
 
     public void setStableMs(long stableMs) {

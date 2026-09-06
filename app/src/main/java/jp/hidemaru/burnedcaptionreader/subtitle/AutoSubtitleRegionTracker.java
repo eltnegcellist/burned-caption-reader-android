@@ -281,23 +281,24 @@ public final class AutoSubtitleRegionTracker {
 
     /**
      * In portrait YouTube layouts, the title and view/upload metadata sit directly
-     * below the player. A view-count/time line is much easier to recognize reliably
-     * than the arbitrary video title, so use it as an anchor and reject nearby
-     * left-aligned text as one metadata cluster. The y threshold is deliberately
-     * low enough to leave ordinary center/bottom burned-in captions alone.
+     * below the player. A view-count/time line is a reliable anchor for the otherwise
+     * arbitrary title. Reject only text that shares the same strongly left-aligned
+     * layout, so centered burned-in captions near the bottom remain eligible.
      */
     private boolean isLikelyPlayerMetadata(Candidate candidate, List<Candidate> all) {
         if (candidate.centerY() < 0.68f) return false;
         String text = candidate.text.toLowerCase(Locale.JAPANESE);
         boolean directMetadata = UI_TERMS.matcher(text).find();
-        boolean leftMetadataLayout = candidate.left <= 0.24f && candidate.centerX() <= 0.64f;
-        if (directMetadata && leftMetadataLayout) return true;
-        if (!leftMetadataLayout) return false;
+        if (directMetadata && candidate.left <= 0.18f) return true;
 
+        // Arbitrary title text has no dependable keywords. Only treat it as UI when
+        // it is strongly left aligned like a nearby view-count/upload-time anchor.
+        if (candidate.left > 0.12f) return false;
         for (Candidate anchor : all) {
-            if (anchor == candidate || anchor.centerY() < 0.65f || anchor.left > 0.35f) continue;
+            if (anchor == candidate || anchor.centerY() < 0.65f || anchor.left > 0.18f) continue;
             String anchorText = anchor.text.toLowerCase(Locale.JAPANESE);
             if (!UI_TERMS.matcher(anchorText).find()) continue;
+            if (Math.abs(candidate.left - anchor.left) > 0.06f) continue;
             float centerDistance = Math.abs(candidate.centerY() - anchor.centerY());
             float edgeDistance = Math.min(Math.abs(candidate.bottom - anchor.top),
                     Math.abs(anchor.bottom - candidate.top));

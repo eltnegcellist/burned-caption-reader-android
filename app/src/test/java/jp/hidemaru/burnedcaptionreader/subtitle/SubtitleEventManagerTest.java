@@ -21,6 +21,27 @@ public class SubtitleEventManagerTest {
     }
 
     @Test
+    public void suppressesMoreDamagedOcrVariantImmediatelyAfterReading() {
+        SubtitleEventManager manager = new SubtitleEventManager(60_000L);
+        assertNotNull(manager.accept(event("1", "今日は天気が良いですね", 1_000L)));
+        assertNull(manager.accept(event("2", "今日は天汽が良いで寸ね", 5_000L)));
+    }
+
+    @Test
+    public void similarButDifferentLaterCaptionIsNotOverSuppressed() {
+        SubtitleEventManager manager = new SubtitleEventManager(60_000L);
+        assertNotNull(manager.accept(event("1", "今日は天気が良いですね", 1_000L)));
+        assertNotNull(manager.accept(event("2", "今日は天汽が良いで寸ね", 12_000L)));
+    }
+
+    @Test
+    public void ellipsisVariantDoesNotCauseDuplicateReading() {
+        SubtitleEventManager manager = new SubtitleEventManager(60_000L);
+        assertNotNull(manager.accept(event("1", "でも…本当にいいの？", 1_000L)));
+        assertNull(manager.accept(event("2", "でも・・・本当にいいの?", 3_000L)));
+    }
+
+    @Test
     public void allowsSameTextAfterHistoryWindow() {
         SubtitleEventManager manager = new SubtitleEventManager(5_000L);
         assertNotNull(manager.accept(event("1", "繰り返す字幕", 1_000L)));

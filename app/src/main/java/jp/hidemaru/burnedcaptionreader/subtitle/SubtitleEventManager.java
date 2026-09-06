@@ -4,6 +4,10 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 public final class SubtitleEventManager {
+    private static final long STRONG_DUPLICATE_WINDOW_MS = 8_000L;
+    private static final double NORMAL_DUPLICATE_THRESHOLD = 0.86;
+    private static final double SHORT_WINDOW_DUPLICATE_THRESHOLD = 0.80;
+
     private final long recentDuplicateMs;
     private final int maxEntries;
     private final Deque<SubtitleEvent> recent = new ArrayDeque<>();
@@ -23,7 +27,8 @@ public final class SubtitleEventManager {
             recent.removeFirst();
         }
         for (SubtitleEvent previous : recent) {
-            if (isNearDuplicate(event.getText(), previous.getText())) {
+            long ageMs = Math.max(0L, event.getCommittedAt() - previous.getCommittedAt());
+            if (isNearDuplicate(event.getText(), previous.getText(), ageMs)) {
                 return null;
             }
         }
@@ -36,15 +41,33 @@ public final class SubtitleEventManager {
         recent.clear();
     }
 
-    private boolean isNearDuplicate(String left, String right) {
-        if (Similarity.areEquivalent(left, right, 0.86)) return true;
-        if (left.length() <= right.length()
-                && Similarity.isMultilineVariant(left, right, 0.50)) return true;
+    private boolean isNearDuplicate(String left, String right, long ageMs) {
+        if (Similarity.areEquivalent(left, right, NORMAL_DUPLICATE_THRESHOLD)) return true;
+        if (Similarity.isMultilineVariant(left, right, 0.50)
+                || Similarity.isMultilineVariant(right, left, 0.50)) {
+            return true;
+        }
+
         String a = SubtitleNormalizer.comparisonKey(left);
         String b = SubtitleNormalizer.comparisonKey(right);
-        int shortLength = Math.min(a.codePointCount(0, a.length()), b.codePointCount(0, b.length()));
-        int longLength = Math.max(a.codePointCount(0, a.length()), b.codePointCount(0, b.length()));
-        return longLength > 0 && shortLength >= Math.ceil(longLength * 0.70)
-                && Similarity.isPrefixRelation(left, right);
+        int aLength = a.codePointCount(0, a.length());
+        int bLength = b.codePointCount(0, b.length());
+        int shortLength = Math.min(aLength, bLength);
+        int longLength = Math.max(aLength, bLength);
+        if (longLength == 0) return true;
+
+        double lengthRatio = shortLength / (double) longLength;
+        if (shortLength >= Math.ceil(longLength * 0.70)
+                && Similarity.isPrefixRelation(left, right)) {
+            return true;
+        }
+
+        // The same burned-in caption can be re-detected with several wrong glyphs
+        // after a track reset. Be deliberately more tolerant only for a few seconds;
+        // the normal 60 s history keeps the stricter threshold so genuinely similar
+        // later captions are not accidentally hidden.
+        return ageMs <= STRONG_DUPLICATE_WINDOW_MS
+                && lengthRatio >= 0.78
+                && Similarity.textSimilarity(left, right) >= SHORT_WINDOW_DUPLICATE_THRESHOLD;
     }
 }

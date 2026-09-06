@@ -95,7 +95,7 @@ public final class AutoSubtitleRegionTracker {
     private static final Pattern ONLY_SYMBOLS_OR_NUMBERS = Pattern.compile(
             "^[\\d\\s:：%％+＋\\-−/／|｜・.,，。!?！？()（）]+$");
     private static final Pattern UI_TERMS = Pattern.compile(
-            "(youtube|チャンネル登録|高評価|低評価|共有|保存|コメント|返信|回視聴|再生リスト|全画面|広告)",
+            "(youtube|チャンネル登録|登録者|高評価|低評価|共有|保存|コメント|返信|回視聴|視聴回数|再生回数|回再生|再生リスト|全画面|広告|\\d+(?:[.,]\\d+)?[万億]?回|\\d+\\s*(?:分|時間|日|週間|週|か月|ヶ月|月|年)前)",
             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
     private static final Pattern JAPANESE_TEXT = Pattern.compile("[\\u3040-\\u30ff\\u3400-\\u9fff]");
     private static final Pattern SHORT_TECHNICAL_LABEL = Pattern.compile(
@@ -207,9 +207,8 @@ public final class AutoSubtitleRegionTracker {
         for (OcrLine line : result.getLines()) {
             String text = SubtitleNormalizer.normalize(line.getText());
             if (text.isEmpty() || line.getConfidence() < 30.0 || line.getHeight() < 0.008f) continue;
-            // The portrait crop ends at the bottom of the 16:9 player. Burned-in
-            // subtitles can therefore sit at y=0.90..1.00; only discard browser
-            // chrome above the player, not the lower edge where captions live.
+            // Kept for the manual portrait hint. CaptureService currently passes false
+            // because burned-in captions may legitimately occupy the top of the video.
             if (portraitVideoViewport && line.getCenterY() < 0.18f) continue;
             eligibleLines.add(line);
             Candidate candidate = grouped.computeIfAbsent(line.getBlockIndex(), ignored -> new Candidate());
@@ -217,10 +216,6 @@ public final class AutoSubtitleRegionTracker {
         }
 
         List<Candidate> candidates = new ArrayList<>();
-        // ML Kit often assigns each row of outlined YouTube text to a different
-        // Text.Block. Rebuild a spatial 2-3 line caption before considering the
-        // individual OCR blocks, otherwise a three-line caption consumes three
-        // tracks and the first row loses to the two-track limit.
         for (Candidate spatialGroup : buildSpatialLineGroups(eligibleLines)) {
             addCandidateIfNew(candidates, spatialGroup);
         }
@@ -236,7 +231,7 @@ public final class AutoSubtitleRegionTracker {
             }
         }
 
-        List<Candidate> output = new ArrayList<>();
+        List<Candidate> scored = new ArrayList<>();
         for (Candidate candidate : candidates) {
             candidate.lines.sort(Comparator.comparingDouble(OcrLine::getTop)
                     .thenComparingDouble(OcrLine::getLeft));
@@ -258,8 +253,16 @@ public final class AutoSubtitleRegionTracker {
             candidate.japanese = JAPANESE_TEXT.matcher(candidate.text).find();
             candidate.lane = laneFor(candidate.centerY());
             candidate.visualScore = visualScore(candidate, length);
-            if (candidate.visualScore >= 0.50) output.add(candidate);
+            scored.add(candidate);
         }
+
+        List<Candidate> output = new ArrayList<>();
+        for (Candidate candidate : scored) {
+            if (candidate.visualScore < 0.50) continue;
+            if (isLikelyPlayerMetadata(candidate, scored)) continue;
+            output.add(candidate);
+        }
+
         List<Candidate> wholeCaptions = new ArrayList<>();
         for (Candidate candidate : output) {
             boolean fragment = false;
@@ -274,6 +277,33 @@ public final class AutoSubtitleRegionTracker {
             if (!fragment) wholeCaptions.add(candidate);
         }
         return wholeCaptions;
+    }
+
+    /**
+     * In portrait YouTube layouts, the title and view/upload metadata sit directly
+     * below the player. A view-count/time line is much easier to recognize reliably
+     * than the arbitrary video title, so use it as an anchor and reject nearby
+     * left-aligned text as one metadata cluster. The y threshold is deliberately
+     * low enough to leave ordinary center/bottom burned-in captions alone.
+     */
+    private boolean isLikelyPlayerMetadata(Candidate candidate, List<Candidate> all) {
+        if (candidate.centerY() < 0.68f) return false;
+        String text = candidate.text.toLowerCase(Locale.JAPANESE);
+        boolean directMetadata = UI_TERMS.matcher(text).find();
+        boolean leftMetadataLayout = candidate.left <= 0.24f && candidate.centerX() <= 0.64f;
+        if (directMetadata && leftMetadataLayout) return true;
+        if (!leftMetadataLayout) return false;
+
+        for (Candidate anchor : all) {
+            if (anchor == candidate || anchor.centerY() < 0.65f || anchor.left > 0.35f) continue;
+            String anchorText = anchor.text.toLowerCase(Locale.JAPANESE);
+            if (!UI_TERMS.matcher(anchorText).find()) continue;
+            float centerDistance = Math.abs(candidate.centerY() - anchor.centerY());
+            float edgeDistance = Math.min(Math.abs(candidate.bottom - anchor.top),
+                    Math.abs(anchor.bottom - candidate.top));
+            if (centerDistance <= 0.20f || edgeDistance <= 0.10f) return true;
+        }
+        return false;
     }
 
     private List<Candidate> buildSpatialLineGroups(List<OcrLine> eligibleLines) {
@@ -416,16 +446,11 @@ public final class AutoSubtitleRegionTracker {
             } else if (isRealTransition(state.lastText, candidate.text, similarity)) {
                 observePendingTransition(timestamp, state, candidate);
             } else {
-                // Ambiguous OCR movement is neither proof of a new subtitle nor a
-                // reason to discard the lane. It must repeat before it can matter.
                 state.stableObservations++;
                 clearPendingTransition(state);
             }
         }
         state.observations++;
-        // Keep the previous accepted text while a possible replacement is being
-        // verified. Otherwise the second observation would look "unchanged" and
-        // a one-frame object/OCR change could never be distinguished correctly.
         if (state.pendingTransitionObservations == 0) state.lastText = candidate.text;
         state.lastSeenAt = timestamp;
         state.visualTotal += candidate.visualScore;
@@ -467,8 +492,6 @@ public final class AutoSubtitleRegionTracker {
         if (Math.abs(candidate.bottom - state.meanBottom) > baselineTolerance) return false;
         if (Math.abs(candidate.height() - state.meanHeight) > heightTolerance) return false;
 
-        // Caption width changes with sentence length. Match whichever horizontal
-        // anchor remains fixed: left-aligned, centered, or right-aligned.
         float anchorShift = Math.min(Math.abs(candidate.left - state.meanLeft),
                 Math.min(Math.abs(candidate.centerX() - state.meanCenterX),
                         Math.abs(candidate.right - state.meanRight)));
@@ -487,8 +510,6 @@ public final class AutoSubtitleRegionTracker {
     }
 
     private void updateGeometry(LaneState state, Candidate candidate) {
-        // A bounded running mean preserves the screen anchor instead of following
-        // a slowly moving product label indefinitely.
         int previousWeight = Math.min(7, state.geometrySamples);
         int totalWeight = previousWeight + 1;
         state.meanLeft = weightedMean(state.meanLeft, candidate.left, previousWeight, totalWeight);

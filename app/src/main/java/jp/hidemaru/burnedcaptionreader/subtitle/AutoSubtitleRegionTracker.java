@@ -267,7 +267,8 @@ public final class AutoSubtitleRegionTracker {
         for (Candidate candidate : output) {
             boolean fragment = false;
             for (Candidate parent : output) {
-                if (parent.spatialGroup && isStrongCaptionShape(parent)
+                if (parent.spatialGroup
+                        && (isStrongCaptionShape(parent) || isUpperCaptionRescueShape(parent))
                         && parent.lines.size() > candidate.lines.size()
                         && parent.lines.containsAll(candidate.lines)) {
                     fragment = true;
@@ -394,10 +395,8 @@ public final class AutoSubtitleRegionTracker {
         double usefulWidth = Math.min(1.0, candidate.width() / 0.55f);
         double compactHeight = 1.0 - Math.min(1.0, candidate.height() / 0.28f);
         double usefulLength = Math.min(1.0, textLength / 14.0);
-        double weakLowerPrior = Math.max(0.0, candidate.centerY() - 0.55f) / 0.45f;
         double score = confidence * 0.90 + centered * 0.45 + usefulWidth * 0.75
-                + compactHeight * 0.20 + usefulLength * 0.45
-                + weakLowerPrior * 0.15;
+                + compactHeight * 0.20 + usefulLength * 0.45;
         String text = candidate.text.toLowerCase(Locale.JAPANESE);
         if (candidate.japanese) score += 0.35;
         if (ONLY_SYMBOLS_OR_NUMBERS.matcher(text).matches()) score -= 2.20;
@@ -545,7 +544,7 @@ public final class AutoSubtitleRegionTracker {
             if (lane.observations < 2 || lane.stableObservations < 2) continue;
             if (timestamp - lane.textSince < 300L
                     || timestamp - lane.firstSeenAt > PROVISIONAL_MAX_STATIC_MS) continue;
-            if (!isStrongCaptionShape(candidate)) continue;
+            if (!isStrongCaptionShape(candidate) && !isUpperCaptionRescueShape(candidate)) continue;
             candidate.finalScore = laneScore(timestamp, lane, candidate);
             provisional.add(lane);
         }
@@ -588,6 +587,20 @@ public final class AutoSubtitleRegionTracker {
                     || candidate.lines.size() >= 2;
         }
         return candidate.width() >= 0.60f && candidate.textLength >= 12;
+    }
+
+    /**
+     * Upper subtitles in short-form/dialogue videos are often narrower and shorter
+     * than the main lower caption. Rescue only stable Japanese text in the upper
+     * half with reasonable OCR confidence and a screen-centered geometry. This keeps
+     * the generic static-label rejection intact for middle/lower object text.
+     */
+    private boolean isUpperCaptionRescueShape(Candidate candidate) {
+        if (!candidate.japanese || candidate.centerY() >= 0.50f) return false;
+        if (candidate.confidence < 55.0 || candidate.visualScore < 1.75) return false;
+        if (candidate.centerX() < 0.18f || candidate.centerX() > 0.82f) return false;
+        return candidate.width() >= 0.24f || candidate.textLength >= 6
+                || candidate.lines.size() >= 2;
     }
 
     private double laneScore(long timestamp, LaneState lane, Candidate candidate) {

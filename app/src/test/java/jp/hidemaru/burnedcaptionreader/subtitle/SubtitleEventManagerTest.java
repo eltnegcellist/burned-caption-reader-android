@@ -6,6 +6,39 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 public class SubtitleEventManagerTest {
+    @Test public void reorderedThreeRowsAreNotReadTwice() {
+        SubtitleEventManager manager = new SubtitleEventManager(60_000L);
+        assertNotNull(manager.accept(event("a", "最初の字幕です\n次の行を読みます\nこれが最後です", 1000)));
+        assertNull(manager.accept(event("b", "これが最後です\n最初の字幕です\n次の行を読みます", 1500)));
+    }
+
+    @Test public void fuzzyTwoRowFragmentDoesNotRepeatFullCaption() {
+        SubtitleEventManager manager = new SubtitleEventManager(60_000L);
+        assertNotNull(manager.accept(event("a", "会社員の私には\n縁がない世界だと\n思っていました", 1000)));
+        assertNull(manager.accept(event("b", "縁がない世畀だと\n思っていました", 1500)));
+    }
+
+    @Test public void recoveredTopRowIsReadWithoutRepeatingAlreadySpokenRows() {
+        SubtitleEventManager manager = new SubtitleEventManager(60_000L);
+        assertNotNull(manager.accept(event("a", "縁がない世界だと\n思っていました", 1000)));
+        org.junit.Assert.assertEquals("会社員の私には", manager.accept(event("b",
+                "会社員の私には\n縁がない世界だと\n思っていました", 1500)).getText());
+        assertNull(manager.accept(event("c", "会社員の私には\n縁がない世界だと\n思っていました", 2000)));
+    }
+
+    @Test public void changedNumericRowIsNotDiscardedWithStableContextRows() {
+        SubtitleEventManager manager = new SubtitleEventManager(60_000L);
+        manager.accept(event("a", "商品の説明です\n価格は100円です\n詳しく説明します", 1000));
+        org.junit.Assert.assertEquals("価格は200円です", manager.accept(event("b",
+                "商品の説明です\n価格は200円です\n詳しく説明します", 1500)).getText());
+    }
+
+    @Test public void singleExactRowFragmentIsNotRepeated() {
+        SubtitleEventManager manager = new SubtitleEventManager(60_000L);
+        manager.accept(event("a", "会社員の私には\n縁がない世界だと\n思っていました", 1000));
+        assertNull(manager.accept(event("b", "思っていました", 1500)));
+    }
+
     @Test
     public void droppedTopRowIsNotReadAgainWhenTrackIdChanges() {
         SubtitleEventManager manager = new SubtitleEventManager(60_000L);

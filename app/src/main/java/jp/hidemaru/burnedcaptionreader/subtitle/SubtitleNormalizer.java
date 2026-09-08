@@ -19,6 +19,7 @@ public final class SubtitleNormalizer {
                 .replace('⋯', '…')
                 .replace('‥', '…')
                 .replace('︙', '…')
+                .replace('⋮', '…')
                 .replaceAll("[\\u200B-\\u200D\\uFEFF]", "");
 
         List<String> lines = new ArrayList<>();
@@ -29,7 +30,7 @@ public final class SubtitleNormalizer {
                     .replaceAll("^[|｜]+|[|｜]+$", "")
                     // ML Kit can alternate between …, ..., ・・・ and similar dot leaders.
                     // Collapse runs to a single semantic ellipsis before comparison/TTS.
-                    .replaceAll("[.．・･·…]{2,}", "…")
+                    .replaceAll("[.．・･·•‧∙⋅◦…]{2,}", "…")
                     .replaceAll("…{2,}", "…")
                     .replaceAll("。{2,}", "。")
                     .replaceAll("、{2,}", "、")
@@ -53,8 +54,12 @@ public final class SubtitleNormalizer {
     public static String toSpeechText(String input) {
         // Treat ellipsis as a pause. Some TTS engines otherwise verbalize dot-like
         // OCR artifacts, which sounds like a recognition error to the listener.
-        return normalize(input)
+        String speech = normalize(input)
                 .replaceAll("…+", "、")
-                .replaceAll("\n+", "、");
+                .replaceAll("\n+", "、")
+                .replaceAll("[、。,.・·•‧∙⋅◦]{2,}", "、")
+                .replaceAll("^[、。,.・·•‧∙⋅◦]+|[、,.・·•‧∙⋅◦]+$", "");
+        // Never ask a TTS engine to pronounce a punctuation-only utterance.
+        return speech.codePoints().anyMatch(Character::isLetterOrDigit) ? speech : "";
     }
 }

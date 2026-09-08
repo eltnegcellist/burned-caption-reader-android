@@ -5,6 +5,18 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public final class SubtitleNormalizerTest {
+    @Test public void punctuationOnlyIsNeverSpoken() {
+        for (String value : new String[]{"…", "・・・", "⋮", "•••", "…\n…", "!?", "・"}) {
+            assertEquals("", SubtitleNormalizer.toSpeechText(value));
+        }
+    }
+
+    @Test public void removesEdgeEllipsesAndCollapsesPauses() {
+        assertEquals("そうなの", SubtitleNormalizer.toSpeechText("…そうなの…"));
+        assertEquals("でも、本当?", SubtitleNormalizer.toSpeechText("でも•••\n…本当?"));
+        assertEquals("価格は3.5ドル", SubtitleNormalizer.toSpeechText("価格は3.5ドル"));
+    }
+
     @Test
     public void normalizesCommonEllipsisOcrVariants() {
         assertEquals("でも…本当にいいの?",

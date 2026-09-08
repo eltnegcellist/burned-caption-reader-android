@@ -77,7 +77,7 @@ public final class AppPreferences {
     }
 
     public float getSpeechRate() {
-        return preferences.getFloat(SPEECH_RATE, 1.25f);
+        return preferences.getFloat(SPEECH_RATE, 1.40f);
     }
 
     public void setSpeechRate(float rate) {

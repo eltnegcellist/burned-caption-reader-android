@@ -83,12 +83,7 @@ public final class CaptureService extends Service {
     }
 
     private final SubtitleSpeechOrderBuffer speechOrder = new SubtitleSpeechOrderBuffer();
-    private final Runnable flushSpeechOrder = () -> {
-        if (!this.shuttingDown && !this.projectionEnded) {
-            speakOrderedEvents(speechOrder.drain(SystemClock.elapsedRealtime()));
-            scheduleSpeechOrderFlush();
-        }
-    };
+    private final Runnable flushSpeechOrder = this::flushOrderedSpeech;
 
     private final AtomicBoolean ocrBusy = new AtomicBoolean(false);
     private final SubtitleStabilizer.Config stabilizerConfig = new SubtitleStabilizer.Config();
@@ -385,7 +380,7 @@ public final class CaptureService extends Service {
         return new RefinedSelection(selection, result.getText(), result.getConfidence());
     }
 
-    private void processAutomaticSelections(OcrResult rawResult, long timestamp,
+    private synchronized void processAutomaticSelections(OcrResult rawResult, long timestamp,
                                             List<RefinedSelection> selections) {
         if (selections.isEmpty()) {
             AppState.setLastOcr(rawResult.getText());
@@ -468,6 +463,12 @@ public final class CaptureService extends Service {
         if (speech.length() > 0) speakAcceptedText(speech.toString());
     }
 
+    private synchronized void flushOrderedSpeech() {
+        if (shuttingDown || projectionEnded) return;
+        speakOrderedEvents(speechOrder.drain(SystemClock.elapsedRealtime()));
+        scheduleSpeechOrderFlush();
+    }
+
     private void scheduleSpeechOrderFlush() {
         if (captureHandler == null) return;
         captureHandler.removeCallbacks(flushSpeechOrder);
@@ -476,7 +477,7 @@ public final class CaptureService extends Service {
                 Math.max(1, deadline - SystemClock.elapsedRealtime()));
     }
 
-    private void resetSpeechOrder() {
+    private synchronized void resetSpeechOrder() {
         speechOrder.reset();
         if (captureHandler != null) captureHandler.removeCallbacks(flushSpeechOrder);
     }

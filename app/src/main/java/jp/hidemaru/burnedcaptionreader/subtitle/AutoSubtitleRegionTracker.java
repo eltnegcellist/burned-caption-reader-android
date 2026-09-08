@@ -321,21 +321,24 @@ public final class AutoSubtitleRegionTracker {
                 .thenComparingDouble(OcrLine::getLeft));
 
         List<Candidate> output = new ArrayList<>();
-        List<OcrLine> cluster = new ArrayList<>();
+        List<List<OcrLine>> clusters = new ArrayList<>();
         for (OcrLine line : japaneseLines) {
-            if (cluster.isEmpty()) {
-                cluster.add(line);
-                continue;
+            List<OcrLine> best = null;
+            float nearestGap = Float.MAX_VALUE;
+            for (List<OcrLine> cluster : clusters) {
+                if (cluster.size() >= 3 || !canJoinSpatialGroup(cluster, line)) continue;
+                OcrLine previous = cluster.get(cluster.size() - 1);
+                float gap = Math.abs(line.getTop() - previous.getBottom());
+                if (gap < nearestGap) { best = cluster; nearestGap = gap; }
             }
-            if (cluster.size() < 3 && canJoinSpatialGroup(cluster, line)) {
-                cluster.add(line);
-                continue;
+            // A small unrelated OCR label must not terminate an existing caption.
+            if (best == null) {
+                best = new ArrayList<>();
+                clusters.add(best);
             }
-            addSpatialGroup(output, cluster);
-            cluster.clear();
-            cluster.add(line);
+            best.add(line);
         }
-        addSpatialGroup(output, cluster);
+        for (List<OcrLine> cluster : clusters) addSpatialGroup(output, cluster);
         return output;
     }
 
@@ -685,3 +688,4 @@ public final class AutoSubtitleRegionTracker {
 
     private static int distance(int left, int right) { return Math.abs(left - right); }
 }
+

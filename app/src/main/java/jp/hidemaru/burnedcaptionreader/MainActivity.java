@@ -26,10 +26,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Locale;
+import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticRecorder;
 
 public final class MainActivity extends Activity {
     private static final int REQUEST_CAPTURE = 1001;
     private static final int REQUEST_NOTIFICATIONS = 1002;
+    private static final int REQUEST_DIAGNOSTIC_EXPORT = 1003;
+    private Switch diagnosticSwitch;
+    private TextView diagnosticStatus;
+    private Button diagnosticExport;
+    private Button diagnosticDelete;
 
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
     private final Runnable refreshTask = new Runnable() {
@@ -204,6 +210,40 @@ public final class MainActivity extends Activity {
                 13, Color.rgb(82, 99, 108));
         root.addView(keepScreenNote);
 
+        root.addView(section("不具合の診断"));
+        diagnosticSwitch = new Switch(this);
+        diagnosticSwitch.setText("診断記録をオンにする");
+        diagnosticSwitch.setChecked(DiagnosticRecorder.get(this).isRecording());
+        diagnosticSwitch.setOnCheckedChangeListener((button, checked) -> {
+            DiagnosticRecorder recorder = DiagnosticRecorder.get(this);
+            if (checked) recorder.start(); else recorder.stop();
+        });
+        root.addView(diagnosticSwitch);
+        root.addView(text("オンの間、OCR処理範囲の画像と認識・発話ログを端末内に記録します。画像にはタイトルなどが含まれる場合があります。直近最大2分・64MBを保持します。新しくオンにすると前の記録を消去します。", 14, Color.rgb(56, 74, 85)));
+        diagnosticStatus = valueText();
+        root.addView(diagnosticStatus);
+        diagnosticExport = normalButton("診断データを書き出す（ZIP）");
+        diagnosticExport.setOnClickListener(v -> {
+            DiagnosticRecorder.get(this).stop();
+            diagnosticSwitch.setChecked(false);
+            try {
+                startActivityForResult(new Intent(Intent.ACTION_CREATE_DOCUMENT)
+                        .addCategory(Intent.CATEGORY_OPENABLE).setType("application/zip")
+                        .putExtra(Intent.EXTRA_TITLE, "caption-diagnostics-" + System.currentTimeMillis() + ".zip"),
+                        REQUEST_DIAGNOSTIC_EXPORT);
+            } catch (RuntimeException e) {
+                Toast.makeText(this, "保存先を開けませんでした", Toast.LENGTH_LONG).show();
+            }
+        });
+        root.addView(diagnosticExport);
+        diagnosticDelete = normalButton("端末内の診断記録を削除");
+        diagnosticDelete.setOnClickListener(v -> {
+            diagnosticSwitch.setChecked(false);
+            DiagnosticRecorder.get(this).clear();
+        });
+        root.addView(diagnosticDelete);
+        root.addView(text("問題が起きたら早めに書き出し、保存したZIPをこのチャットに添付してください。自動送信はしません。記録のオンだけでは画面共有は始まりません。", 14, Color.rgb(56, 74, 85)));
+
         root.addView(section("プライバシー"));
         TextView privacy = text("画面画像と認識結果は端末内だけで処理します。映像をサーバーへ送信しません。DRMなどで保護された画面は取得できない場合があります。", 14,
                 Color.rgb(56, 74, 85));
@@ -241,6 +281,18 @@ public final class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_DIAGNOSTIC_EXPORT) {
+            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                DiagnosticRecorder.get(this).export(data.getData(), error -> {
+                    if (!isDestroyed()) {
+                        Toast.makeText(this, error == null
+                                ? "ZIPを保存しました。チャットに添付してください" : error, Toast.LENGTH_LONG).show();
+                        refreshStatus();
+                    }
+                });
+            }
+            return;
+        }
         if (requestCode != REQUEST_CAPTURE) return;
         if (resultCode != RESULT_OK || data == null) {
             Toast.makeText(this, "画面共有は開始されませんでした", Toast.LENGTH_SHORT).show();
@@ -314,6 +366,14 @@ public final class MainActivity extends Activity {
         stableValue.setText(preferences.getStableMs() + " ms");
         startButton.setEnabled(!AppState.isRunning());
         stopButton.setEnabled(AppState.isRunning());
+        DiagnosticRecorder recorder = DiagnosticRecorder.get(this);
+        diagnosticStatus.setText(recorder.status());
+        diagnosticSwitch.setEnabled(!recorder.isExporting());
+        diagnosticExport.setEnabled(!recorder.isExporting());
+        diagnosticDelete.setEnabled(!recorder.isExporting());
+        if (diagnosticSwitch.isChecked() != recorder.isRecording()) {
+            diagnosticSwitch.setChecked(recorder.isRecording());
+        }
     }
 
     private TextView section(String title) {

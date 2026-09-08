@@ -32,10 +32,9 @@ import android.view.WindowManager;
 import jp.hidemaru.burnedcaptionreader.capture.SceneChangeDetector;
 import jp.hidemaru.burnedcaptionreader.ocr.MlKitJapaneseOcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrEngine;
-import jp.hidemaru.burnedcaptionreader.ocr.OcrLine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
 import jp.hidemaru.burnedcaptionreader.subtitle.AutoSubtitleRegionTracker;
-import jp.hidemaru.burnedcaptionreader.subtitle.Similarity;
+import jp.hidemaru.burnedcaptionreader.subtitle.OcrRefinementSelector;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleEvent;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleEventManager;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleNormalizer;
@@ -381,71 +380,9 @@ public final class CaptureService extends Service {
 
     private RefinedSelection selectBestRefinement(AutoSubtitleRegionTracker.Selection selection,
                                                   OcrResult refinedResult) {
-        String original = SubtitleNormalizer.normalize(selection.getText());
-        String bestText = null;
-        double bestConfidence = selection.getConfidence();
-        double bestScore = Double.NEGATIVE_INFINITY;
-
-        List<OcrLine> lines = refinedResult.getLines();
-        for (int start = 0; start < lines.size(); start++) {
-            StringBuilder text = new StringBuilder();
-            double confidenceTotal = 0.0;
-            for (int end = start; end < lines.size() && end < start + 3; end++) {
-                OcrLine line = lines.get(end);
-                if (text.length() > 0) text.append('\n');
-                text.append(line.getText());
-                confidenceTotal += line.getConfidence();
-                String candidate = SubtitleNormalizer.normalize(text.toString());
-                double meanConfidence = confidenceTotal / (end - start + 1);
-                if (!isUsableRefinement(original, candidate)) continue;
-                double score = refinementScore(original, candidate, meanConfidence);
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestText = candidate;
-                    bestConfidence = meanConfidence;
-                }
-            }
-        }
-
-        String whole = SubtitleNormalizer.normalize(refinedResult.getText());
-        if (!whole.isEmpty() && isUsableRefinement(original, whole)) {
-            double score = refinementScore(original, whole, refinedResult.getConfidence());
-            if (score > bestScore) {
-                bestText = whole;
-                bestConfidence = refinedResult.getConfidence();
-            }
-        }
-        if (bestText == null) {
-            return new RefinedSelection(selection, original, selection.getConfidence());
-        }
-        return new RefinedSelection(selection, bestText, bestConfidence);
-    }
-
-    private boolean isUsableRefinement(String original, String candidate) {
-        if (candidate.isEmpty()) return false;
-        double similarity = Similarity.textSimilarity(original, candidate);
-        if (similarity >= 0.55
-                || Similarity.isPrefixRelation(original, candidate)
-                || Similarity.isMultilineVariant(original, candidate, 0.45)) {
-            return true;
-        }
-        String a = SubtitleNormalizer.comparisonKey(original);
-        String b = SubtitleNormalizer.comparisonKey(candidate);
-        if (a.isEmpty() || b.isEmpty() || (!a.contains(b) && !b.contains(a))) return false;
-        int shortLength = Math.min(a.codePointCount(0, a.length()), b.codePointCount(0, b.length()));
-        int longLength = Math.max(a.codePointCount(0, a.length()), b.codePointCount(0, b.length()));
-        return shortLength >= Math.ceil(longLength * 0.45);
-    }
-
-    private double refinementScore(String original, String candidate, double confidence) {
-        double similarity = Similarity.textSimilarity(original, candidate);
-        String key = SubtitleNormalizer.comparisonKey(candidate);
-        int length = key.codePointCount(0, key.length());
-        double lengthBonus = Math.min(1.0, length / 28.0) * 0.10;
-        double confidenceBonus = Math.max(0.0, Math.min(100.0, confidence)) / 100.0 * 0.25;
-        boolean containsOriginal = !SubtitleNormalizer.comparisonKey(original).isEmpty()
-                && key.contains(SubtitleNormalizer.comparisonKey(original));
-        return similarity * 2.0 + confidenceBonus + lengthBonus + (containsOriginal ? 0.12 : 0.0);
+        OcrRefinementSelector.Result result = new OcrRefinementSelector().select(
+                selection.getText(), selection.getConfidence(), refinedResult);
+        return new RefinedSelection(selection, result.getText(), result.getConfidence());
     }
 
     private void processAutomaticSelections(OcrResult rawResult, long timestamp,
@@ -832,3 +769,4 @@ public final class CaptureService extends Service {
         return null;
     }
 }
+

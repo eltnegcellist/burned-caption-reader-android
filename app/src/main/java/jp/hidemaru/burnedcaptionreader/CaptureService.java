@@ -432,8 +432,7 @@ public final class CaptureService extends Service {
                 }
                 continue;
             }
-            SubtitleEvent accepted = eventManager.accept(candidate);
-            if (accepted != null) committed.add(new SubtitleSpeechOrderBuffer.Entry(accepted, selection.getTop(), selection.getBottom()));
+            committed.add(new SubtitleSpeechOrderBuffer.Entry(candidate, selection.getTop(), selection.getBottom()));
         }
 
         for (Map.Entry<Integer, SubtitleStabilizer> entry : autoStabilizers.entrySet()) {
@@ -460,10 +459,13 @@ public final class CaptureService extends Service {
         if (entries.isEmpty() || shuttingDown || projectionEnded) return;
         StringBuilder speech = new StringBuilder();
         for (SubtitleSpeechOrderBuffer.Entry entry : entries) {
+            if (SubtitleNormalizer.toSpeechText(entry.event.getText()).isEmpty()) continue;
+            SubtitleEvent accepted = eventManager.accept(entry.event);
+            if (accepted == null) continue;
             if (speech.length() > 0) speech.append('\n');
-            speech.append(entry.event.getText());
+            speech.append(accepted.getText());
         }
-        speakAcceptedText(speech.toString());
+        if (speech.length() > 0) speakAcceptedText(speech.toString());
     }
 
     private void scheduleSpeechOrderFlush() {

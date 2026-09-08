@@ -30,8 +30,33 @@ public final class SubtitleSpeechOrderBuffer {
 
     public synchronized List<Entry> offer(long now, List<Entry> committed, List<Band> stabilizing) {
         waiting = new ArrayList<>(stabilizing);
-        for (Entry entry : committed) pending.add(new Pending(entry, now + MAX_WAIT_MS));
+        for (Entry entry : committed) {
+            long deadline = now + MAX_WAIT_MS;
+            boolean duplicate = false;
+            for (int i = pending.size() - 1; i >= 0; i--) {
+                Pending previous = pending.get(i);
+                if (!sameCaptionArea(previous.entry, entry)) continue;
+                String a = previous.entry.event.getText();
+                String b = entry.event.getText();
+                if (SubtitleNormalizer.comparisonKey(a).equals(SubtitleNormalizer.comparisonKey(b))) {
+                    duplicate = true;
+                    break;
+                }
+                if (Similarity.isMultilineVariant(a, b, .50)) {
+                    if (b.length() > a.length()) {
+                        deadline = Math.min(deadline, previous.deadline);
+                        pending.remove(i);
+                    } else { duplicate = true; break; }
+                }
+            }
+            if (!duplicate) pending.add(new Pending(entry, deadline));
+        }
         return drain(now);
+    }
+
+    private boolean sameCaptionArea(Entry a, Entry b) {
+        float gap = Math.max(a.top, b.top) - Math.min(a.bottom, b.bottom);
+        return gap <= .035f;
     }
 
     public synchronized List<Entry> drain(long now) {

@@ -39,13 +39,13 @@ import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleEvent;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleEventManager;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleNormalizer;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleStabilizer;
+import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleSpeechOrderBuffer;
 import jp.hidemaru.burnedcaptionreader.subtitle.TemporalOcrConsensus;
 import jp.hidemaru.burnedcaptionreader.tts.AndroidTtsSpeaker;
 import jp.hidemaru.burnedcaptionreader.tts.SpeechEngine;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -69,16 +69,6 @@ public final class CaptureService extends Service {
     private static final int AUTO_REFINEMENT_MAX_WIDTH = 2_000;
     private static final int AUTO_REFINEMENT_MIN_HEIGHT = 180;
 
-    private static final class PositionedEvent {
-        final SubtitleEvent event;
-        final float top;
-
-        PositionedEvent(SubtitleEvent event, float top) {
-            this.event = event;
-            this.top = top;
-        }
-    }
-
     private static final class RefinedSelection {
         final AutoSubtitleRegionTracker.Selection selection;
         final String text;
@@ -91,6 +81,14 @@ public final class CaptureService extends Service {
             this.confidence = confidence;
         }
     }
+
+    private final SubtitleSpeechOrderBuffer speechOrder = new SubtitleSpeechOrderBuffer();
+    private final Runnable flushSpeechOrder = () -> {
+        if (!this.shuttingDown && !this.projectionEnded) {
+            speakOrderedEvents(speechOrder.drain(SystemClock.elapsedRealtime()));
+            scheduleSpeechOrderFlush();
+        }
+    };
 
     private final AtomicBoolean ocrBusy = new AtomicBoolean(false);
     private final SubtitleStabilizer.Config stabilizerConfig = new SubtitleStabilizer.Config();
@@ -240,6 +238,7 @@ public final class CaptureService extends Service {
             int currentRoiVersion = preferences.getRoiVersion();
             if (currentRoiVersion != roiVersion) {
                 roiVersion = currentRoiVersion;
+                resetSpeechOrder();
                 stabilizer.reset();
                 regionTracker.reset();
                 sceneChangeDetector.reset();
@@ -316,6 +315,7 @@ public final class CaptureService extends Service {
             return;
         }
         if (sceneChanged) {
+            resetSpeechOrder();
             autoStabilizers.clear();
             autoConsensus.clear();
             autoTrackLastSeen.clear();
@@ -392,6 +392,9 @@ public final class CaptureService extends Service {
             for (SubtitleStabilizer track : autoStabilizers.values()) {
                 track.observe(timestamp, "", 100.0);
             }
+            speakOrderedEvents(speechOrder.offer(SystemClock.elapsedRealtime(),
+                    new ArrayList<>(), new ArrayList<>()));
+            scheduleSpeechOrderFlush();
             expireAutoTracks(timestamp);
             AppState.setStatus("自動字幕帯を学習中");
             return;
@@ -399,7 +402,8 @@ public final class CaptureService extends Service {
 
         StringBuilder observed = new StringBuilder();
         Set<Integer> visibleTracks = new HashSet<>();
-        List<PositionedEvent> committed = new ArrayList<>();
+        List<SubtitleSpeechOrderBuffer.Entry> committed = new ArrayList<>();
+        List<SubtitleSpeechOrderBuffer.Band> waitingBands = new ArrayList<>();
         boolean allLocked = true;
         SubtitleStabilizer.State mostActiveState = SubtitleStabilizer.State.EMPTY;
         for (RefinedSelection refined : selections) {
@@ -420,9 +424,16 @@ public final class CaptureService extends Service {
             SubtitleEvent candidate = track.observe(timestamp, consensus.getText(),
                     consensus.getConfidence());
             mostActiveState = track.getState();
-            if (candidate == null) continue;
+            if (candidate == null) {
+                if (track.getState() == SubtitleStabilizer.State.CANDIDATE
+                        || track.getState() == SubtitleStabilizer.State.STABILIZING) {
+                    waitingBands.add(new SubtitleSpeechOrderBuffer.Band(
+                            selection.getTop(), selection.getBottom()));
+                }
+                continue;
+            }
             SubtitleEvent accepted = eventManager.accept(candidate);
-            if (accepted != null) committed.add(new PositionedEvent(accepted, selection.getTop()));
+            if (accepted != null) committed.add(new SubtitleSpeechOrderBuffer.Entry(accepted, selection.getTop(), selection.getBottom()));
         }
 
         for (Map.Entry<Integer, SubtitleStabilizer> entry : autoStabilizers.entrySet()) {
@@ -432,20 +443,40 @@ public final class CaptureService extends Service {
         }
         expireAutoTracks(timestamp);
         AppState.setLastOcr(observed.toString());
-        if (committed.isEmpty()) {
+        List<SubtitleSpeechOrderBuffer.Entry> ready = speechOrder.offer(
+                SystemClock.elapsedRealtime(), committed, waitingBands);
+        scheduleSpeechOrderFlush();
+        if (ready.isEmpty()) {
             String label = selections.size() == 1 ? "1本" : selections.size() + "本";
             AppState.setStatus((allLocked ? "自動字幕帯を追跡中（" : "自動字幕候補（")
                     + label + "・" + stateLabel(mostActiveState) + "）");
             return;
         }
 
-        committed.sort(Comparator.comparingDouble(value -> value.top));
+        speakOrderedEvents(ready);
+    }
+
+    private void speakOrderedEvents(List<SubtitleSpeechOrderBuffer.Entry> entries) {
+        if (entries.isEmpty() || shuttingDown || projectionEnded) return;
         StringBuilder speech = new StringBuilder();
-        for (PositionedEvent value : committed) {
+        for (SubtitleSpeechOrderBuffer.Entry entry : entries) {
             if (speech.length() > 0) speech.append('\n');
-            speech.append(value.event.getText());
+            speech.append(entry.event.getText());
         }
         speakAcceptedText(speech.toString());
+    }
+
+    private void scheduleSpeechOrderFlush() {
+        if (captureHandler == null) return;
+        captureHandler.removeCallbacks(flushSpeechOrder);
+        long deadline = speechOrder.nextDeadline();
+        if (deadline != Long.MAX_VALUE) captureHandler.postDelayed(flushSpeechOrder,
+                Math.max(1, deadline - SystemClock.elapsedRealtime()));
+    }
+
+    private void resetSpeechOrder() {
+        speechOrder.reset();
+        if (captureHandler != null) captureHandler.removeCallbacks(flushSpeechOrder);
     }
 
     private void expireAutoTracks(long timestamp) {
@@ -621,6 +652,7 @@ public final class CaptureService extends Service {
             previous.close();
         }
         AppState.clearFrame();
+        resetSpeechOrder();
         stabilizer.reset();
         regionTracker.reset();
         sceneChangeDetector.reset();
@@ -743,6 +775,7 @@ public final class CaptureService extends Service {
     @Override
     public void onDestroy() {
         shuttingDown = true;
+        resetSpeechOrder();
         AppState.setRunning(false);
         if (!projectionEnded) AppState.setStatus("停止中");
         if (speechEngine != null) speechEngine.close();

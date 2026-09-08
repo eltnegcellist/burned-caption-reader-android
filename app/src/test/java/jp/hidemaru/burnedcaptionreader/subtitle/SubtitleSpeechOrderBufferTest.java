@@ -5,6 +5,23 @@ import static org.junit.Assert.*;
 import java.util.List;
 
 public class SubtitleSpeechOrderBufferTest {
+    @Test public void completeCaptionReplacesPendingTwoRowFragment() {
+        var buffer = new SubtitleSpeechOrderBuffer();
+        buffer.offer(0, List.of(entry("中段の字幕\n下段の字幕", .3f, .46f)),
+                List.of(new SubtitleSpeechOrderBuffer.Band(.2f, .26f)));
+        var ready = buffer.offer(480, List.of(entry("上段の字幕\n中段の字幕\n下段の字幕", .2f, .46f)), List.of());
+        assertEquals(1, ready.size());
+        assertEquals("上段の字幕\n中段の字幕\n下段の字幕", ready.get(0).event.getText());
+    }
+
+    @Test public void duplicateCommitDuringWaitIsEmittedOnce() {
+        var buffer = new SubtitleSpeechOrderBuffer();
+        var waiting = List.of(new SubtitleSpeechOrderBuffer.Band(.2f, .26f));
+        buffer.offer(0, List.of(entry("下段の字幕", .3f, .36f)), waiting);
+        buffer.offer(480, List.of(entry("下段の字幕", .3f, .36f)), waiting);
+        assertEquals(1, buffer.drain(700).size());
+    }
+
     private SubtitleSpeechOrderBuffer.Entry entry(String text, float top, float bottom) {
         return new SubtitleSpeechOrderBuffer.Entry(new SubtitleEvent(text, text, 0, 0, 90), top, bottom);
     }

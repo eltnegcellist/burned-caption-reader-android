@@ -10,9 +10,11 @@ import android.speech.tts.UtteranceProgressListener;
 import java.util.Locale;
 import java.util.UUID;
 import jp.hidemaru.burnedcaptionreader.AppPreferences;
+import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticRecorder;
 
 public final class AndroidTtsSpeaker implements SpeechEngine {
     private static final class PendingSpeech {
+        final String id = UUID.randomUUID().toString();
         final String text;
         final Mode mode;
         final float rate;
@@ -27,6 +29,7 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
     }
 
     private final BoundedSpeechQueue<PendingSpeech> pending = new BoundedSpeechQueue<>(2);
+    private final DiagnosticRecorder diagnostics;
     private final SharedPreferences preferences;
     private TextToSpeech textToSpeech;
     private Listener listener;
@@ -36,9 +39,11 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
 
     public AndroidTtsSpeaker(Context context) {
         Context appContext = context.getApplicationContext();
+        diagnostics = DiagnosticRecorder.get(appContext);
         preferences = appContext.getSharedPreferences(
                 AppPreferences.PREFERENCES_FILE, Context.MODE_PRIVATE);
         textToSpeech = new TextToSpeech(appContext, status -> {
+            diagnostics.event("tts_init", "status", status);
             if (closed || status != TextToSpeech.SUCCESS) return;
             textToSpeech.setLanguage(Locale.JAPAN);
             textToSpeech.setAudioAttributes(new AudioAttributes.Builder()
@@ -47,14 +52,20 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
                     .build());
             textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                 @Override public void onStart(String utteranceId) {
+                    diagnostics.event("tts_start", "utterance_id", utteranceId);
                     notifySpeaking(true);
                 }
 
                 @Override public void onDone(String utteranceId) {
+                    diagnostics.event("tts_done", "utterance_id", utteranceId);
                     finishUtterance(utteranceId);
                 }
 
+                @Override public void onStop(String utteranceId, boolean interrupted) {
+                    diagnostics.event("tts_stop", "utterance_id", utteranceId, "interrupted", interrupted);
+                }
                 @Override public void onError(String utteranceId) {
+                    diagnostics.event("tts_error", "utterance_id", utteranceId);
                     finishUtterance(utteranceId);
                 }
             });
@@ -67,11 +78,15 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
     public synchronized void speak(String text, Mode mode, float rate) {
         if (closed || text == null || text.trim().isEmpty()) return;
         PendingSpeech speech = new PendingSpeech(text, mode, rate);
+        diagnostics.event("tts_request", "utterance_id", speech.id, "text", text,
+                "mode", mode.name(), "rate", rate, "ready", ready);
         if (!ready) {
+            diagnostics.event("tts_queued", "utterance_id", speech.id, "previous_queue_size", pending.size(), "mode", mode.name());
             pending.offer(speech, mode);
             return;
         }
         if (mode == Mode.LATEST) {
+            diagnostics.event("tts_interrupt", "active_id", activeUtteranceId, "replacement_id", speech.id);
             activeUtteranceId = null;
             pending.clear();
             textToSpeech.stop();
@@ -79,6 +94,7 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
         } else if (activeUtteranceId == null) {
             speakNow(speech);
         } else {
+            diagnostics.event("tts_queued", "utterance_id", speech.id, "previous_queue_size", pending.size(), "mode", mode.name());
             pending.offer(speech, mode);
         }
     }
@@ -103,10 +119,15 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
         params.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME,
                 Math.max(0.0f, Math.min(1.0f, volume)));
 
-        String utteranceId = UUID.randomUUID().toString();
+        String utteranceId = speech.id;
+        if (diagnostics.isRecording()) diagnostics.event("tts_submit", "utterance_id", utteranceId, "text", speech.text,
+                "waiting_ms", waitingMs, "effective_rate", Math.min(2.0f, speech.rate * (1.0f + catchUp)),
+                "volume", volume, "engine", textToSpeech.getDefaultEngine(),
+                "voice", String.valueOf(textToSpeech.getVoice()));
         activeUtteranceId = utteranceId;
         int result = textToSpeech.speak(
                 speech.text, TextToSpeech.QUEUE_FLUSH, params, utteranceId);
+        diagnostics.event("tts_submit_result", "utterance_id", utteranceId, "result", result);
         if (result == TextToSpeech.ERROR) finishUtterance(utteranceId);
     }
 
@@ -136,6 +157,7 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
 
     @Override
     public synchronized void stop() {
+        diagnostics.event("tts_stop_requested", "active_id", activeUtteranceId);
         pending.clear();
         activeUtteranceId = null;
         if (textToSpeech != null) textToSpeech.stop();
@@ -144,6 +166,7 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
 
     @Override
     public synchronized void close() {
+        diagnostics.event("tts_close", "active_id", activeUtteranceId);
         closed = true;
         ready = false;
         pending.clear();
@@ -157,3 +180,4 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
         listener = null;
     }
 }
+

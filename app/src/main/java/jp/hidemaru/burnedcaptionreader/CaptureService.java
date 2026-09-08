@@ -44,6 +44,7 @@ import jp.hidemaru.burnedcaptionreader.subtitle.TemporalOcrConsensus;
 import jp.hidemaru.burnedcaptionreader.tts.AndroidTtsSpeaker;
 import jp.hidemaru.burnedcaptionreader.tts.SpeechEngine;
 
+import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticRecorder;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -94,6 +95,7 @@ public final class CaptureService extends Service {
     private final Map<Integer, TemporalOcrConsensus> autoConsensus = new HashMap<>();
     private final Map<Integer, Long> autoTrackLastSeen = new HashMap<>();
 
+    private DiagnosticRecorder diagnostics;
     private AppPreferences preferences;
     private OcrEngine ocrEngine;
     private SpeechEngine speechEngine;
@@ -117,6 +119,8 @@ public final class CaptureService extends Service {
     public void onCreate() {
         super.onCreate();
         preferences = new AppPreferences(this);
+        diagnostics = DiagnosticRecorder.get(this);
+        diagnostics.event("capture_service_start");
         ocrEngine = new MlKitJapaneseOcrEngine();
         speechEngine = new AndroidTtsSpeaker(this);
         browserMediaController = new BrowserMediaController(this);
@@ -267,8 +271,13 @@ public final class CaptureService extends Service {
 
     private void recognize(Bitmap detectionBitmap, Bitmap highResSource,
                            long timestamp, boolean automatic, boolean sceneChanged) {
+        diagnostics.image("ocr_input", detectionBitmap, "frame_id", timestamp,
+                "automatic", automatic, "scene_changed", sceneChanged,
+                "rate", preferences.getSpeechRate(), "stable_ms", preferences.getStableMs(),
+                "roi_version", roiVersion, "capture_width", captureWidth, "capture_height", captureHeight);
         ocrEngine.recognize(detectionBitmap,
                 result -> {
+                    diagnostics.ocr("ocr_raw", timestamp, -1, result);
                     if (automatic) {
                         handleAutomaticOcrResult(result, timestamp, sceneChanged, highResSource,
                                 () -> finishOcrPass(detectionBitmap, highResSource));
@@ -281,6 +290,7 @@ public final class CaptureService extends Service {
                     }
                 },
                 error -> {
+                    diagnostics.event("ocr_error", "frame_id", timestamp, "error", safeMessage(error));
                     finishOcrPass(detectionBitmap, highResSource);
                     AppState.setStatus("OCRエラー: " + safeMessage(error));
                 });
@@ -292,11 +302,15 @@ public final class CaptureService extends Service {
         double confidence = result.getConfidence();
         AppState.setLastOcr(observedText);
         SubtitleEvent candidate = stabilizer.observe(timestamp, observedText, confidence);
+        diagnostics.event("manual_stabilizer", "frame_id", timestamp, "state", stabilizer.getState().name(),
+                "text", observedText, "event_id", candidate == null ? "" : candidate.getId());
         if (candidate == null) {
             AppState.setStatus("手動範囲（" + stateLabel(stabilizer.getState()) + "）");
             return;
         }
         SubtitleEvent accepted = eventManager.accept(candidate);
+        diagnostics.event("dedup", "event_id", candidate.getId(), "text", candidate.getText(),
+                "accepted", accepted != null, "output", accepted == null ? "" : accepted.getText());
         if (accepted == null) return;
 
         speakAcceptedText(accepted.getText());
@@ -310,6 +324,7 @@ public final class CaptureService extends Service {
             return;
         }
         if (sceneChanged) {
+            diagnostics.event("scene_reset", "frame_id", timestamp);
             resetSpeechOrder();
             autoStabilizers.clear();
             autoConsensus.clear();
@@ -326,7 +341,7 @@ public final class CaptureService extends Service {
             return;
         }
 
-        refineSelections(highResSource, selections, 0, new ArrayList<>(), refined -> {
+        refineSelections(highResSource, timestamp, selections, 0, new ArrayList<>(), refined -> {
             try {
                 processAutomaticSelections(result, timestamp, refined);
             } finally {
@@ -335,7 +350,7 @@ public final class CaptureService extends Service {
         });
     }
 
-    private void refineSelections(Bitmap highResSource,
+    private void refineSelections(Bitmap highResSource, long timestamp,
                                   List<AutoSubtitleRegionTracker.Selection> selections,
                                   int index, List<RefinedSelection> output,
                                   Consumer<List<RefinedSelection>> completion) {
@@ -356,20 +371,30 @@ public final class CaptureService extends Service {
         Bitmap prepared = resizeForRefinement(band);
         if (prepared != band) band.recycle();
 
+        diagnostics.image("refinement_input", prepared, "frame_id", timestamp,
+                "track_id", selection.getTrackId(), "selection_top", selection.getTop(),
+                "selection_bottom", selection.getBottom(), "original", selection.getText());
         ocrEngine.recognize(prepared,
                 refinedResult -> {
+                    diagnostics.ocr("ocr_refined", timestamp, selection.getTrackId(), refinedResult);
                     try {
-                        output.add(selectBestRefinement(selection, refinedResult));
+                        RefinedSelection chosen = selectBestRefinement(selection, refinedResult);
+                        diagnostics.event("refinement_choice", "frame_id", timestamp,
+                                "track_id", selection.getTrackId(), "text", chosen.text,
+                                "confidence", chosen.confidence);
+                        output.add(chosen);
                     } finally {
                         prepared.recycle();
                     }
-                    refineSelections(highResSource, selections, index + 1, output, completion);
+                    refineSelections(highResSource, timestamp, selections, index + 1, output, completion);
                 },
                 error -> {
+                    diagnostics.event("refinement_error", "frame_id", timestamp,
+                            "track_id", selection.getTrackId(), "error", safeMessage(error));
                     prepared.recycle();
                     output.add(new RefinedSelection(selection, selection.getText(),
                             selection.getConfidence()));
-                    refineSelections(highResSource, selections, index + 1, output, completion);
+                    refineSelections(highResSource, timestamp, selections, index + 1, output, completion);
                 });
     }
 
@@ -383,6 +408,7 @@ public final class CaptureService extends Service {
     private synchronized void processAutomaticSelections(OcrResult rawResult, long timestamp,
                                             List<RefinedSelection> selections) {
         if (selections.isEmpty()) {
+            diagnostics.event("no_selection", "frame_id", timestamp);
             AppState.setLastOcr(rawResult.getText());
             for (SubtitleStabilizer track : autoStabilizers.values()) {
                 track.observe(timestamp, "", 100.0);
@@ -419,6 +445,12 @@ public final class CaptureService extends Service {
             SubtitleEvent candidate = track.observe(timestamp, consensus.getText(),
                     consensus.getConfidence());
             mostActiveState = track.getState();
+            diagnostics.event("stabilizer", "frame_id", timestamp, "track_id", trackId,
+                    "selected", selection.getText(), "refined", refined.text,
+                    "consensus", consensus.getText(), "confidence", consensus.getConfidence(),
+                    "top", selection.getTop(), "bottom", selection.getBottom(),
+                    "state", mostActiveState.name(), "event_id", candidate == null ? "" : candidate.getId(),
+                    "committed_text", candidate == null ? "" : candidate.getText());
             if (candidate == null) {
                 if (track.getState() == SubtitleStabilizer.State.CANDIDATE
                         || track.getState() == SubtitleStabilizer.State.STABILIZING) {
@@ -456,6 +488,8 @@ public final class CaptureService extends Service {
         for (SubtitleSpeechOrderBuffer.Entry entry : entries) {
             if (SubtitleNormalizer.toSpeechText(entry.event.getText()).isEmpty()) continue;
             SubtitleEvent accepted = eventManager.accept(entry.event);
+            diagnostics.event("dedup", "event_id", entry.event.getId(), "text", entry.event.getText(),
+                    "accepted", accepted != null, "output", accepted == null ? "" : accepted.getText());
             if (accepted == null) continue;
             if (speech.length() > 0) speech.append('\n');
             speech.append(accepted.getText());
@@ -473,6 +507,7 @@ public final class CaptureService extends Service {
         if (captureHandler == null) return;
         captureHandler.removeCallbacks(flushSpeechOrder);
         long deadline = speechOrder.nextDeadline();
+        diagnostics.event("speech_order", "deadline_ms", deadline == Long.MAX_VALUE ? -1 : deadline);
         if (deadline != Long.MAX_VALUE) captureHandler.postDelayed(flushSpeechOrder,
                 Math.max(1, deadline - SystemClock.elapsedRealtime()));
     }
@@ -496,6 +531,8 @@ public final class CaptureService extends Service {
 
     private void speakAcceptedText(String originalText) {
         String speechText = SubtitleNormalizer.toSpeechText(originalText);
+        diagnostics.event("tts_text", "original", originalText, "text", speechText,
+                "rate", preferences.getSpeechRate(), "mode", preferences.getSpeechMode());
         if (speechText.isEmpty()) return;
 
         SpeechEngine.Mode mode = AppPreferences.MODE_LATEST.equals(preferences.getSpeechMode())
@@ -778,6 +815,7 @@ public final class CaptureService extends Service {
     @Override
     public void onDestroy() {
         shuttingDown = true;
+        diagnostics.event("capture_service_stop");
         resetSpeechOrder();
         AppState.setRunning(false);
         if (!projectionEnded) AppState.setStatus("停止中");

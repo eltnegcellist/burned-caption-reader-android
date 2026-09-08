@@ -10,8 +10,8 @@ android {
         applicationId = "jp.hidemaru.burnedcaptionreader"
         minSdk = 26
         targetSdk = 36
-        versionCode = 14
-        versionName = "0.3.9"
+        versionCode = 15
+        versionName = "0.3.10"
 
         testInstrumentationRunner = "android.app.Instrumentation"
     }
@@ -42,4 +42,3 @@ dependencies {
     implementation("com.google.mlkit:text-recognition-japanese:16.0.1")
     testImplementation("junit:junit:4.13.2")
 }
-

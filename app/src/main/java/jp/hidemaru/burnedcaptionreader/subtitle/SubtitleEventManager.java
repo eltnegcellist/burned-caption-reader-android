@@ -108,7 +108,7 @@ public final class SubtitleEventManager {
             int best = -1;
             double similarity = .84;
             for (int i = 0; i < old.length; i++) {
-                if (used[i]) continue;
+                if (used[i] || meaningfulChange(row, old[i])) continue;
                 double score = Similarity.textSimilarity(row, old[i]);
                 // A changed amount/date is content, not an OCR punctuation wobble.
                 String digits = SubtitleNormalizer.comparisonKey(row).replaceAll("[^0-9]", "");

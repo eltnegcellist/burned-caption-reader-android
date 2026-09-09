@@ -547,6 +547,7 @@ public final class AutoSubtitleRegionTracker {
             Candidate candidate = lane.current;
             if (!lane.seenThisFrame || candidate == null || lane.transitions > 0) continue;
             if (lane.observations < 2 || lane.stableObservations < 2) continue;
+            if (isShortReaction(candidate) && candidate.confidence < 35 && lane.stableObservations < 3) continue;
             if (timestamp - lane.textSince < 300L
                     || timestamp - lane.firstSeenAt > PROVISIONAL_MAX_STATIC_MS) continue;
             if (!isStrongCaptionShape(candidate) && !isUpperCaptionRescueShape(candidate)) continue;
@@ -626,6 +627,9 @@ public final class AutoSubtitleRegionTracker {
     }
 
     private boolean isStrongCaptionShape(Candidate candidate) {
+        // A sustained vocal reaction is dialogue even when too short for the
+        // normal sentence score. Keep geometry/confidence and temporal gates.
+        if (isShortReaction(candidate)) return true;
         if (candidate.japanese && candidate.spatialGroup && candidate.lines.size() >= 2
                 && candidate.confidence >= 55 && candidate.width() >= .18f
                 && candidate.visualScore >= 1.70) return true;
@@ -635,6 +639,13 @@ public final class AutoSubtitleRegionTracker {
                     || candidate.lines.size() >= 2;
         }
         return candidate.width() >= 0.60f && candidate.textLength >= 12;
+    }
+
+    private boolean isShortReaction(Candidate candidate) {
+        return candidate.lines.size() == 1 && candidate.confidence >= 20
+                && candidate.width() >= .12f && candidate.height() >= .025f
+                && candidate.centerX() >= .18f && candidate.centerX() <= .82f
+                && candidate.text.matches("[えあうお]{3,}[0oO8…。.・!！?？]*");
     }
 
     private boolean isUpperCaptionRescueShape(Candidate candidate) {

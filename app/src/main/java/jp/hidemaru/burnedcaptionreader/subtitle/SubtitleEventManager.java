@@ -28,7 +28,8 @@ public final class SubtitleEventManager {
                 && event.getCommittedAt() - recent.peekFirst().getCommittedAt() > recentDuplicateMs) {
             recent.removeFirst();
         }
-        String remaining = event.getText();
+        String remaining = removeSeparatelySpokenRows(event.getText());
+        if (remaining.isEmpty()) return null;
         for (SubtitleEvent previous : recent) {
             long ageMs = Math.max(0L, event.getCommittedAt() - previous.getCommittedAt());
             String uncovered = ageMs <= STRONG_DUPLICATE_WINDOW_MS
@@ -52,6 +53,49 @@ public final class SubtitleEventManager {
         recent.clear();
     }
 
+    /** Compare a merged block against individual rows across history entries.
+     * Require two matching rows before using the relaxed OCR threshold; a single
+     * shared sentence must not suppress an otherwise different caption.
+     */
+    private String removeSeparatelySpokenRows(String text) {
+        String[] rows = SubtitleNormalizer.normalize(text).split("\n");
+        if (rows.length < 2 || rows.length > 3) return text;
+        List<String> history = new ArrayList<>();
+        for (SubtitleEvent e : recent) {
+            for (String row : SubtitleNormalizer.normalize(e.getText()).split("\n")) {
+                if (!history.contains(row)) history.add(row);
+            }
+        }
+        boolean[] used = new boolean[history.size()];
+        List<String> remaining = new ArrayList<>();
+        int matched = 0;
+        for (String row : rows) {
+            int best = -1;
+            double score = .799999;
+            for (int i = 0; i < history.size(); i++) {
+                if (used[i] || meaningfulChange(row, history.get(i))) continue;
+                String key = SubtitleNormalizer.comparisonKey(row);
+                if (key.codePointCount(0, key.length()) < 6) continue;
+                double similarity = Similarity.textSimilarity(row, history.get(i));
+                if (similarity > score) { score = similarity; best = i; }
+            }
+            if (best < 0) remaining.add(row);
+            else { used[best] = true; matched++; }
+        }
+        return matched >= 2 ? String.join("\n", remaining) : text;
+    }
+
+    private boolean meaningfulChange(String a, String b) {
+        a = SubtitleNormalizer.comparisonKey(a);
+        b = SubtitleNormalizer.comparisonKey(b);
+        if (!a.replaceAll("[^0-9]", "").equals(b.replaceAll("[^0-9]", ""))) return true;
+        // Conservative lexical guard, not a general semantic equivalence test.
+        for (String marker : new String[]{"ない", "ません", "禁止", "不可", "不要", "無効"}) {
+            if (a.contains(marker) != b.contains(marker)) return true;
+        }
+        return false;
+    }
+
     /** Recognize row reorder/split variants without discarding a newly recovered row. */
     private String uncoveredRows(String current, String previous) {
         String[] rows = SubtitleNormalizer.normalize(current).split("\n");
@@ -64,7 +108,7 @@ public final class SubtitleEventManager {
             int best = -1;
             double similarity = .84;
             for (int i = 0; i < old.length; i++) {
-                if (used[i]) continue;
+                if (used[i] || meaningfulChange(row, old[i])) continue;
                 double score = Similarity.textSimilarity(row, old[i]);
                 // A changed amount/date is content, not an OCR punctuation wobble.
                 String digits = SubtitleNormalizer.comparisonKey(row).replaceAll("[^0-9]", "");
@@ -89,6 +133,7 @@ public final class SubtitleEventManager {
     }
 
     private boolean isNearDuplicate(String left, String right, long ageMs) {
+        if (meaningfulChange(left, right)) return false;
         if (Similarity.areEquivalent(left, right, NORMAL_DUPLICATE_THRESHOLD)) return true;
         if (Similarity.isMultilineVariant(left, right, 0.50)
                 || Similarity.isMultilineVariant(right, left, 0.50)) {

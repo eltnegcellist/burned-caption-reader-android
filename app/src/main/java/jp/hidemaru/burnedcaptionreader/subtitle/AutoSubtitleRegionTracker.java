@@ -88,7 +88,7 @@ public final class AutoSubtitleRegionTracker {
     }
 
     private static final int LANE_COUNT = 24;
-    private static final int MAX_ACTIVE_LANES = 3;
+    private static final int MAX_ACTIVE_LANES = 4;
     private static final long LOCK_MISSING_MS = 2_800L;
     private static final long LANE_EXPIRES_MS = 8_000L;
     private static final long PROVISIONAL_MAX_STATIC_MS = 2_500L;
@@ -137,9 +137,9 @@ public final class AutoSubtitleRegionTracker {
     }
 
     /**
-     * Selects independent screen-anchored subtitle bands. Usually at most two are
-     * active; a third is allowed only when it looks like a missing row of a nearby
-     * multi-line subtitle. A scene cut invalidates transition evidence.
+     * Selects up to four independent, qualified screen-anchored bands. Narration
+     * plus two dialogue groups must not compete for a two-band budget.
+     * A scene cut invalidates transition evidence.
      */
     public synchronized List<Selection> selectAll(long timestamp, OcrResult result,
                                                   boolean portraitVideoViewport,
@@ -560,9 +560,7 @@ public final class AutoSubtitleRegionTracker {
 
     private boolean canAddSelectedLane(LaneState candidate, List<LaneState> selected) {
         if (!isDistinctFrom(candidate, selected)) return false;
-        if (selected.size() < 2) return true;
-        if (selected.size() >= MAX_ACTIVE_LANES) return false;
-        return isLikelyThirdLineFragment(candidate, selected);
+        return selected.size() < MAX_ACTIVE_LANES;
     }
 
     private boolean isLikelyThirdLineFragment(LaneState candidate, List<LaneState> selected) {
@@ -628,6 +626,9 @@ public final class AutoSubtitleRegionTracker {
     }
 
     private boolean isStrongCaptionShape(Candidate candidate) {
+        if (candidate.japanese && candidate.spatialGroup && candidate.lines.size() >= 2
+                && candidate.confidence >= 55 && candidate.width() >= .18f
+                && candidate.visualScore >= 1.70) return true;
         if (candidate.visualScore < 2.05) return false;
         if (candidate.japanese) {
             return candidate.width() >= 0.35f || candidate.textLength >= 9
@@ -688,4 +689,3 @@ public final class AutoSubtitleRegionTracker {
 
     private static int distance(int left, int right) { return Math.abs(left - right); }
 }
-

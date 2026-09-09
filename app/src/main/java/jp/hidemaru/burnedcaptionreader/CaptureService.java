@@ -436,7 +436,7 @@ public final class CaptureService extends Service {
 
             TemporalOcrConsensus.Result consensus = autoConsensus.computeIfAbsent(
                     trackId, ignored -> new TemporalOcrConsensus())
-                    .observe(timestamp, refined.text, refined.confidence);
+                    .observe(timestamp, refined.text, refined.confidence, selection.getText());
             if (observed.length() > 0) observed.append('\n');
             observed.append(consensus.getText());
 
@@ -843,4 +843,3 @@ public final class CaptureService extends Service {
         return null;
     }
 }
-

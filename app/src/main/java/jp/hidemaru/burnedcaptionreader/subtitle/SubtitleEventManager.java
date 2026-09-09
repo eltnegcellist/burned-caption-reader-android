@@ -63,6 +63,7 @@ public final class SubtitleEventManager {
         List<String> history = new ArrayList<>();
         for (SubtitleEvent e : recent) {
             for (String row : SubtitleNormalizer.normalize(e.getText()).split("\n")) {
+                row = TrailingPunctuation.repair(row, text);
                 if (!history.contains(row)) history.add(row);
             }
         }
@@ -133,6 +134,8 @@ public final class SubtitleEventManager {
     }
 
     private boolean isNearDuplicate(String left, String right, long ageMs) {
+        left = TrailingPunctuation.repair(left, right);
+        right = TrailingPunctuation.repair(right, left);
         if (meaningfulChange(left, right)) return false;
         if (Similarity.areEquivalent(left, right, NORMAL_DUPLICATE_THRESHOLD)) return true;
         if (Similarity.isMultilineVariant(left, right, 0.50)

@@ -43,8 +43,14 @@ public final class TemporalOcrConsensus {
     private static final double SAME_CAPTION_THRESHOLD = 0.72;
 
     private final Deque<Observation> history = new ArrayDeque<>();
+    private final Deque<Observation> punctuationEvidence = new ArrayDeque<>();
 
     public synchronized Result observe(long timestamp, String rawText, double confidence) {
+        return observe(timestamp, rawText, confidence, rawText);
+    }
+
+    /** Evidence comes from the same selected screen band before refinement. */
+    public synchronized Result observe(long timestamp, String rawText, double confidence, String coarseText) {
         String text = SubtitleNormalizer.normalize(rawText);
         if (text.isEmpty()) {
             expire(timestamp);
@@ -55,7 +61,24 @@ public final class TemporalOcrConsensus {
         Observation previous = history.peekLast();
         if (previous != null && !sameCaption(previous.text, text)) {
             history.clear();
+            punctuationEvidence.clear();
         }
+
+        punctuationEvidence.addLast(new Observation(timestamp, coarseText, confidence));
+        punctuationEvidence.addLast(new Observation(timestamp, text, confidence));
+        while (punctuationEvidence.size() > 8) punctuationEvidence.removeFirst();
+        for (Observation evidence : punctuationEvidence) text = TrailingPunctuation.repair(text, evidence.text);
+
+        // Correct old votes too; otherwise a prior '0' keeps winning after clear
+        // punctuation appears in the next frame of this same tracked band.
+        List<Observation> repaired = new ArrayList<>();
+        for (Observation observation : history) {
+            String value = observation.text;
+            for (Observation evidence : punctuationEvidence) value = TrailingPunctuation.repair(value, evidence.text);
+            repaired.add(new Observation(observation.timestamp, value, observation.confidence));
+        }
+        history.clear();
+        history.addAll(repaired);
 
         history.addLast(new Observation(timestamp, text, confidence));
         while (history.size() > MAX_OBSERVATIONS) history.removeFirst();
@@ -106,6 +129,7 @@ public final class TemporalOcrConsensus {
 
     public synchronized void reset() {
         history.clear();
+        punctuationEvidence.clear();
     }
 
     private Observation buildCharacterConsensus(List<Observation> values, long timestamp) {
@@ -159,6 +183,9 @@ public final class TemporalOcrConsensus {
     }
 
     private void expire(long timestamp) {
+        while (!punctuationEvidence.isEmpty() && timestamp - punctuationEvidence.peekFirst().timestamp > MAX_HISTORY_MS) {
+            punctuationEvidence.removeFirst();
+        }
         while (!history.isEmpty()
                 && timestamp - history.peekFirst().timestamp > MAX_HISTORY_MS) {
             history.removeFirst();

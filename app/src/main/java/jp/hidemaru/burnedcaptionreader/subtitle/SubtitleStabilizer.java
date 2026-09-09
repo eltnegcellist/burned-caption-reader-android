@@ -109,7 +109,7 @@ public final class SubtitleStabilizer {
         double meanConfidence = stats.confidenceTotal / stats.count;
         SubtitleEvent event = new SubtitleEvent(
                 timestamp + "-" + (++sequence),
-                preferred,
+                TrailingPunctuation.repair(preferred, text),
                 candidate.detectedAt,
                 timestamp,
                 Math.round(meanConfidence * 10.0) / 10.0

@@ -94,7 +94,11 @@ public final class AppPreferences {
 
     public String getSpeechMode() {
         String mode = preferences.getString(SPEECH_MODE, MODE_BALANCED);
-        return MODE_CONTINUOUS.equals(mode) ? MODE_BALANCED : mode;
+        // Preserve the stored policy.  Continuous mode is deliberately a
+        // lossless FIFO policy; silently converting it to BALANCED caused
+        // captions to be discarded whenever TTS lagged behind the video.
+        if (MODE_CONTINUOUS.equals(mode) || MODE_LATEST.equals(mode)) return mode;
+        return MODE_BALANCED;
     }
 
     public void setSpeechMode(String mode) {

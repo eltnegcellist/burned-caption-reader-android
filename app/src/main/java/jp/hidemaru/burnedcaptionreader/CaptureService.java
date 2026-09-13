@@ -36,7 +36,7 @@ import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
 import jp.hidemaru.burnedcaptionreader.subtitle.AutoSubtitleRegionTracker;
 import jp.hidemaru.burnedcaptionreader.subtitle.OcrRefinementSelector;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleEvent;
-import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleEventManager;
+import jp.hidemaru.burnedcaptionreader.subtitle.RowSpeechLedger;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleNormalizer;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleStabilizer;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleSpeechOrderBuffer;
@@ -88,7 +88,7 @@ public final class CaptureService extends Service {
 
     private final AtomicBoolean ocrBusy = new AtomicBoolean(false);
     private final SubtitleStabilizer.Config stabilizerConfig = new SubtitleStabilizer.Config();
-    private final SubtitleEventManager eventManager = new SubtitleEventManager(60_000L);
+    private final RowSpeechLedger speechLedger = new RowSpeechLedger(60_000L);
     private final AutoSubtitleRegionTracker regionTracker = new AutoSubtitleRegionTracker();
     private final SceneChangeDetector sceneChangeDetector = new SceneChangeDetector();
     private final Map<Integer, SubtitleStabilizer> autoStabilizers = new HashMap<>();
@@ -308,12 +308,7 @@ public final class CaptureService extends Service {
             AppState.setStatus("手動範囲（" + stateLabel(stabilizer.getState()) + "）");
             return;
         }
-        SubtitleEvent accepted = eventManager.accept(candidate);
-        diagnostics.event("dedup", "event_id", candidate.getId(), "text", candidate.getText(),
-                "accepted", accepted != null, "output", accepted == null ? "" : accepted.getText());
-        if (accepted == null) return;
-
-        speakAcceptedText(accepted.getText());
+        speakAcceptedText(candidate);
     }
 
     private void handleAutomaticOcrResult(OcrResult result, long timestamp,
@@ -487,14 +482,16 @@ public final class CaptureService extends Service {
         StringBuilder speech = new StringBuilder();
         for (SubtitleSpeechOrderBuffer.Entry entry : entries) {
             if (SubtitleNormalizer.toSpeechText(entry.event.getText()).isEmpty()) continue;
-            SubtitleEvent accepted = eventManager.accept(entry.event);
-            diagnostics.event("dedup", "event_id", entry.event.getId(), "text", entry.event.getText(),
-                    "accepted", accepted != null, "output", accepted == null ? "" : accepted.getText());
-            if (accepted == null) continue;
             if (speech.length() > 0) speech.append('\n');
-            speech.append(accepted.getText());
+            speech.append(entry.event.getText());
         }
-        if (speech.length() > 0) speakAcceptedText(speech.toString());
+        if (speech.length() > 0) {
+            // Reserve the merged utterance once so each physical caption row is
+            // independently compared with prior speech.
+            speakAcceptedText(new SubtitleEvent("ordered-" + SystemClock.elapsedRealtime(),
+                    speech.toString(), SystemClock.elapsedRealtime(),
+                    SystemClock.elapsedRealtime(), 1.0));
+        }
     }
 
     private synchronized void flushOrderedSpeech() {
@@ -529,23 +526,78 @@ public final class CaptureService extends Service {
         }
     }
 
-    private void speakAcceptedText(String originalText) {
+    private void speakAcceptedText(SubtitleEvent event) {
+        SpeechEngine.Mode mode = configuredSpeechMode();
+        RowSpeechLedger.Reservation reservation = speechLedger.reserve(event,
+                mode == SpeechEngine.Mode.BALANCED || mode == SpeechEngine.Mode.LATEST,
+                mode == SpeechEngine.Mode.LATEST);
+        diagnostics.event("dedup", "event_id", event.getId(), "text", event.getText(),
+                "accepted", reservation != null,
+                "output", reservation == null ? "" : reservation.getText(),
+                "ledger_pending", speechLedger.pendingReservationCount(),
+                "ledger_in_flight", speechLedger.inFlightReservationCount(),
+                "ledger_spoken_rows", speechLedger.spokenRowCount());
+        if (reservation != null) speakReservation(reservation);
+    }
+
+    private void speakReservation(RowSpeechLedger.Reservation reservation) {
+        String originalText = reservation.getText();
         String speechText = SubtitleNormalizer.toSpeechText(originalText);
         diagnostics.event("tts_text", "original", originalText, "text", speechText,
                 "rate", preferences.getSpeechRate(), "mode", preferences.getSpeechMode());
-        if (speechText.isEmpty()) return;
+        if (speechText.isEmpty()) { speechLedger.release(reservation.getId()); return; }
 
-        SpeechEngine.Mode mode = AppPreferences.MODE_LATEST.equals(preferences.getSpeechMode())
-                ? SpeechEngine.Mode.LATEST
-                : SpeechEngine.Mode.BALANCED;
+        SpeechEngine.Mode mode = configuredSpeechMode();
         boolean pauseRequested = preferences.isAutoPauseBrowser();
         boolean paused = pauseRequested && browserMediaController.pauseBrowser();
-        speechEngine.speak(speechText, mode, preferences.getSpeechRate());
+        diagnostics.event("speech_reservation", "reservation_id", reservation.getId(),
+                "text", originalText, "state", "pending", "mode", mode.name());
+        speechEngine.speak(speechText, mode, preferences.getSpeechRate(),
+                new SpeechEngine.Completion() {
+                    @Override public void onStart() {
+                        boolean moved = speechLedger.markInFlight(reservation.getId());
+                        diagnostics.event("speech_reservation", "reservation_id", reservation.getId(),
+                                "state", moved ? "in_flight" : "start_after_replacement");
+                    }
+                    @Override public void onDone() {
+                        speechLedger.markInFlight(reservation.getId());
+                        boolean completed = speechLedger.markSpoken(
+                                reservation.getId(), SystemClock.elapsedRealtime());
+                        diagnostics.event("speech_reservation", "reservation_id", reservation.getId(),
+                                "state", completed ? "completed" : "done_after_replacement");
+                    }
+                    @Override public void onError() {
+                        boolean released = speechLedger.release(reservation.getId());
+                        diagnostics.event("speech_reservation", "reservation_id", reservation.getId(),
+                                "state", released ? "released" : "replaced");
+                        if (released) requestSpeechRetry();
+                    }
+                });
         AppState.setLastSpoken(originalText);
         AppState.setStatus(pauseRequested && !paused
                 ? "読み上げ中（ブラウザを自動停止できませんでした）"
                 : "読み上げ中");
         updateNotification("読み上げ: " + oneLine(originalText));
+    }
+
+    private SpeechEngine.Mode configuredSpeechMode() {
+        String configuredMode = preferences.getSpeechMode();
+        if (AppPreferences.MODE_LATEST.equals(configuredMode)) {
+            return SpeechEngine.Mode.LATEST;
+        } else if (AppPreferences.MODE_CONTINUOUS.equals(configuredMode)) {
+            return SpeechEngine.Mode.CONTINUOUS;
+        }
+        return SpeechEngine.Mode.BALANCED;
+    }
+
+    /** Let OCR re-commit a caption whose utterance was interrupted or rejected. */
+    private void requestSpeechRetry() {
+        if (captureHandler == null || shuttingDown) return;
+        captureHandler.post(() -> {
+            if (shuttingDown) return;
+            stabilizer.reset();
+            for (SubtitleStabilizer track : autoStabilizers.values()) track.reset();
+        });
     }
 
     private void finishOcrPass(Bitmap detectionBitmap, Bitmap highResSource) {
@@ -817,6 +869,7 @@ public final class CaptureService extends Service {
         shuttingDown = true;
         diagnostics.event("capture_service_stop");
         resetSpeechOrder();
+        speechLedger.reset();
         AppState.setRunning(false);
         if (!projectionEnded) AppState.setStatus("停止中");
         if (speechEngine != null) speechEngine.close();

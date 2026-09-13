@@ -152,10 +152,23 @@ public final class RowSpeechLedger {
     public synchronized boolean markSpoken(String reservationId, long timestamp) {
         InFlight found = removeInFlight(reservationId);
         if (found == null) return false;
-        for (String row : found.reservation.rows) spoken.add(new Entry(row, timestamp));
-        purge(timestamp);
-        while (spoken.size() > MAX_COMPLETED_ROWS) spoken.remove(0);
+        recordSpoken(found.reservation, timestamp);
         return true;
+    }
+
+    /** Complete atomically, accepting a callback that arrives before onStart. */
+    public synchronized boolean complete(String reservationId, long timestamp) {
+        InFlight active = removeInFlight(reservationId);
+        if (active != null) {
+            recordSpoken(active.reservation, timestamp);
+            return true;
+        }
+        Pending queued = removePending(reservationId);
+        if (queued != null) {
+            recordSpoken(queued.reservation, timestamp);
+            return true;
+        }
+        return false;
     }
 
     /** Releases a cancelled or failed pending/in-flight reservation for retry. */
@@ -195,6 +208,12 @@ public final class RowSpeechLedger {
         for (Iterator<Entry> it = spoken.iterator(); it.hasNext();) {
             if (timestamp - it.next().time > historyMs) it.remove();
         }
+    }
+
+    private void recordSpoken(Reservation reservation, long timestamp) {
+        for (String row : reservation.rows) spoken.add(new Entry(row, timestamp));
+        purge(timestamp);
+        while (spoken.size() > MAX_COMPLETED_ROWS) spoken.remove(0);
     }
 
     private boolean equivalent(String left, String right) {

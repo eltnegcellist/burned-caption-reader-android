@@ -560,8 +560,7 @@ public final class CaptureService extends Service {
                                 "state", moved ? "in_flight" : "start_after_replacement");
                     }
                     @Override public void onDone() {
-                        speechLedger.markInFlight(reservation.getId());
-                        boolean completed = speechLedger.markSpoken(
+                        boolean completed = speechLedger.complete(
                                 reservation.getId(), SystemClock.elapsedRealtime());
                         diagnostics.event("speech_reservation", "reservation_id", reservation.getId(),
                                 "state", completed ? "completed" : "done_after_replacement");

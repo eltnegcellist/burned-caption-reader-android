@@ -50,6 +50,14 @@ public class RowSpeechLedgerTest {
         assertNotNull(ledger.reserve(event("再試行できます", 1100)));
     }
 
+    @Test public void completionIsAtomicAndIdempotentWithoutOnStart() {
+        RowSpeechLedger ledger = new RowSpeechLedger(60000);
+        RowSpeechLedger.Reservation reservation = ledger.reserve(event("開始通知なしでも完了", 1000));
+        assertTrue(ledger.complete(reservation.getId(), 1100));
+        assertFalse(ledger.complete(reservation.getId(), 1200));
+        assertNull(ledger.reserve(event("開始通知なしでも完了", 1300)));
+    }
+
     @Test public void balancedReplacementCarriesWaitingRowsIntoFullCaption() {
         RowSpeechLedger ledger = new RowSpeechLedger(60000);
         RowSpeechLedger.Reservation partial = ledger.reserve(event("一行目", 1000));

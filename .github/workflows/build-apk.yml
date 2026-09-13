@@ -17,6 +17,9 @@ on:
       - "gradle.properties"
       - ".github/workflows/build-apk.yml"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -36,7 +39,24 @@ jobs:
       - run: sdkmanager "platforms;android-36" "build-tools;35.0.0"
       - run: tools/replay-evaluator/run.sh
       - run: gradle :app:testDebugUnitTest :app:assembleDebug --stacktrace
+      - name: Publish v0.3.14 test APK
+        if: github.event_name == 'pull_request' && github.head_ref == 'v0.3.14-speech-lifecycle' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk burned-caption-reader-v0.3.14-debug.apk
+          if gh release view v0.3.14-test --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload v0.3.14-test burned-caption-reader-v0.3.14-debug.apk --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create v0.3.14-test burned-caption-reader-v0.3.14-debug.apk \
+              --prerelease \
+              --target "$GITHUB_HEAD_REF" \
+              --title "v0.3.14 test build" \
+              --notes "Unmerged test APK for PR #14. Android build and automated tests passed in GitHub Actions." \
+              --repo "$GITHUB_REPOSITORY"
+          fi
       - uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: burned-caption-reader-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk

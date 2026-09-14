@@ -60,7 +60,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          split -b 4000000 app/build/outputs/apk/debug/app-debug.apk /tmp/caption-apk-part-
+          split -b 950000 app/build/outputs/apk/debug/app-debug.apk /tmp/caption-apk-part-
           echo "APK_TRANSFER_BEGIN"
           for part in /tmp/caption-apk-part-*; do
             sha=$(base64 -w0 "$part" |

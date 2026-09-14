@@ -55,6 +55,21 @@ jobs:
               --notes "Unmerged test APK for PR #14. Android build and automated tests passed in GitHub Actions." \
               --repo "$GITHUB_REPOSITORY"
           fi
+      - name: Export APK for chat attachment
+        if: github.event_name == 'pull_request' && github.head_ref == 'v0.3.14-speech-lifecycle' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          split -b 4000000 app/build/outputs/apk/debug/app-debug.apk /tmp/caption-apk-part-
+          echo "APK_TRANSFER_BEGIN"
+          for part in /tmp/caption-apk-part-*; do
+            sha=$(base64 -w0 "$part" |
+              jq -Rs '{content: ., encoding: "base64"}' |
+              gh api --method POST "repos/$GITHUB_REPOSITORY/git/blobs" --input - --jq '.sha')
+            echo "APK_TRANSFER_PART $(basename "$part") $sha $(stat -c '%s' "$part")"
+          done
+          echo "APK_TRANSFER_SHA256 $(sha256sum app/build/outputs/apk/debug/app-debug.apk | cut -d' ' -f1)"
+          echo "APK_TRANSFER_END"
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         with:

@@ -183,6 +183,24 @@ public final class MainActivity extends Activity {
         });
         root.addView(volume);
 
+        root.addView(text("読み上げ音量ブースト", 16, Color.rgb(31, 52, 64)));
+        Spinner boost = new Spinner(this);
+        ArrayAdapter<String> boostAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item,
+                new String[]{"オフ", "弱（+6 dB）", "強（+12 dB）"});
+        boostAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        boost.setAdapter(boostAdapter);
+        boost.setSelection(preferences.getSpeechBoost());
+        boost.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                preferences.setSpeechBoost(position);
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        root.addView(boost);
+        root.addView(text("読み上げの声だけを増幅します。まず「弱」でお試しください。変更は次の読み上げから反映されます。音が割れる場合は弱めてください。端末や音声エンジンにより効果が異なります。", 13,
+                Color.rgb(82, 99, 108)));
+
         stableValue = valueText();
         root.addView(labelValue("字幕の安定待ち時間", stableValue));
         SeekBar stable = new SeekBar(this);

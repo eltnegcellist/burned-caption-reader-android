@@ -7,6 +7,7 @@ import android.graphics.RectF;
 public final class AppPreferences {
     public static final String PREFERENCES_FILE = "burned_caption_reader";
     public static final String SPEECH_VOLUME = "speech_volume";
+    public static final String SPEECH_BOOST = "speech_boost";
 
     private static final String ROI_SET = "roi_set";
     private static final String ROI_LEFT = "roi_left";
@@ -90,6 +91,14 @@ public final class AppPreferences {
 
     public void setSpeechVolume(float volume) {
         preferences.edit().putFloat(SPEECH_VOLUME, Math.max(0.0f, Math.min(1.0f, volume))).apply();
+    }
+
+    public int getSpeechBoost() {
+        return Math.max(0, Math.min(2, preferences.getInt(SPEECH_BOOST, 0)));
+    }
+
+    public void setSpeechBoost(int level) {
+        preferences.edit().putInt(SPEECH_BOOST, Math.max(0, Math.min(2, level))).apply();
     }
 
     public String getSpeechMode() {

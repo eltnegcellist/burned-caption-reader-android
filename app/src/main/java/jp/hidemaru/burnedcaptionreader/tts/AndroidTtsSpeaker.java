@@ -3,6 +3,12 @@ package jp.hidemaru.burnedcaptionreader.tts;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.audiofx.AudioEffect;
+import android.media.audiofx.LoudnessEnhancer;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.Toast;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
@@ -33,6 +39,10 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
     private final BoundedSpeechQueue<PendingSpeech> pending = new BoundedSpeechQueue<>(2);
     private final DiagnosticRecorder diagnostics;
     private final SharedPreferences preferences;
+    private final SpeechBoost speechBoost;
+    private final int speechSessionId;
+    private final Context appContext;
+    private boolean boostWarningShown;
     private TextToSpeech textToSpeech;
     private Listener listener;
     private String activeUtteranceId;
@@ -42,10 +52,30 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
     private boolean closed;
 
     public AndroidTtsSpeaker(Context context) {
-        Context appContext = context.getApplicationContext();
+        appContext = context.getApplicationContext();
         diagnostics = DiagnosticRecorder.get(appContext);
         preferences = appContext.getSharedPreferences(
                 AppPreferences.PREFERENCES_FILE, Context.MODE_PRIVATE);
+        int session = AudioManager.ERROR;
+        try {
+            AudioManager audio = (AudioManager) appContext.getSystemService(Context.AUDIO_SERVICE);
+            if (audio != null) session = audio.generateAudioSessionId();
+        } catch (RuntimeException error) {
+            diagnostics.event("tts_boost_session_error", "error", error.toString());
+        }
+        speechSessionId = session;
+        speechBoost = new SpeechBoost(session, id -> {
+            LoudnessEnhancer enhancer = new LoudnessEnhancer(id);
+            return new SpeechBoost.Effect() {
+                @Override public void enable(int gainMillibels) {
+                    enhancer.setTargetGain(gainMillibels);
+                    if (enhancer.setEnabled(true) != AudioEffect.SUCCESS || !enhancer.getEnabled()) {
+                        throw new IllegalStateException("Speech boost could not be enabled");
+                    }
+                }
+                @Override public void release() { enhancer.release(); }
+            };
+        });
         textToSpeech = new TextToSpeech(appContext, status -> {
             diagnostics.event("tts_init", "status", status);
             if (closed || status != TextToSpeech.SUCCESS) {
@@ -141,6 +171,22 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
         textToSpeech.setSpeechRate(Math.min(2.0f, speech.rate * (1.0f + catchUp)));
 
         Bundle params = new Bundle();
+        // A private session lets the effect boost speech without changing browser audio.
+        if (speechSessionId > 0) {
+            params.putInt(TextToSpeech.Engine.KEY_PARAM_SESSION_ID, speechSessionId);
+        }
+        int boostLevel = SpeechBoost.normalize(preferences.getInt(AppPreferences.SPEECH_BOOST, 0));
+        boolean boostAvailable = speechBoost.apply(boostLevel);
+        diagnostics.event("tts_boost", "level", boostLevel, "gain_mb", boostLevel * 600,
+                "session_id", speechSessionId, "effect_configured", boostAvailable);
+        if (!boostAvailable && !boostWarningShown) {
+            boostWarningShown = true;
+            new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(appContext,
+                    "音量ブーストを利用できません。通常音量で読み上げます。",
+                    Toast.LENGTH_LONG).show());
+        } else if (boostLevel == 0) {
+            boostWarningShown = false;
+        }
         float volume = preferences.getFloat(AppPreferences.SPEECH_VOLUME, 1.0f);
         params.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME,
                 Math.max(0.0f, Math.min(1.0f, volume)));
@@ -217,6 +263,7 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
             textToSpeech.shutdown();
             textToSpeech = null;
         }
+        speechBoost.close();
         notifySpeaking(false);
         listener = null;
     }

@@ -10,10 +10,20 @@ android {
         applicationId = "jp.hidemaru.burnedcaptionreader"
         minSdk = 26
         targetSdk = 36
-        versionCode = 19
-        versionName = "0.3.14"
+        versionCode = 20
+        versionName = "0.3.15"
 
         testInstrumentationRunner = "android.app.Instrumentation"
+    }
+
+    // Optional persistent test key. Keep the key outside the repository.
+    System.getenv("CAPTION_DEBUG_KEYSTORE")?.let { keyPath ->
+        signingConfigs.getByName("debug") {
+            storeFile = file(keyPath)
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {

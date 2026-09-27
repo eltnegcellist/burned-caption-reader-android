@@ -55,12 +55,15 @@ public final class MainActivity extends Activity {
     private Button startButton;
     private Button stopButton;
     private boolean continueStartAfterNotificationRequest;
+    private String sharedVideoId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         preferences = new AppPreferences(this);
+        acceptSharedVideo(getIntent());
         buildUi();
+        if (sharedVideoId != null) beginStartFlow();
     }
 
     private void buildUi() {
@@ -85,7 +88,7 @@ public final class MainActivity extends Activity {
         root.addView(subtitle);
 
         root.addView(section("使い方"));
-        root.addView(text("1. 「画面共有を開始」を押す\n2. ブラウザでYouTube動画を全画面再生する\n3. 字幕位置は自動的に学習されます\n4. 誤検出するときだけ手動範囲を使います", 16,
+        root.addView(text("ブラウザのYouTube動画から「共有」→「焼き付け字幕リーダー」を選ぶと、アプリ内再生へ進みます。画面共有を許可すると字幕を読み上げます。従来のブラウザ画面共有も使えます。", 16,
                 Color.rgb(31, 52, 64)));
 
         root.addView(section("字幕の検出範囲"));
@@ -279,7 +282,8 @@ public final class MainActivity extends Activity {
 
     private void beginStartFlow() {
         if (AppState.isRunning()) {
-            Toast.makeText(this, "すでに画面共有中です", Toast.LENGTH_SHORT).show();
+            if (sharedVideoId != null) openSharedPlayer();
+            else Toast.makeText(this, "すでに画面共有中です", Toast.LENGTH_SHORT).show();
             return;
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
@@ -313,7 +317,8 @@ public final class MainActivity extends Activity {
         }
         if (requestCode != REQUEST_CAPTURE) return;
         if (resultCode != RESULT_OK || data == null) {
-            Toast.makeText(this, "画面共有は開始されませんでした", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "画面共有は開始されませんでした。映像取得の実験は試せます", Toast.LENGTH_LONG).show();
+            if (sharedVideoId != null) openSharedPlayer();
             return;
         }
         Intent service = new Intent(this, CaptureService.class)
@@ -323,10 +328,14 @@ public final class MainActivity extends Activity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(service);
         else startService(service);
         AppState.setStatus("画面共有を準備しています");
-        Toast.makeText(this, preferences.isAutoRegion()
-                ? "ブラウザへ移動すると字幕位置を自動検出します"
-                : "ブラウザへ移動し、通知から字幕領域を指定してください",
-                Toast.LENGTH_LONG).show();
+        if (sharedVideoId != null) {
+            openSharedPlayer();
+        } else {
+            Toast.makeText(this, preferences.isAutoRegion()
+                    ? "ブラウザへ移動すると字幕位置を自動検出します"
+                    : "ブラウザへ移動し、通知から字幕領域を指定してください",
+                    Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -335,11 +344,38 @@ public final class MainActivity extends Activity {
         if (requestCode == REQUEST_NOTIFICATIONS && continueStartAfterNotificationRequest) {
             continueStartAfterNotificationRequest = false;
             if (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "画面共有の動作状況を表示するため、通知の許可が必要です", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "通知の許可がないため画面共有は開始できません。映像取得の実験は試せます", Toast.LENGTH_LONG).show();
+                if (sharedVideoId != null) openSharedPlayer();
                 return;
             }
             requestScreenCapture();
         }
+    }
+
+    @Override protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if (acceptSharedVideo(intent)) beginStartFlow();
+    }
+
+    private boolean acceptSharedVideo(Intent intent) {
+        if (intent == null || !Intent.ACTION_SEND.equals(intent.getAction())
+                || !"text/plain".equals(intent.getType())) return false;
+        String id = YouTubeShareUrl.videoId(intent.getStringExtra(Intent.EXTRA_TEXT));
+        if (id == null) {
+            Toast.makeText(this, "YouTube動画のURLを読み取れませんでした", Toast.LENGTH_LONG).show();
+            return false;
+        }
+        sharedVideoId = id;
+        preferences.setAutoRegion(true);
+        return true;
+    }
+
+    private void openSharedPlayer() {
+        String id = sharedVideoId;
+        sharedVideoId = null;
+        if (id != null) startActivity(new Intent(this, SharedPlayerActivity.class)
+                .putExtra(SharedPlayerActivity.EXTRA_VIDEO_ID, id));
     }
 
     private void openBrowser() {

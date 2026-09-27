@@ -78,6 +78,26 @@ jobs:
               --notes "Speech-only boost: off / +6 dB / +12 dB. Automated tests passed. Device loudness is unverified. Debug signing may differ from your installed APK; preserve settings before uninstalling if an update is rejected." \
               --repo "$GITHUB_REPOSITORY"
           fi
+      - name: Publish v0.3.16 share-player test APK
+        if: github.event_name == 'pull_request' && github.head_ref == 'v0.3.16-share-player-poc' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CAPTION_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk burned-caption-reader-v0.3.16-share-player-test.apk
+          sha256sum burned-caption-reader-v0.3.16-share-player-test.apk > burned-caption-reader-v0.3.16-share-player-test.apk.sha256
+          if gh release view v0.3.16-share-player-test --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release already exists; preserving the published test APK."
+          else
+            gh release create v0.3.16-share-player-test \
+              burned-caption-reader-v0.3.16-share-player-test.apk \
+              burned-caption-reader-v0.3.16-share-player-test.apk.sha256 \
+              --prerelease \
+              --target "$CAPTION_HEAD_SHA" \
+              --title "v0.3.16 shared-player experiment" \
+              --notes "Share a YouTube video from an Android browser to start an embedded player and optional OCR frame probe. Existing real-time OCR still requires one screen sharing approval per session. Device-level PixelCopy success is unverified. Debug signature may differ from previous test APKs." \
+              --repo "$GITHUB_REPOSITORY"
+          fi
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         with:

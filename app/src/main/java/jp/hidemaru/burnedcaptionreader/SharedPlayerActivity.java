@@ -1,7 +1,6 @@
 package jp.hidemaru.burnedcaptionreader;
 
 import android.app.Activity;
-import android.app.role.RoleManager;
 import android.content.Intent;
 import android.net.Uri;
 import android.graphics.Bitmap;
@@ -102,26 +101,11 @@ public final class SharedPlayerActivity extends Activity {
     private void openInBrowser() {
         Uri url = Uri.parse("https://www.youtube.com/watch?v=" + videoId);
         Intent view = new Intent(Intent.ACTION_VIEW, url).addCategory(Intent.CATEGORY_BROWSABLE);
-        // Android 10+ normally knows the user's default browser even when the
-        // YouTube app also handles watch URLs. Fall back to the system chooser.
-        if (android.os.Build.VERSION.SDK_INT >= 29) {
-            RoleManager roles = getSystemService(RoleManager.class);
-            if (roles != null && roles.isRoleAvailable(RoleManager.ROLE_BROWSER)
-                    && !roles.getRoleHolders(RoleManager.ROLE_BROWSER).isEmpty()) {
-                view.setPackage(roles.getRoleHolders(RoleManager.ROLE_BROWSER).get(0));
-            }
-        }
         try {
-            startActivity(view);
+            startActivity(Intent.createChooser(view, "動画を開くブラウザを選択"));
             finish();
-        } catch (RuntimeException unavailable) {
-            try {
-                view.setPackage(null);
-                startActivity(view);
-                finish();
-            } catch (RuntimeException error) {
-                probeStatus.setText("動画ページを開けませんでした: " + error.getMessage());
-            }
+        } catch (RuntimeException error) {
+            probeStatus.setText("動画ページを開けませんでした: " + error.getMessage());
         }
     }
 

@@ -88,7 +88,7 @@ public final class MainActivity extends Activity {
         root.addView(subtitle);
 
         root.addView(section("使い方"));
-        root.addView(text("ブラウザのYouTube動画から「共有」→「焼き付け字幕リーダー」を選ぶと、アプリ内再生へ進みます。画面共有を許可すると字幕を読み上げます。従来のブラウザ画面共有も使えます。", 16,
+        root.addView(text("ブラウザのYouTube動画から「共有」→「焼き付け字幕リーダー」を選び、画面共有を許可します。埋め込み動画が再生できない場合は「ブラウザで動画を再生」から通常の動画ページを開いてください。共有中は字幕を読み上げます。", 16,
                 Color.rgb(31, 52, 64)));
 
         root.addView(section("字幕の検出範囲"));

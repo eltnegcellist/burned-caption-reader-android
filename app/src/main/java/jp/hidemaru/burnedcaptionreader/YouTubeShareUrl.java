@@ -1,8 +1,6 @@
 package jp.hidemaru.burnedcaptionreader;
 
 import java.net.URI;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,7 +31,7 @@ public final class YouTubeShareUrl {
                         if (raw != null) for (String field : raw.split("&")) {
                             int eq = field.indexOf('=');
                             if (eq > 0 && field.substring(0, eq).equals("v")) {
-                                candidate = URLDecoder.decode(field.substring(eq + 1), StandardCharsets.UTF_8);
+                                candidate = field.substring(eq + 1);
                                 break;
                             }
                         }

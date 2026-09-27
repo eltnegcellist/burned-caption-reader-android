@@ -35,7 +35,7 @@ public final class SharedPlayerActivity extends Activity {
             finish();
             return;
         }
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_KEEP_SCREEN_ON);
+        getWindow().getDecorView().setKeepScreenOn(true);
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.BLACK);
@@ -70,7 +70,7 @@ public final class SharedPlayerActivity extends Activity {
 
         // Only validated video IDs are inserted into this fixed, local HTML page.
         String html = "<!doctype html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'></head>"
-                + "<body style='margin:0;background:#000'><iframe width='100%' height='100%' "
+                + "<body style='margin:0;background:#000;height:100vh'><iframe width='100%' height='100%' "
                 + "src='https://www.youtube.com/embed/" + videoId + "?enablejsapi=1&playsinline=1' "
                 + "title='YouTube video player' allow='autoplay; encrypted-media; fullscreen; picture-in-picture' "
                 + "allowfullscreen frameborder='0'></iframe></body></html>";

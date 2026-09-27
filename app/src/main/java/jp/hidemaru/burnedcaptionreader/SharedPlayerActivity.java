@@ -1,6 +1,8 @@
 package jp.hidemaru.burnedcaptionreader;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -10,6 +12,7 @@ import android.os.Looper;
 import android.view.PixelCopy;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -23,6 +26,7 @@ import jp.hidemaru.burnedcaptionreader.ocr.OcrEngine;
 public final class SharedPlayerActivity extends Activity {
     public static final String EXTRA_VIDEO_ID = "video_id";
     private WebView player;
+    private String videoId;
     private OcrEngine probeOcr;
     private TextView probeStatus;
     private ImageView preview;
@@ -30,7 +34,7 @@ public final class SharedPlayerActivity extends Activity {
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String videoId = getIntent().getStringExtra(EXTRA_VIDEO_ID);
+        videoId = getIntent().getStringExtra(EXTRA_VIDEO_ID);
         if (videoId == null || !videoId.matches("[A-Za-z0-9_-]{11}")) {
             finish();
             return;
@@ -45,22 +49,39 @@ public final class SharedPlayerActivity extends Activity {
         player.getSettings().setJavaScriptEnabled(true);
         player.getSettings().setDomStorageEnabled(true);
         player.getSettings().setMediaPlaybackRequiresUserGesture(true);
-        player.setWebViewClient(new WebViewClient());
+        player.setWebViewClient(new WebViewClient() {
+            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                if (!request.isForMainFrame()) return false;
+                Uri target = request.getUrl();
+                String host = target.getHost();
+                if ("https".equalsIgnoreCase(target.getScheme()) && host != null
+                        && (host.equals("youtube.com") || host.endsWith(".youtube.com")
+                        || host.equals("youtu.be"))) {
+                    openInBrowser();
+                    return true;
+                }
+                return true; // Do not load unknown pages inside the small video panel.
+            }
+        });
         root.addView(player, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 Math.round(getResources().getDisplayMetrics().widthPixels * 9f / 16f)));
 
         TextView instructions = new TextView(this);
-        instructions.setText("動画をタップして再生してください。画面共有を許可した場合は、既存の字幕読み上げが動作します。");
+        instructions.setText("動画をタップして再生してください。埋め込み再生できない場合は、下のボタンから通常の動画ページを開けます。画面共有中なら読み上げは継続します。");
         instructions.setTextColor(Color.WHITE);
         instructions.setPadding(18, 18, 18, 18);
         root.addView(instructions);
+        Button browser = new Button(this);
+        browser.setText("ブラウザで動画を再生");
+        root.addView(browser);
+        browser.setOnClickListener(v -> openInBrowser());
         Button probe = new Button(this);
         probe.setText("映像取得を確認（実験）");
         root.addView(probe);
         probeStatus = new TextView(this);
         probeStatus.setTextColor(Color.WHITE);
         probeStatus.setPadding(18, 14, 18, 14);
-        probeStatus.setText("再生中に押すと、画面共有を使わずにプレーヤー部分を1枚取得してOCRを試します。");
+        probeStatus.setText("埋め込み動画の表示範囲を1枚取得する実験です。ページ全体を読み取った場合、タイトルや操作文字も混ざり、字幕の自動選別は確認できません。");
         root.addView(probeStatus);
         preview = new ImageView(this);
         preview.setAdjustViewBounds(true);
@@ -75,6 +96,17 @@ public final class SharedPlayerActivity extends Activity {
                 + "title='YouTube video player' allow='autoplay; encrypted-media; fullscreen; picture-in-picture' "
                 + "allowfullscreen frameborder='0'></iframe></body></html>";
         player.loadDataWithBaseURL("https://www.youtube.com", html, "text/html", "UTF-8", null);
+    }
+
+    private void openInBrowser() {
+        Uri url = Uri.parse("https://www.youtube.com/watch?v=" + videoId);
+        Intent view = new Intent(Intent.ACTION_VIEW, url).addCategory(Intent.CATEGORY_BROWSABLE);
+        try {
+            startActivity(Intent.createChooser(view, "動画を開くブラウザを選択"));
+            finish();
+        } catch (RuntimeException error) {
+            probeStatus.setText("動画ページを開けませんでした: " + error.getMessage());
+        }
     }
 
     private void probeFrame() {

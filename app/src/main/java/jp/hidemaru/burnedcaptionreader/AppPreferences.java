@@ -3,11 +3,13 @@ package jp.hidemaru.burnedcaptionreader;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.RectF;
+import jp.hidemaru.burnedcaptionreader.tts.SpeechLevel;
 
 public final class AppPreferences {
     public static final String PREFERENCES_FILE = "burned_caption_reader";
     public static final String SPEECH_VOLUME = "speech_volume";
     public static final String SPEECH_BOOST = "speech_boost";
+    private static final String SPEECH_LEVEL = "speech_level_percent";
 
     private static final String ROI_SET = "roi_set";
     private static final String ROI_LEFT = "roi_left";
@@ -100,6 +102,20 @@ public final class AppPreferences {
 
     public void setSpeechBoost(int level) {
         preferences.edit().putInt(SPEECH_BOOST, Math.max(0, Math.min(2, level))).apply();
+    }
+
+    /** Migrates the previous independent volume and +6/+12 dB controls on first use. */
+    public int getSpeechLevel() {
+        if (preferences.contains(SPEECH_LEVEL)) {
+            return SpeechLevel.clamp(preferences.getInt(SPEECH_LEVEL, 100));
+        }
+        int migrated = SpeechLevel.fromLegacy(getSpeechVolume(), getSpeechBoost());
+        preferences.edit().putInt(SPEECH_LEVEL, migrated).apply();
+        return migrated;
+    }
+
+    public void setSpeechLevel(int percent) {
+        preferences.edit().putInt(SPEECH_LEVEL, SpeechLevel.clamp(percent)).apply();
     }
 
     public String getSpeechMode() {

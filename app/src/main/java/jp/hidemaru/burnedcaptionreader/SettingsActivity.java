@@ -1,13 +1,10 @@
 package jp.hidemaru.burnedcaptionreader;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
@@ -15,6 +12,7 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import java.util.Locale;
+import jp.hidemaru.burnedcaptionreader.tts.SpeechLevel;
 
 /** Settings used by the in-app video reader. */
 public final class SettingsActivity extends Activity {
@@ -26,21 +24,25 @@ public final class SettingsActivity extends Activity {
         preferences = new AppPreferences(this);
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
-        scroll.setBackgroundColor(Color.rgb(245, 248, 251));
-        root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
+        scroll.setBackgroundColor(ReaderUi.SURFACE);
+        LinearLayout page = new LinearLayout(this);
+        page.setOrientation(LinearLayout.VERTICAL);
         int padding = dp(22);
-        root.setPadding(padding, padding, padding, padding);
-        scroll.addView(root);
+        page.setPadding(padding, dp(28), padding, dp(32));
+        scroll.addView(page);
         scroll.setOnApplyWindowInsetsListener((view, insets) -> {
             scroll.setPadding(0, insets.getSystemWindowInsetTop(), 0,
                     insets.getSystemWindowInsetBottom());
             return insets;
         });
 
-        TextView title = label("読み上げ設定", 26, Color.rgb(11, 37, 50));
+        TextView title = label("読み上げ設定", 28, ReaderUi.INK);
         title.setTypeface(null, android.graphics.Typeface.BOLD);
-        root.addView(title);
+        page.addView(title);
+        page.addView(label("字幕と声を自分に合う設定に。", 15, ReaderUi.MUTED),
+                ReaderUi.block(this, 6));
+        root = ReaderUi.card(this);
+        page.addView(root, ReaderUi.block(this, 22));
         note("変更は次に開く動画から反映されます。");
 
         heading("字幕が続いたとき");
@@ -57,7 +59,7 @@ public final class SettingsActivity extends Activity {
         });
 
         heading("読み上げ速度");
-        TextView rateValue = label("", 15, Color.rgb(68, 88, 100));
+        TextView rateValue = label("", 15, ReaderUi.TEAL);
         root.addView(rateValue);
         SeekBar rate = new SeekBar(this);
         rate.setMax(150);
@@ -74,35 +76,25 @@ public final class SettingsActivity extends Activity {
         root.addView(rate);
 
         heading("読み上げ音量");
-        TextView volumeValue = label("", 15, Color.rgb(68, 88, 100));
+        TextView volumeValue = label("", 15, ReaderUi.TEAL);
         root.addView(volumeValue);
         SeekBar volume = new SeekBar(this);
-        volume.setMax(100);
-        volume.setProgress(Math.round(preferences.getSpeechVolume() * 100));
-        volumeValue.setText(Math.round(preferences.getSpeechVolume() * 100) + "%");
+        volume.setMax(SpeechLevel.MAX_PERCENT);
+        volume.setProgress(preferences.getSpeechLevel());
+        volumeValue.setText(volumeLabel(preferences.getSpeechLevel()));
         volume.setOnSeekBarChangeListener(new Slider() {
             @Override public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
                 if (!fromUser) return;
-                preferences.setSpeechVolume(progress / 100f);
-                volumeValue.setText(progress + "%");
+                preferences.setSpeechLevel(progress);
+                volumeValue.setText(volumeLabel(progress));
             }
         });
         root.addView(volume);
-
-        heading("声だけを増幅");
-        Spinner boost = spinner(new String[]{"オフ", "弱（+6 dB）", "強（+12 dB）"});
-        boost.setSelection(preferences.getSpeechBoost());
-        boost.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int index, long id) {
-                preferences.setSpeechBoost(index);
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
-        });
-        note("動画の音量は変えません。声が割れる場合は弱めてください。");
+        note("100%が標準。超えると声だけを増幅します（最大400%相当）。動画の音量は変わりません。声が割れる場合は下げてください。");
 
         heading("字幕の安定待ち時間");
         TextView stableValue = label(preferences.getStableMs() + " ms",
-                15, Color.rgb(68, 88, 100));
+                15, ReaderUi.TEAL);
         root.addView(stableValue);
         SeekBar stable = new SeekBar(this);
         stable.setMax(15);
@@ -117,6 +109,9 @@ public final class SettingsActivity extends Activity {
         });
         root.addView(stable);
 
+        root = ReaderUi.card(this);
+        page.addView(root, ReaderUi.block(this, 16));
+        root.addView(label("再生画面", 20, ReaderUi.INK));
         Switch hideCc = toggle("YouTubeの表示字幕（CC）を隠す",
                 preferences.isYouTubeCcHidden());
         hideCc.setOnCheckedChangeListener((button, checked) ->
@@ -127,12 +122,9 @@ public final class SettingsActivity extends Activity {
         keepAwake.setOnCheckedChangeListener((button, checked) ->
                 preferences.setKeepScreenOn(checked));
 
-        Button back = new Button(this);
-        back.setText("戻る");
-        back.setAllCaps(false);
+        android.widget.Button back = ReaderUi.button(this, "動画のURL入力へ戻る", false);
         back.setOnClickListener(v -> finish());
-        root.addView(back, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        page.addView(back, ReaderUi.block(this, 22));
         setContentView(scroll);
     }
 
@@ -140,7 +132,7 @@ public final class SettingsActivity extends Activity {
         Switch value = new Switch(this);
         value.setText(title);
         value.setTextSize(16);
-        value.setTextColor(Color.rgb(11, 37, 50));
+        value.setTextColor(ReaderUi.INK);
         value.setChecked(checked);
         value.setPadding(0, dp(22), 0, dp(6));
         root.addView(value);
@@ -158,27 +150,29 @@ public final class SettingsActivity extends Activity {
     }
 
     private void heading(String text) {
-        TextView heading = label(text, 17, Color.rgb(11, 37, 50));
+        TextView heading = label(text, 17, ReaderUi.INK);
         heading.setPadding(0, dp(22), 0, dp(8));
         root.addView(heading);
     }
 
     private void note(String text) {
-        TextView value = label(text, 14, Color.rgb(68, 88, 100));
+        TextView value = label(text, 14, ReaderUi.MUTED);
         value.setPadding(0, dp(8), 0, dp(8));
         root.addView(value);
     }
 
     private TextView label(String text, int size, int color) {
-        TextView value = new TextView(this);
-        value.setText(text);
-        value.setTextSize(size);
-        value.setTextColor(color);
-        return value;
+        return ReaderUi.text(this, text, size, color, false);
+    }
+
+    private String volumeLabel(int percent) {
+        if (percent <= 100) return percent + "%" + (percent == 100 ? "  ·  標準" : "");
+        return String.format(Locale.JAPAN, "%d%%  ·  声だけ +%.1f dB",
+                percent, SpeechLevel.gainMillibels(percent) / 100f);
     }
 
     private int dp(int px) {
-        return Math.round(px * getResources().getDisplayMetrics().density);
+        return ReaderUi.dp(this, px);
     }
 
     private abstract static class Slider implements SeekBar.OnSeekBarChangeListener {

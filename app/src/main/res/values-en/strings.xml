@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">In-Video Caption Reader</string>
+    <string name="notification_channel_name">Caption reading</string>
+    <string name="notification_channel_description">Reading captions shown in the video</string>
+</resources>

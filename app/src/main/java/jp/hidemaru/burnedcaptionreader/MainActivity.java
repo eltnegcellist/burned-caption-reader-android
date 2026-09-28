@@ -2,14 +2,10 @@ package jp.hidemaru.burnedcaptionreader;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputType;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -34,13 +30,13 @@ public final class MainActivity extends Activity {
     private void showHome() {
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
-        scroll.setBackgroundColor(Color.rgb(245, 248, 251));
+        scroll.setBackgroundColor(ReaderUi.SURFACE);
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setFocusableInTouchMode(true);
         root.requestFocus();
-        int padding = dp(22);
-        root.setPadding(padding, padding, padding, padding);
+        int padding = dp(24);
+        root.setPadding(padding, dp(42), padding, dp(26));
         scroll.addView(root);
         scroll.setOnApplyWindowInsetsListener((view, insets) -> {
             scroll.setPadding(0, insets.getSystemWindowInsetTop(), 0,
@@ -48,25 +44,35 @@ public final class MainActivity extends Activity {
             return insets;
         });
 
-        TextView title = label("焼き付け字幕リーダー", 27, Color.rgb(11, 37, 50));
-        title.setTypeface(null, android.graphics.Typeface.BOLD);
-        root.addView(title);
-        TextView description = label(
-                "YouTube動画のURLを入れて再生。画面に描かれた日本語字幕を読み上げます。",
-                16, Color.rgb(68, 88, 100));
-        description.setPadding(0, dp(10), 0, dp(30));
-        root.addView(description);
+        TextView eyebrow = ReaderUi.text(this, "VIDEO CAPTIONS  ·  AUDIO", 12,
+                ReaderUi.TEAL, true);
+        root.addView(eyebrow);
+        TextView title = ReaderUi.text(this, getString(R.string.app_name), 29,
+                ReaderUi.INK, true);
+        root.addView(title, ReaderUi.block(this, 10));
+        TextView description = ReaderUi.text(this,
+                "動画に映る字幕を、耳で楽しむ。\nYouTubeのURLからそのまま再生できます。",
+                16, ReaderUi.MUTED, false);
+        root.addView(description, ReaderUi.block(this, 12));
 
-        root.addView(label("動画のURL", 17, Color.rgb(11, 37, 50)));
+        LinearLayout videoCard = ReaderUi.card(this);
+        root.addView(videoCard, ReaderUi.block(this, 34));
+        videoCard.addView(ReaderUi.text(this, "動画を開く", 21, ReaderUi.INK, true));
+        videoCard.addView(ReaderUi.text(this, "YouTube動画のURL", 14,
+                ReaderUi.MUTED, false), ReaderUi.block(this, 16));
         urlInput = new EditText(this);
         urlInput.setSingleLine(true);
         urlInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
         urlInput.setImeOptions(EditorInfo.IME_ACTION_GO);
         urlInput.setTextSize(16);
+        urlInput.setTextColor(ReaderUi.INK);
+        urlInput.setHintTextColor(ReaderUi.MUTED);
         urlInput.setHint("https://www.youtube.com/watch?v=...");
         urlInput.setSelectAllOnFocus(true);
-        root.addView(urlInput, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        urlInput.setPadding(dp(14), dp(14), dp(14), dp(14));
+        urlInput.setBackground(ReaderUi.shape(this, ReaderUi.SURFACE, 12,
+                android.graphics.Color.rgb(210, 225, 228)));
+        videoCard.addView(urlInput, ReaderUi.block(this, 8));
         if (pendingVideoId != null) {
             urlInput.setText("https://www.youtube.com/watch?v=" + pendingVideoId);
         }
@@ -76,20 +82,17 @@ public final class MainActivity extends Activity {
             return true;
         });
 
-        Button play = button("動画を開いて読み上げる", true);
-        LinearLayout.LayoutParams playParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        playParams.topMargin = dp(20);
-        root.addView(play, playParams);
+        android.widget.Button play = ReaderUi.button(this, "動画を開いて読み上げる  ›", true);
+        videoCard.addView(play, ReaderUi.block(this, 18));
         play.setOnClickListener(v -> openEnteredUrl());
 
-        TextView shareHint = label("ブラウザの「共有」からこのアプリを選ぶ方法も使えます。",
-                14, Color.rgb(68, 88, 100));
-        shareHint.setPadding(0, dp(14), 0, dp(24));
-        root.addView(shareHint);
+        TextView shareHint = ReaderUi.text(this,
+                "ブラウザの「共有」から直接開くこともできます。", 14,
+                ReaderUi.MUTED, false);
+        videoCard.addView(shareHint, ReaderUi.block(this, 16));
 
-        Button settings = button("設定", false);
-        root.addView(settings);
+        android.widget.Button settings = ReaderUi.button(this, "読み上げ設定  ›", false);
+        root.addView(settings, ReaderUi.block(this, 18));
         settings.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
         setContentView(scroll);
     }
@@ -139,29 +142,7 @@ public final class MainActivity extends Activity {
         super.onSaveInstanceState(outState);
     }
 
-    private Button button(String text, boolean primary) {
-        Button button = new Button(this);
-        button.setText(text);
-        button.setAllCaps(false);
-        button.setTextSize(17);
-        button.setGravity(Gravity.CENTER);
-        button.setMinHeight(dp(54));
-        if (primary) {
-            button.setTextColor(Color.WHITE);
-            button.setBackgroundColor(Color.rgb(8, 115, 157));
-        }
-        return button;
-    }
-
-    private TextView label(String value, int size, int color) {
-        TextView text = new TextView(this);
-        text.setText(value);
-        text.setTextSize(size);
-        text.setTextColor(color);
-        return text;
-    }
-
     private int dp(int px) {
-        return Math.round(px * getResources().getDisplayMetrics().density);
+        return ReaderUi.dp(this, px);
     }
 }

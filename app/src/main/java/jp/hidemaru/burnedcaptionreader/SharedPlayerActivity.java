@@ -104,9 +104,10 @@ public final class SharedPlayerActivity extends Activity {
         }
         preferences = new AppPreferences(this);
         stableConfig.stableMs = preferences.getStableMs();
+        hideCc = preferences.isYouTubeCcHidden();
         ocr = new MlKitJapaneseOcrEngine();
         speaker = new AndroidTtsSpeaker(this);
-        getWindow().getDecorView().setKeepScreenOn(true);
+        getWindow().getDecorView().setKeepScreenOn(preferences.isKeepScreenOn());
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.BLACK);
@@ -152,9 +153,11 @@ public final class SharedPlayerActivity extends Activity {
         lastRead.setPadding(18, 8, 18, 8);
         root.addView(lastRead);
         ccButton = new Button(this);
-        ccButton.setText("YouTubeの表示字幕: 非表示");
+        ccButton.setText(hideCc ? "YouTubeの表示字幕: 非表示"
+                : "YouTubeの表示字幕: 表示を許可");
         ccButton.setOnClickListener(v -> {
             hideCc = !hideCc;
+            preferences.setYouTubeCcHidden(hideCc);
             ccButton.setText(hideCc ? "YouTubeの表示字幕: 非表示"
                     : "YouTubeの表示字幕: 表示を許可");
             applyCcPreference();

@@ -5,7 +5,10 @@ import android.content.SharedPreferences;
 import android.graphics.RectF;
 
 public final class AppPreferences {
-    private static final String FILE = "burned_caption_reader";
+    public static final String PREFERENCES_FILE = "burned_caption_reader";
+    public static final String SPEECH_VOLUME = "speech_volume";
+    public static final String SPEECH_BOOST = "speech_boost";
+
     private static final String ROI_SET = "roi_set";
     private static final String ROI_LEFT = "roi_left";
     private static final String ROI_TOP = "roi_top";
@@ -18,6 +21,7 @@ public final class AppPreferences {
     private static final String STABLE_MS = "stable_ms";
     private static final String AUTO_PAUSE_BROWSER = "auto_pause_browser";
     private static final String KEEP_SCREEN_ON = "keep_screen_on";
+    private static final String HIDE_YOUTUBE_CC = "hide_youtube_cc";
 
     public static final String REGION_AUTO = "auto";
     public static final String REGION_MANUAL = "manual";
@@ -28,7 +32,7 @@ public final class AppPreferences {
     private final SharedPreferences preferences;
 
     public AppPreferences(Context context) {
-        preferences = context.getSharedPreferences(FILE, Context.MODE_PRIVATE);
+        preferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
     }
 
     public boolean hasRoi() {
@@ -75,16 +79,36 @@ public final class AppPreferences {
     }
 
     public float getSpeechRate() {
-        return preferences.getFloat(SPEECH_RATE, 1.0f);
+        return preferences.getFloat(SPEECH_RATE, 1.40f);
     }
 
     public void setSpeechRate(float rate) {
         preferences.edit().putFloat(SPEECH_RATE, Math.max(0.5f, Math.min(2.0f, rate))).apply();
     }
 
+    public float getSpeechVolume() {
+        return preferences.getFloat(SPEECH_VOLUME, 1.0f);
+    }
+
+    public void setSpeechVolume(float volume) {
+        preferences.edit().putFloat(SPEECH_VOLUME, Math.max(0.0f, Math.min(1.0f, volume))).apply();
+    }
+
+    public int getSpeechBoost() {
+        return Math.max(0, Math.min(2, preferences.getInt(SPEECH_BOOST, 0)));
+    }
+
+    public void setSpeechBoost(int level) {
+        preferences.edit().putInt(SPEECH_BOOST, Math.max(0, Math.min(2, level))).apply();
+    }
+
     public String getSpeechMode() {
         String mode = preferences.getString(SPEECH_MODE, MODE_BALANCED);
-        return MODE_CONTINUOUS.equals(mode) ? MODE_BALANCED : mode;
+        // Preserve the stored policy.  Continuous mode is deliberately a
+        // lossless FIFO policy; silently converting it to BALANCED caused
+        // captions to be discarded whenever TTS lagged behind the video.
+        if (MODE_CONTINUOUS.equals(mode) || MODE_LATEST.equals(mode)) return mode;
+        return MODE_BALANCED;
     }
 
     public void setSpeechMode(String mode) {
@@ -108,11 +132,19 @@ public final class AppPreferences {
     }
 
     public long getStableMs() {
-        return preferences.getLong(STABLE_MS, 450L);
+        return preferences.getLong(STABLE_MS, 300L);
     }
 
     public void setStableMs(long stableMs) {
         preferences.edit().putLong(STABLE_MS, Math.max(250L, Math.min(1_000L, stableMs))).apply();
+    }
+
+    public boolean isYouTubeCcHidden() {
+        return preferences.getBoolean(HIDE_YOUTUBE_CC, true);
+    }
+
+    public void setYouTubeCcHidden(boolean hidden) {
+        preferences.edit().putBoolean(HIDE_YOUTUBE_CC, hidden).apply();
     }
 
     private static float clamp(float value) {

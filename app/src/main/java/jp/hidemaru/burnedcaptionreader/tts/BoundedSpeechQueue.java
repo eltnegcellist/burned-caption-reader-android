@@ -12,13 +12,16 @@ public final class BoundedSpeechQueue<T> {
         this.capacity = Math.max(1, capacity);
     }
 
-    public void offer(T value, SpeechEngine.Mode mode) {
+    /** Returns the oldest value evicted by the capacity policy, if any. */
+    public T offer(T value, SpeechEngine.Mode mode) {
+        T evicted = null;
         if (mode == SpeechEngine.Mode.BALANCED || mode == SpeechEngine.Mode.LATEST) {
             values.clear();
         } else {
-            while (values.size() >= capacity) values.removeFirst();
+            while (values.size() >= capacity) evicted = values.removeFirst();
         }
         values.addLast(value);
+        return evicted;
     }
 
     public T poll() { return values.pollFirst(); }

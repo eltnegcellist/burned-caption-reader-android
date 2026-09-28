@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public final class MlKitJapaneseOcrEngine implements OcrEngine {
+    /** ML Kit may omit confidence for some Japanese elements; unknown is not certainty. */
+    private static final double UNKNOWN_CONFIDENCE = 55.0;
+
     private final TextRecognizer recognizer = TextRecognition.getClient(
             new JapaneseTextRecognizerOptions.Builder().build()
     );
@@ -71,7 +74,7 @@ public final class MlKitJapaneseOcrEngine implements OcrEngine {
             Rect box = line.getBoundingBox();
             if (box != null) {
                 double lineConfidence = lineConfidenceCount == 0
-                        ? 100.0 : lineConfidenceTotal / lineConfidenceCount;
+                        ? UNKNOWN_CONFIDENCE : lineConfidenceTotal / lineConfidenceCount;
                 recognizedLines.add(new OcrLine(indexed.blockIndex, value, lineConfidence,
                         box.left / (float) Math.max(1, imageWidth),
                         box.top / (float) Math.max(1, imageHeight),
@@ -79,7 +82,8 @@ public final class MlKitJapaneseOcrEngine implements OcrEngine {
                         box.bottom / (float) Math.max(1, imageHeight)));
             }
         }
-        double confidence = confidenceCount == 0 ? 100.0 : confidenceTotal / confidenceCount;
+        double confidence = confidenceCount == 0
+                ? UNKNOWN_CONFIDENCE : confidenceTotal / confidenceCount;
         return new OcrResult(text.toString(), confidence, recognizedLines);
     }
 

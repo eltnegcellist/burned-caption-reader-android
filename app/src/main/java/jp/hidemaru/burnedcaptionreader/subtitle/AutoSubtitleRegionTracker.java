@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrLine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
 
-/** Selects up to two recurring, changing subtitle-like text lanes from broad OCR results. */
+/** Selects recurring, changing subtitle-like text lanes from broad OCR results. */
 public final class AutoSubtitleRegionTracker {
     public static final class Selection {
         private final int trackId;
@@ -88,14 +88,14 @@ public final class AutoSubtitleRegionTracker {
     }
 
     private static final int LANE_COUNT = 24;
-    private static final int MAX_ACTIVE_LANES = 2;
+    private static final int MAX_ACTIVE_LANES = 4;
     private static final long LOCK_MISSING_MS = 2_800L;
     private static final long LANE_EXPIRES_MS = 8_000L;
     private static final long PROVISIONAL_MAX_STATIC_MS = 2_500L;
     private static final Pattern ONLY_SYMBOLS_OR_NUMBERS = Pattern.compile(
             "^[\\d\\s:：%％+＋\\-−/／|｜・.,，。!?！？()（）]+$");
     private static final Pattern UI_TERMS = Pattern.compile(
-            "(youtube|チャンネル登録|高評価|低評価|共有|保存|コメント|返信|回視聴|再生リスト|全画面|広告)",
+            "(youtube|チャンネル登録|登録者|高評価|低評価|共有|保存|コメント|返信|回視聴|視聴回数|再生回数|回再生|再生リスト|全画面|広告|\\d+(?:[.,]\\d+)?[万億]?回|\\d+\\s*(?:分|時間|日|週間|週|か月|ヶ月|月|年)前)",
             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
     private static final Pattern JAPANESE_TEXT = Pattern.compile("[\\u3040-\\u30ff\\u3400-\\u9fff]");
     private static final Pattern SHORT_TECHNICAL_LABEL = Pattern.compile(
@@ -137,8 +137,9 @@ public final class AutoSubtitleRegionTracker {
     }
 
     /**
-     * Selects up to two independent screen-anchored subtitle bands. A scene cut
-     * invalidates transition evidence so unrelated object labels are not joined.
+     * Selects up to four independent, qualified screen-anchored bands. Narration
+     * plus two dialogue groups must not compete for a two-band budget.
+     * A scene cut invalidates transition evidence.
      */
     public synchronized List<Selection> selectAll(long timestamp, OcrResult result,
                                                   boolean portraitVideoViewport,
@@ -169,21 +170,21 @@ public final class AutoSubtitleRegionTracker {
                 (LaneState lane) -> laneScore(timestamp, lane, lane.current)).reversed());
         for (LaneState lane : confirmed) {
             if (lockedLanes.size() >= MAX_ACTIVE_LANES) break;
-            if (!lockedLanes.contains(lane) && isDistinctFrom(lane, lockedLanes)) {
+            if (!lockedLanes.contains(lane) && canAddSelectedLane(lane, lockedLanes)) {
                 lockedLanes.add(lane);
             }
         }
 
         List<LaneState> selected = new ArrayList<>();
         for (LaneState lane : lockedLanes) {
-            if (lane.seenThisFrame && lane.current != null && isDistinctFrom(lane, selected)) {
+            if (lane.seenThisFrame && lane.current != null && canAddSelectedLane(lane, selected)) {
                 selected.add(lane);
             }
         }
 
         for (LaneState lane : provisionalLanes(timestamp)) {
             if (selected.size() >= MAX_ACTIVE_LANES) break;
-            if (!lockedLanes.contains(lane) && isDistinctFrom(lane, selected)) {
+            if (!lockedLanes.contains(lane) && canAddSelectedLane(lane, selected)) {
                 selected.add(lane);
             }
         }
@@ -206,10 +207,12 @@ public final class AutoSubtitleRegionTracker {
         List<OcrLine> eligibleLines = new ArrayList<>();
         for (OcrLine line : result.getLines()) {
             String text = SubtitleNormalizer.normalize(line.getText());
-            if (text.isEmpty() || line.getConfidence() < 30.0 || line.getHeight() < 0.008f) continue;
-            // The portrait crop ends at the bottom of the 16:9 player. Burned-in
-            // subtitles can therefore sit at y=0.90..1.00; only discard browser
-            // chrome above the player, not the lower edge where captions live.
+            if (text.isEmpty() || line.getHeight() < 0.008f) continue;
+            boolean japaneseLine = JAPANESE_TEXT.matcher(text).find();
+            double minimumConfidence = japaneseLine ? 20.0 : 30.0;
+            if (line.getConfidence() < minimumConfidence) continue;
+            // Kept for the manual portrait hint. CaptureService currently passes false
+            // because burned-in captions may legitimately occupy the top of the video.
             if (portraitVideoViewport && line.getCenterY() < 0.18f) continue;
             eligibleLines.add(line);
             Candidate candidate = grouped.computeIfAbsent(line.getBlockIndex(), ignored -> new Candidate());
@@ -217,10 +220,6 @@ public final class AutoSubtitleRegionTracker {
         }
 
         List<Candidate> candidates = new ArrayList<>();
-        // ML Kit often assigns each row of outlined YouTube text to a different
-        // Text.Block. Rebuild a spatial 2-3 line caption before considering the
-        // individual OCR blocks, otherwise a three-line caption consumes three
-        // tracks and the first row loses to the two-track limit.
         for (Candidate spatialGroup : buildSpatialLineGroups(eligibleLines)) {
             addCandidateIfNew(candidates, spatialGroup);
         }
@@ -236,7 +235,7 @@ public final class AutoSubtitleRegionTracker {
             }
         }
 
-        List<Candidate> output = new ArrayList<>();
+        List<Candidate> scored = new ArrayList<>();
         for (Candidate candidate : candidates) {
             candidate.lines.sort(Comparator.comparingDouble(OcrLine::getTop)
                     .thenComparingDouble(OcrLine::getLeft));
@@ -258,13 +257,22 @@ public final class AutoSubtitleRegionTracker {
             candidate.japanese = JAPANESE_TEXT.matcher(candidate.text).find();
             candidate.lane = laneFor(candidate.centerY());
             candidate.visualScore = visualScore(candidate, length);
-            if (candidate.visualScore >= 0.50) output.add(candidate);
+            scored.add(candidate);
         }
+
+        List<Candidate> output = new ArrayList<>();
+        for (Candidate candidate : scored) {
+            if (candidate.visualScore < 0.50) continue;
+            if (isLikelyPlayerMetadata(candidate, scored)) continue;
+            output.add(candidate);
+        }
+
         List<Candidate> wholeCaptions = new ArrayList<>();
         for (Candidate candidate : output) {
             boolean fragment = false;
             for (Candidate parent : output) {
-                if (parent.spatialGroup && isStrongCaptionShape(parent)
+                if (parent.spatialGroup
+                        && (isStrongCaptionShape(parent) || isUpperCaptionRescueShape(parent))
                         && parent.lines.size() > candidate.lines.size()
                         && parent.lines.containsAll(candidate.lines)) {
                     fragment = true;
@@ -274,6 +282,32 @@ public final class AutoSubtitleRegionTracker {
             if (!fragment) wholeCaptions.add(candidate);
         }
         return wholeCaptions;
+    }
+
+    /**
+     * In portrait YouTube layouts, the title and view/upload metadata sit directly
+     * below the player. A view-count/time line is a reliable anchor for the otherwise
+     * arbitrary title. Reject only text that shares the same strongly left-aligned
+     * layout, so centered burned-in captions near the bottom remain eligible.
+     */
+    private boolean isLikelyPlayerMetadata(Candidate candidate, List<Candidate> all) {
+        if (candidate.centerY() < 0.68f) return false;
+        String text = candidate.text.toLowerCase(Locale.JAPANESE);
+        boolean directMetadata = UI_TERMS.matcher(text).find();
+        if (directMetadata && candidate.left <= 0.18f) return true;
+
+        if (candidate.left > 0.12f) return false;
+        for (Candidate anchor : all) {
+            if (anchor == candidate || anchor.centerY() < 0.65f || anchor.left > 0.18f) continue;
+            String anchorText = anchor.text.toLowerCase(Locale.JAPANESE);
+            if (!UI_TERMS.matcher(anchorText).find()) continue;
+            if (Math.abs(candidate.left - anchor.left) > 0.06f) continue;
+            float centerDistance = Math.abs(candidate.centerY() - anchor.centerY());
+            float edgeDistance = Math.min(Math.abs(candidate.bottom - anchor.top),
+                    Math.abs(anchor.bottom - candidate.top));
+            if (centerDistance <= 0.20f || edgeDistance <= 0.10f) return true;
+        }
+        return false;
     }
 
     private List<Candidate> buildSpatialLineGroups(List<OcrLine> eligibleLines) {
@@ -287,33 +321,36 @@ public final class AutoSubtitleRegionTracker {
                 .thenComparingDouble(OcrLine::getLeft));
 
         List<Candidate> output = new ArrayList<>();
-        List<OcrLine> cluster = new ArrayList<>();
+        List<List<OcrLine>> clusters = new ArrayList<>();
         for (OcrLine line : japaneseLines) {
-            if (cluster.isEmpty()) {
-                cluster.add(line);
-                continue;
+            List<OcrLine> best = null;
+            float nearestGap = Float.MAX_VALUE;
+            for (List<OcrLine> cluster : clusters) {
+                if (cluster.size() >= 3 || !canJoinSpatialGroup(cluster, line)) continue;
+                OcrLine previous = cluster.get(cluster.size() - 1);
+                float gap = Math.abs(line.getTop() - previous.getBottom());
+                if (gap < nearestGap) { best = cluster; nearestGap = gap; }
             }
-            if (cluster.size() < 3 && canJoinSpatialGroup(cluster, line)) {
-                cluster.add(line);
-                continue;
+            // A small unrelated OCR label must not terminate an existing caption.
+            if (best == null) {
+                best = new ArrayList<>();
+                clusters.add(best);
             }
-            addSpatialGroup(output, cluster);
-            cluster.clear();
-            cluster.add(line);
+            best.add(line);
         }
-        addSpatialGroup(output, cluster);
+        for (List<OcrLine> cluster : clusters) addSpatialGroup(output, cluster);
         return output;
     }
 
     private boolean canJoinSpatialGroup(List<OcrLine> cluster, OcrLine next) {
         OcrLine previous = cluster.get(cluster.size() - 1);
         float referenceHeight = Math.max(previous.getHeight(), next.getHeight());
-        if (Math.min(previous.getHeight(), next.getHeight()) < referenceHeight * 0.55f) {
+        if (Math.min(previous.getHeight(), next.getHeight()) < referenceHeight * 0.45f) {
             return false;
         }
         float verticalGap = next.getTop() - previous.getBottom();
-        if (verticalGap < -referenceHeight * 0.45f
-                || verticalGap > Math.max(0.040f, referenceHeight * 0.90f)) {
+        if (verticalGap < -referenceHeight * 0.55f
+                || verticalGap > Math.max(0.055f, referenceHeight * 1.35f)) {
             return false;
         }
 
@@ -328,7 +365,7 @@ public final class AutoSubtitleRegionTracker {
         float alignmentShift = Math.min(Math.abs(previous.getLeft() - next.getLeft()),
                 Math.min(Math.abs(previous.getCenterX() - next.getCenterX()),
                         Math.abs(previous.getRight() - next.getRight())));
-        return overlapRatio >= 0.25f || alignmentShift <= 0.09f;
+        return overlapRatio >= 0.15f || alignmentShift <= 0.12f;
     }
 
     private void addSpatialGroup(List<Candidate> output, List<OcrLine> lines) {
@@ -363,10 +400,8 @@ public final class AutoSubtitleRegionTracker {
         double usefulWidth = Math.min(1.0, candidate.width() / 0.55f);
         double compactHeight = 1.0 - Math.min(1.0, candidate.height() / 0.28f);
         double usefulLength = Math.min(1.0, textLength / 14.0);
-        double weakLowerPrior = Math.max(0.0, candidate.centerY() - 0.55f) / 0.45f;
         double score = confidence * 0.90 + centered * 0.45 + usefulWidth * 0.75
-                + compactHeight * 0.20 + usefulLength * 0.45
-                + weakLowerPrior * 0.15;
+                + compactHeight * 0.20 + usefulLength * 0.45;
         String text = candidate.text.toLowerCase(Locale.JAPANESE);
         if (candidate.japanese) score += 0.35;
         if (ONLY_SYMBOLS_OR_NUMBERS.matcher(text).matches()) score -= 2.20;
@@ -416,16 +451,11 @@ public final class AutoSubtitleRegionTracker {
             } else if (isRealTransition(state.lastText, candidate.text, similarity)) {
                 observePendingTransition(timestamp, state, candidate);
             } else {
-                // Ambiguous OCR movement is neither proof of a new subtitle nor a
-                // reason to discard the lane. It must repeat before it can matter.
                 state.stableObservations++;
                 clearPendingTransition(state);
             }
         }
         state.observations++;
-        // Keep the previous accepted text while a possible replacement is being
-        // verified. Otherwise the second observation would look "unchanged" and
-        // a one-frame object/OCR change could never be distinguished correctly.
         if (state.pendingTransitionObservations == 0) state.lastText = candidate.text;
         state.lastSeenAt = timestamp;
         state.visualTotal += candidate.visualScore;
@@ -467,8 +497,6 @@ public final class AutoSubtitleRegionTracker {
         if (Math.abs(candidate.bottom - state.meanBottom) > baselineTolerance) return false;
         if (Math.abs(candidate.height() - state.meanHeight) > heightTolerance) return false;
 
-        // Caption width changes with sentence length. Match whichever horizontal
-        // anchor remains fixed: left-aligned, centered, or right-aligned.
         float anchorShift = Math.min(Math.abs(candidate.left - state.meanLeft),
                 Math.min(Math.abs(candidate.centerX() - state.meanCenterX),
                         Math.abs(candidate.right - state.meanRight)));
@@ -487,8 +515,6 @@ public final class AutoSubtitleRegionTracker {
     }
 
     private void updateGeometry(LaneState state, Candidate candidate) {
-        // A bounded running mean preserves the screen anchor instead of following
-        // a slowly moving product label indefinitely.
         int previousWeight = Math.min(7, state.geometrySamples);
         int totalWeight = previousWeight + 1;
         state.meanLeft = weightedMean(state.meanLeft, candidate.left, previousWeight, totalWeight);
@@ -521,15 +547,56 @@ public final class AutoSubtitleRegionTracker {
             Candidate candidate = lane.current;
             if (!lane.seenThisFrame || candidate == null || lane.transitions > 0) continue;
             if (lane.observations < 2 || lane.stableObservations < 2) continue;
+            if (isShortReaction(candidate) && candidate.confidence < 35 && lane.stableObservations < 3) continue;
             if (timestamp - lane.textSince < 300L
                     || timestamp - lane.firstSeenAt > PROVISIONAL_MAX_STATIC_MS) continue;
-            if (!isStrongCaptionShape(candidate)) continue;
+            if (!isStrongCaptionShape(candidate) && !isUpperCaptionRescueShape(candidate)) continue;
             candidate.finalScore = laneScore(timestamp, lane, candidate);
             provisional.add(lane);
         }
         provisional.sort(Comparator.comparingDouble(
                 (LaneState lane) -> lane.current.finalScore).reversed());
         return provisional;
+    }
+
+    private boolean canAddSelectedLane(LaneState candidate, List<LaneState> selected) {
+        if (!isDistinctFrom(candidate, selected)) return false;
+        return selected.size() < MAX_ACTIVE_LANES;
+    }
+
+    private boolean isLikelyThirdLineFragment(LaneState candidate, List<LaneState> selected) {
+        Candidate current = candidate.current;
+        if (current == null || !current.japanese) return false;
+        for (LaneState existingLane : selected) {
+            Candidate existing = existingLane.current;
+            if (existing == null || !existing.japanese) continue;
+
+            float heightRatio = Math.min(current.height(), existing.height())
+                    / Math.max(0.001f, Math.max(current.height(), existing.height()));
+            if (heightRatio < 0.40f) continue;
+
+            float verticalGap;
+            if (current.top >= existing.bottom) verticalGap = current.top - existing.bottom;
+            else if (existing.top >= current.bottom) verticalGap = existing.top - current.bottom;
+            else verticalGap = 0f;
+            float allowedGap = Math.max(0.060f,
+                    Math.max(current.height(), existing.height()) * 1.50f);
+            if (verticalGap > allowedGap) continue;
+
+            float horizontalOverlap = Math.max(0f,
+                    Math.min(current.right, existing.right) - Math.max(current.left, existing.left));
+            float overlapRatio = horizontalOverlap / Math.max(0.001f,
+                    Math.min(current.width(), existing.width()));
+            float alignmentShift = Math.min(Math.abs(current.left - existing.left),
+                    Math.min(Math.abs(current.centerX() - existing.centerX()),
+                            Math.abs(current.right - existing.right)));
+            if (overlapRatio < 0.15f && alignmentShift > 0.12f) continue;
+
+            float combinedTop = Math.min(current.top, existing.top);
+            float combinedBottom = Math.max(current.bottom, existing.bottom);
+            if (combinedBottom - combinedTop <= 0.34f) return true;
+        }
+        return false;
     }
 
     private boolean isDistinctFrom(LaneState candidate, List<LaneState> selected) {
@@ -560,12 +627,33 @@ public final class AutoSubtitleRegionTracker {
     }
 
     private boolean isStrongCaptionShape(Candidate candidate) {
+        // A sustained vocal reaction is dialogue even when too short for the
+        // normal sentence score. Keep geometry/confidence and temporal gates.
+        if (isShortReaction(candidate)) return true;
+        if (candidate.japanese && candidate.spatialGroup && candidate.lines.size() >= 2
+                && candidate.confidence >= 55 && candidate.width() >= .18f
+                && candidate.visualScore >= 1.70) return true;
         if (candidate.visualScore < 2.05) return false;
         if (candidate.japanese) {
             return candidate.width() >= 0.35f || candidate.textLength >= 9
                     || candidate.lines.size() >= 2;
         }
         return candidate.width() >= 0.60f && candidate.textLength >= 12;
+    }
+
+    private boolean isShortReaction(Candidate candidate) {
+        return candidate.lines.size() == 1 && candidate.confidence >= 20
+                && candidate.width() >= .12f && candidate.height() >= .025f
+                && candidate.centerX() >= .18f && candidate.centerX() <= .82f
+                && candidate.text.matches("[えあうお]{3,}[0oO8…。.・!！?？]*");
+    }
+
+    private boolean isUpperCaptionRescueShape(Candidate candidate) {
+        if (!candidate.japanese || candidate.centerY() >= 0.50f) return false;
+        if (candidate.confidence < 55.0 || candidate.visualScore < 1.75) return false;
+        if (candidate.centerX() < 0.18f || candidate.centerX() > 0.82f) return false;
+        return candidate.width() >= 0.24f || candidate.textLength >= 6
+                || candidate.lines.size() >= 2;
     }
 
     private double laneScore(long timestamp, LaneState lane, Candidate candidate) {

@@ -1,0 +1,20 @@
+# kind	case_id	group	text	expected	mono_ms
+observed	known_second_line_repeat	obs-1	、金のためにって。	EMIT	615676496
+observed	known_second_line_repeat	obs-2	損益未達だと組織としても大変なのは	EMIT	615676928
+observed	known_second_line_repeat	obs-3	、金のためって0。\n損益未達だと組織としても大変なのは\nお前もわかってるだろ?	AMBIGUOUS_FIRST|SUPPRESS_SECOND|EMIT_THIRD	615679470
+observed	known_second_line_repeat	obs-4	お前もわかってるだろ?-	EMIT_FRAGMENT_ONCE	615680891
+observed	third_line_fragment	obs-5	金の話を出した途端にごれか。\n普段は客のことなんて\nまったく気にしてないくせにgo	EMIT	615703692
+observed	third_line_fragment	obs-6	まったく気にしでないくせに。条\nお客様視点\nじやなくて	HARD_CASE_UNRESOLVED	615706964
+synthetic	changed_number	num-1	損益未達 0	EMIT	700000000
+synthetic	changed_number	num-2	損益未達 1	EMIT	700000001
+synthetic	changed_negation	neg-1	客を気にしている	EMIT	700000100
+synthetic	changed_negation	neg-2	客を気にしていない	EMIT	700000101
+synthetic	disappearance_reappearance	gap-1	再登場字幕	EMIT	700000200
+synthetic	disappearance_reappearance	gap-2	別字幕	EMIT	700000201
+synthetic	disappearance_reappearance	gap-3	再登場字幕	EMIT_AFTER_GAP	700060202
+synthetic	reordered_groups	order-1	甲\n乙	EMIT	700000300
+synthetic	reordered_groups	order-2	乙\n甲	EMIT_EACH_LINE_ONCE	700000301
+synthetic	separated_groups	sep-1	分離字幕	EMIT	700000400
+synthetic	separated_groups	sep-2	分離字幕	EMIT_AFTER_SEPARATOR	700000401
+synthetic	short_caption	short-1	go	EMIT	700000500
+synthetic	short_caption	short-2	go	SUPPRESS_DUPLICATE	700000501

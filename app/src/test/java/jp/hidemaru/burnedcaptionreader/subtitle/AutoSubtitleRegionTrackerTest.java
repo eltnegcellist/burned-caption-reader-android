@@ -11,6 +11,19 @@ import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
 import org.junit.Test;
 
 public class AutoSubtitleRegionTrackerTest {
+    @Test public void interleavedSmallLabelDoesNotSplitThreeLineCaption() {
+        AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
+        OcrLine top = new OcrLine(0, "私にも責任のある仕事が", 85, .15f, .20f, .85f, .26f);
+        OcrLine label = new OcrLine(9, "小物", 90, .01f, .27f, .07f, .29f);
+        OcrLine middle = new OcrLine(1, "任されることになり", 95, .15f, .28f, .85f, .34f);
+        OcrLine bottom = new OcrLine(2, "考え直しました", 95, .15f, .36f, .85f, .42f);
+        OcrResult result = new OcrResult("", 90, Arrays.asList(bottom, label, top, middle));
+        tracker.selectAll(0, result, false);
+        List<AutoSubtitleRegionTracker.Selection> selected = tracker.selectAll(500, result, false);
+        assertEquals(1, selected.size());
+        assertEquals(top.getText() + "\n" + middle.getText() + "\n" + bottom.getText(), selected.get(0).getText());
+    }
+
     @Test
     public void learnsCenteredChangingSubtitleInsteadOfCornerLabel() {
         AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();

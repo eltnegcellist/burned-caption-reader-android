@@ -21,6 +21,7 @@ public final class AppPreferences {
     private static final String STABLE_MS = "stable_ms";
     private static final String AUTO_PAUSE_BROWSER = "auto_pause_browser";
     private static final String KEEP_SCREEN_ON = "keep_screen_on";
+    private static final String HIDE_YOUTUBE_CC = "hide_youtube_cc";
 
     public static final String REGION_AUTO = "auto";
     public static final String REGION_MANUAL = "manual";
@@ -136,6 +137,14 @@ public final class AppPreferences {
 
     public void setStableMs(long stableMs) {
         preferences.edit().putLong(STABLE_MS, Math.max(250L, Math.min(1_000L, stableMs))).apply();
+    }
+
+    public boolean isYouTubeCcHidden() {
+        return preferences.getBoolean(HIDE_YOUTUBE_CC, true);
+    }
+
+    public void setYouTubeCcHidden(boolean hidden) {
+        preferences.edit().putBoolean(HIDE_YOUTUBE_CC, hidden).apply();
     }
 
     private static float clamp(float value) {

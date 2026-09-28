@@ -11,7 +11,7 @@ public final class SpeechBoost implements AutoCloseable {
     private final int sessionId;
     private final Factory factory;
     private Effect effect;
-    private int lastLevel = -1;
+    private int lastGainMillibels = -1;
     private boolean available = true;
     private boolean closed;
 
@@ -20,22 +20,22 @@ public final class SpeechBoost implements AutoCloseable {
         this.factory = factory;
     }
 
-    public static int normalize(int level) { return Math.max(0, Math.min(2, level)); }
+    public static int normalize(int gainMillibels) { return Math.max(0, Math.min(1205, gainMillibels)); }
 
     /** False means fall back to ordinary speech; retry after changing the selection. */
-    public synchronized boolean apply(int level) {
+    public synchronized boolean apply(int gainMillibels) {
         if (closed) return false;
-        level = normalize(level);
-        if (level == lastLevel) return available;
-        lastLevel = level;
-        if (level == 0) {
+        gainMillibels = normalize(gainMillibels);
+        if (gainMillibels == lastGainMillibels) return available;
+        lastGainMillibels = gainMillibels;
+        if (gainMillibels == 0) {
             releaseEffect();
             return available = true;
         }
         if (sessionId <= 0) return available = false;
         try {
             if (effect == null) effect = factory.create(sessionId);
-            effect.enable(level * 600);
+            effect.enable(gainMillibels);
             return available = true;
         } catch (RuntimeException unavailable) {
             releaseEffect();

@@ -1,7 +1,6 @@
 package jp.hidemaru.burnedcaptionreader.tts;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.audiofx.AudioEffect;
@@ -38,7 +37,6 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
 
     private final BoundedSpeechQueue<PendingSpeech> pending = new BoundedSpeechQueue<>(2);
     private final DiagnosticRecorder diagnostics;
-    private final SharedPreferences preferences;
     private final SpeechBoost speechBoost;
     private final int speechSessionId;
     private final Context appContext;
@@ -54,8 +52,6 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
     public AndroidTtsSpeaker(Context context) {
         appContext = context.getApplicationContext();
         diagnostics = DiagnosticRecorder.get(appContext);
-        preferences = appContext.getSharedPreferences(
-                AppPreferences.PREFERENCES_FILE, Context.MODE_PRIVATE);
         int session = AudioManager.ERROR;
         try {
             AudioManager audio = (AudioManager) appContext.getSystemService(Context.AUDIO_SERVICE);
@@ -175,19 +171,20 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
         if (speechSessionId > 0) {
             params.putInt(TextToSpeech.Engine.KEY_PARAM_SESSION_ID, speechSessionId);
         }
-        int boostLevel = SpeechBoost.normalize(preferences.getInt(AppPreferences.SPEECH_BOOST, 0));
-        boolean boostAvailable = speechBoost.apply(boostLevel);
-        diagnostics.event("tts_boost", "level", boostLevel, "gain_mb", boostLevel * 600,
+        int speechLevel = new AppPreferences(appContext).getSpeechLevel();
+        int gainMillibels = SpeechLevel.gainMillibels(speechLevel);
+        boolean boostAvailable = speechBoost.apply(gainMillibels);
+        diagnostics.event("tts_boost", "speech_level_percent", speechLevel, "gain_mb", gainMillibels,
                 "session_id", speechSessionId, "effect_configured", boostAvailable);
-        if (!boostAvailable && !boostWarningShown) {
+        if (gainMillibels > 0 && !boostAvailable && !boostWarningShown) {
             boostWarningShown = true;
             new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(appContext,
                     "音量ブーストを利用できません。通常音量で読み上げます。",
                     Toast.LENGTH_LONG).show());
-        } else if (boostLevel == 0) {
+        } else if (gainMillibels == 0) {
             boostWarningShown = false;
         }
-        float volume = preferences.getFloat(AppPreferences.SPEECH_VOLUME, 1.0f);
+        float volume = SpeechLevel.engineVolume(speechLevel);
         params.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME,
                 Math.max(0.0f, Math.min(1.0f, volume)));
 

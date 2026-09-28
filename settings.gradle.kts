@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "BurnedCaptionReaderAndroid"
+rootProject.name = "InVideoCaptionReaderAndroid"
 include(":app")

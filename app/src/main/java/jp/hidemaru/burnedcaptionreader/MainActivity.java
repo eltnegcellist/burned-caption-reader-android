@@ -63,7 +63,7 @@ public final class MainActivity extends Activity {
         preferences = new AppPreferences(this);
         acceptSharedVideo(getIntent());
         buildUi();
-        if (sharedVideoId != null) beginStartFlow();
+        if (sharedVideoId != null) openSharedPlayer();
     }
 
     private void buildUi() {
@@ -88,7 +88,7 @@ public final class MainActivity extends Activity {
         root.addView(subtitle);
 
         root.addView(section("使い方"));
-        root.addView(text("ブラウザのYouTube動画から「共有」→「焼き付け字幕リーダー」を選び、画面共有を許可します。埋め込み動画が再生できない場合は「ブラウザで動画を再生」から通常の動画ページを開いてください。共有中は字幕を読み上げます。", 16,
+        root.addView(text("ブラウザのYouTube動画から「共有」→「焼き付け字幕リーダー」を選ぶと、アプリ内で動画を開きます。動画をタップして再生すると、画面共有なしで動画の表示部分を読み上げます。従来の「画面共有を開始」はブラウザ利用時の別モードです。", 16,
                 Color.rgb(31, 52, 64)));
 
         root.addView(section("字幕の検出範囲"));
@@ -355,7 +355,7 @@ public final class MainActivity extends Activity {
     @Override protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        if (acceptSharedVideo(intent)) beginStartFlow();
+        if (acceptSharedVideo(intent)) openSharedPlayer();
     }
 
     private boolean acceptSharedVideo(Intent intent) {
@@ -374,8 +374,15 @@ public final class MainActivity extends Activity {
     private void openSharedPlayer() {
         String id = sharedVideoId;
         sharedVideoId = null;
-        if (id != null) startActivity(new Intent(this, SharedPlayerActivity.class)
-                .putExtra(SharedPlayerActivity.EXTRA_VIDEO_ID, id));
+        if (id != null) {
+            // Switch from the legacy projection reader when sharing a URL.
+            if (AppState.isRunning()) {
+                stopService(new Intent(this, CaptureService.class));
+                AppState.setRunning(false);
+            }
+            startActivity(new Intent(this, SharedPlayerActivity.class)
+                    .putExtra(SharedPlayerActivity.EXTRA_VIDEO_ID, id));
+        }
     }
 
     private void openBrowser() {

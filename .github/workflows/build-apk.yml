@@ -158,6 +158,26 @@ jobs:
               --notes "In-app fullscreen video custom view supports local PixelCopy OCR. YouTube page CC is hidden by default, with a toggle and English-only OCR fallback filtering. YouTube HTML can change; Galaxy S25 fullscreen playback and caption suppression are not yet verified. No MediaProjection for shared URL playback." \
               --repo "$GITHUB_REPOSITORY"
           fi
+      - name: Publish v0.3.20 URL-first test APK
+        if: github.event_name == 'pull_request' && github.head_ref == 'v0.3.20-url-home' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CAPTION_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk burned-caption-reader-v0.3.20-url-home.apk
+          sha256sum burned-caption-reader-v0.3.20-url-home.apk > burned-caption-reader-v0.3.20-url-home.apk.sha256
+          if gh release view v0.3.20-url-home --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release already exists; preserving its published APK."
+          else
+            gh release create v0.3.20-url-home \
+              burned-caption-reader-v0.3.20-url-home.apk \
+              burned-caption-reader-v0.3.20-url-home.apk.sha256 \
+              --prerelease \
+              --target "$CAPTION_HEAD_SHA" \
+              --title "v0.3.20 URL-first app test" \
+              --notes "Launcher now shows YouTube URL input and settings only. Shared URLs still open directly in the on-device video reader. Old screen capture components and projection permissions are removed from the app manifest; legacy branches are retained. Galaxy S25 UI validation pending." \
+              --repo "$GITHUB_REPOSITORY"
+          fi
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         with:

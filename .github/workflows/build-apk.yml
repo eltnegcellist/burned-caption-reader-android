@@ -118,6 +118,26 @@ jobs:
               --notes "If YouTube rejects embedding, the video opens in the default browser and an active screen sharing session can continue caption reading. PixelCopy probe captures only an iframe snapshot, not the live OCR pipeline. Real-device verification pending. Debug signing may differ from previous builds." \
               --repo "$GITHUB_REPOSITORY"
           fi
+      - name: Publish v0.3.18 local reader test APK
+        if: github.event_name == 'pull_request' && github.head_ref == 'v0.3.18-in-app-local-reader' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CAPTION_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk burned-caption-reader-v0.3.18-local-test.apk
+          sha256sum burned-caption-reader-v0.3.18-local-test.apk > burned-caption-reader-v0.3.18-local-test.apk.sha256
+          if gh release view v0.3.18-local-test --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release already exists; preserving its published APK."
+          else
+            gh release create v0.3.18-local-test \
+              burned-caption-reader-v0.3.18-local-test.apk \
+              burned-caption-reader-v0.3.18-local-test.apk.sha256 \
+              --prerelease \
+              --target "$CAPTION_HEAD_SHA" \
+              --title "v0.3.18 local video OCR experiment" \
+              --notes "Shared URL opens inside app without MediaProjection. PixelCopy samples the visible HTML video element and feeds local OCR/stabilization/TTS. Some video formats or protected surfaces may not expose pixels. Android real-device validation pending. Test-only debug signing may differ from older APKs." \
+              --repo "$GITHUB_REPOSITORY"
+          fi
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         with:

@@ -218,6 +218,24 @@ jobs:
               --notes "Speech-only pause/resume, in-player settings while video keeps playing, clearer home action, and refreshed buttons. Real-device behavior requires validation." \
               --repo "$GITHUB_REPOSITORY"
           fi
+      - name: Publish v0.3.23 stable APK
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v0.3.23 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Stable release already exists; preserving the published APK."
+          else
+            cp app/build/outputs/apk/debug/app-debug.apk in-video-caption-reader-v0.3.23.apk
+            sha256sum in-video-caption-reader-v0.3.23.apk > in-video-caption-reader-v0.3.23.apk.sha256
+            gh release create v0.3.23 \
+              in-video-caption-reader-v0.3.23.apk \
+              in-video-caption-reader-v0.3.23.apk.sha256 \
+              --target "$GITHUB_SHA" \
+              --title "動画内字幕リーダー v0.3.23" \
+              --notes "URLを共有・入力してアプリ内でYouTubeを再生し、動画内の日本語字幕をローカルOCRとTTSで読み上げます。読み上げのみ一時停止、再生中の設定変更、専用のアプリアイコンを追加。Androidテストとビルドは成功。動画ごとのOCR精度および実機での今回のアイコン表示は未確認。APKはデバッグ署名のため以前のAPKと署名が異なる場合は上書きインストールできません。" \
+              --repo "$GITHUB_REPOSITORY"
+          fi
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         with:

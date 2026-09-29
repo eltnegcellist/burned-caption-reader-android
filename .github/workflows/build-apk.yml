@@ -198,6 +198,26 @@ jobs:
               --notes "Renames the app, combines speech volume and boost on a 0-400% slider, and refreshes the home/settings design. Device playback and loudness require validation." \
               --repo "$GITHUB_REPOSITORY"
           fi
+      - name: Publish v0.3.22 player controls test APK
+        if: github.event_name == 'pull_request' && github.head_ref == 'v0.3.22-player-controls' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CAPTION_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk in-video-caption-reader-v0.3.22.apk
+          sha256sum in-video-caption-reader-v0.3.22.apk > in-video-caption-reader-v0.3.22.apk.sha256
+          if gh release view v0.3.22-player-controls --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release already exists; preserving its published APK."
+          else
+            gh release create v0.3.22-player-controls \
+              in-video-caption-reader-v0.3.22.apk \
+              in-video-caption-reader-v0.3.22.apk.sha256 \
+              --prerelease \
+              --target "$CAPTION_HEAD_SHA" \
+              --title "v0.3.22 player controls" \
+              --notes "Speech-only pause/resume, in-player settings while video keeps playing, clearer home action, and refreshed buttons. Real-device behavior requires validation." \
+              --repo "$GITHUB_REPOSITORY"
+          fi
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         with:

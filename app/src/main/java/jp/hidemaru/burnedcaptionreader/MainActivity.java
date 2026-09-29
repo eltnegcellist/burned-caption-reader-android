@@ -94,6 +94,9 @@ public final class MainActivity extends Activity {
         android.widget.Button settings = ReaderUi.button(this, "読み上げ設定  ›", false);
         root.addView(settings, ReaderUi.block(this, 18));
         settings.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
+        android.widget.Button guide = ReaderUi.button(this, "使い方を見る  ›", false);
+        root.addView(guide, ReaderUi.block(this, 10));
+        guide.setOnClickListener(v -> startActivity(new Intent(this, HelpActivity.class)));
         setContentView(scroll);
     }
 

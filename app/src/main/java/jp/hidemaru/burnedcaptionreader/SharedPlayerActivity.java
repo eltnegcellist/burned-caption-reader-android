@@ -69,7 +69,7 @@ public final class SharedPlayerActivity extends Activity {
     private final Runnable sampler = new Runnable() {
         @Override public void run() {
             if (!sampling) return;
-            if (!busy && player != null) {
+            if (!readingPaused && !busy && player != null) {
                 applyCcPreference();
                 if (fullView != null) copyFullscreenVideo();
                 else locateVideoAndCopy();
@@ -79,9 +79,11 @@ public final class SharedPlayerActivity extends Activity {
     };
     private WebView player;
     private LinearLayout root;
+    private LinearLayout controls;
     private TextView status;
     private TextView lastRead;
-    private Button ccButton;
+    private Button speechToggle;
+    private SettingsPanel settingsPanel;
     private View fullView;
     private WebChromeClient.CustomViewCallback fullCallback;
     private int previousOrientation;
@@ -94,6 +96,8 @@ public final class SharedPlayerActivity extends Activity {
     private String videoId;
     private boolean sampling;
     private boolean busy;
+    private boolean readingPaused;
+    private int captureGeneration;
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -110,7 +114,7 @@ public final class SharedPlayerActivity extends Activity {
         getWindow().getDecorView().setKeepScreenOn(preferences.isKeepScreenOn());
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(Color.BLACK);
+        root.setBackgroundColor(ReaderUi.SURFACE);
         player = new WebView(this);
         player.setBackgroundColor(Color.BLACK);
         player.getSettings().setJavaScriptEnabled(true);
@@ -134,39 +138,49 @@ public final class SharedPlayerActivity extends Activity {
                         || !(host.equals("youtube.com") || host.endsWith(".youtube.com"));
             }
             @Override public void onPageFinished(WebView view, String url) {
+                captureGeneration++;
                 resetTracks();
                 applyCcPreference();
-                status.setText("動画をタップして再生してください。字幕領域を検出中…");
+                if (!readingPaused) {
+                    status.setText("動画をタップして再生してください。字幕領域を検出中…");
+                }
             }
         });
         root.addView(player, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        controls = new LinearLayout(this);
+        controls.setOrientation(LinearLayout.VERTICAL);
+        controls.setPadding(ReaderUi.dp(this, 18), ReaderUi.dp(this, 12),
+                ReaderUi.dp(this, 18), ReaderUi.dp(this, 18));
+        root.addView(controls);
         status = new TextView(this);
-        status.setTextColor(Color.WHITE);
-        status.setMaxLines(4);
-        status.setPadding(18, 12, 18, 12);
+        status.setTextSize(14);
+        status.setTextColor(ReaderUi.MUTED);
+        status.setMaxLines(2);
         status.setText("アプリ内で動画を読み込み中…");
-        root.addView(status);
+        controls.addView(status);
         lastRead = new TextView(this);
-        lastRead.setTextColor(Color.WHITE);
+        lastRead.setTextColor(ReaderUi.INK);
+        lastRead.setTextSize(15);
         lastRead.setMaxLines(2);
-        lastRead.setPadding(18, 8, 18, 8);
-        root.addView(lastRead);
-        ccButton = new Button(this);
-        ccButton.setText(hideCc ? "YouTubeの表示字幕: 非表示"
-                : "YouTubeの表示字幕: 表示を許可");
-        ccButton.setOnClickListener(v -> {
-            hideCc = !hideCc;
-            preferences.setYouTubeCcHidden(hideCc);
-            ccButton.setText(hideCc ? "YouTubeの表示字幕: 非表示"
-                    : "YouTubeの表示字幕: 表示を許可");
-            applyCcPreference();
-        });
-        root.addView(ccButton);
-        Button stop = new Button(this);
-        stop.setText("読み上げ停止");
-        stop.setOnClickListener(v -> finish());
-        root.addView(stop);
+        controls.addView(lastRead, ReaderUi.block(this, 6));
+        LinearLayout actions = new LinearLayout(this);
+        actions.setOrientation(LinearLayout.HORIZONTAL);
+        controls.addView(actions, ReaderUi.block(this, 14));
+        speechToggle = ReaderUi.button(this, "読み上げを一時停止", true);
+        LinearLayout.LayoutParams speechParams = new LinearLayout.LayoutParams(0,
+                ViewGroup.LayoutParams.WRAP_CONTENT, 1.7f);
+        actions.addView(speechToggle, speechParams);
+        speechToggle.setOnClickListener(v -> setReadingPaused(!readingPaused));
+        Button settings = ReaderUi.button(this, "設定", false);
+        LinearLayout.LayoutParams settingsParams = new LinearLayout.LayoutParams(0,
+                ViewGroup.LayoutParams.WRAP_CONTENT, 0.8f);
+        settingsParams.leftMargin = ReaderUi.dp(this, 10);
+        actions.addView(settings, settingsParams);
+        settings.setOnClickListener(v -> showSettings());
+        Button home = ReaderUi.button(this, "トップ画面に戻る", false);
+        controls.addView(home, ReaderUi.block(this, 10));
+        home.setOnClickListener(v -> finish());
         setContentView(root);
         player.loadUrl("https://m.youtube.com/watch?v=" + videoId);
     }
@@ -181,6 +195,7 @@ public final class SharedPlayerActivity extends Activity {
 
     @Override protected void onPause() {
         sampling = false;
+        captureGeneration++;
         main.removeCallbacks(sampler);
         if (player != null) player.onPause();
         if (speaker != null) speaker.stop();
@@ -258,9 +273,54 @@ public final class SharedPlayerActivity extends Activity {
             WebChromeClient.CustomViewCallback callback = fullCallback;
             hideFullscreen();
             if (callback != null) callback.onCustomViewHidden();
+        } else if (settingsPanel != null) {
+            closeSettings();
         } else {
             super.onBackPressed();
         }
+    }
+
+    private void setReadingPaused(boolean paused) {
+        if (readingPaused == paused) return;
+        readingPaused = paused;
+        captureGeneration++;
+        speechToggle.setText(paused ? "読み上げを再開" : "読み上げを一時停止");
+        if (paused) {
+            speaker.stop();
+            resetTracks();
+            status.setText("読み上げを一時停止中 · 動画は再生中");
+        } else {
+            resetTracks();
+            status.setText("動画内の字幕を探索中");
+        }
+    }
+
+    private void showSettings() {
+        if (settingsPanel != null) return;
+        captureGeneration++;
+        settingsPanel = new SettingsPanel(this, preferences, this::closeSettings,
+                this::applyLiveSettings, true);
+        controls.setVisibility(View.GONE);
+        int height = Math.min(ReaderUi.dp(this, 410),
+                Math.round(getResources().getDisplayMetrics().heightPixels * 0.52f));
+        root.addView(settingsPanel, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, height));
+        applyLiveSettings();
+    }
+
+    private void closeSettings() {
+        if (settingsPanel == null) return;
+        captureGeneration++;
+        root.removeView(settingsPanel);
+        settingsPanel = null;
+        controls.setVisibility(View.VISIBLE);
+    }
+
+    private void applyLiveSettings() {
+        stableConfig.stableMs = preferences.getStableMs();
+        hideCc = preferences.isYouTubeCcHidden();
+        getWindow().getDecorView().setKeepScreenOn(preferences.isKeepScreenOn());
+        applyCcPreference();
     }
 
     private void applyCcPreference() {
@@ -301,11 +361,13 @@ public final class SharedPlayerActivity extends Activity {
 
     private void locateVideoAndCopy() {
         busy = true;
+        final int generation = captureGeneration;
         // Returning an array (not a string) keeps WebView's JSON result simple.
         player.evaluateJavascript("(() => {const v=document.querySelector('video');" +
                 "if(!v)return null;const r=v.getBoundingClientRect();" +
                 "return [r.left,r.top,r.right,r.bottom,innerWidth,innerHeight];})()", json -> {
-            if (!sampling || player == null) { busy = false; return; }
+            if (!sampling || readingPaused || generation != captureGeneration
+                    || player == null) { busy = false; return; }
             try {
                 if (json == null || "null".equals(json)) {
                     status.setText("動画部分の読み込みを待っています");
@@ -342,17 +404,20 @@ public final class SharedPlayerActivity extends Activity {
 
     private void copyWindowFrame(Rect rect) {
         busy = true;
+        final int generation = captureGeneration;
         try {
             Bitmap frame = Bitmap.createBitmap(rect.width(), rect.height(), Bitmap.Config.ARGB_8888);
             PixelCopy.request(getWindow(), rect, frame, result -> {
-                if (!sampling || isDestroyed()) { frame.recycle(); busy = false; return; }
+                if (!sampling || readingPaused || generation != captureGeneration || isDestroyed()) {
+                    frame.recycle(); busy = false; return;
+                }
                 if (result != PixelCopy.SUCCESS) {
                     frame.recycle();
                     status.setText("動画の画像を取得できません (PixelCopy " + result + ")");
                     busy = false;
                     return;
                 }
-                recognizeFrame(frame);
+                recognizeFrame(frame, generation);
             }, main);
         } catch (RuntimeException error) {
             busy = false;
@@ -360,7 +425,7 @@ public final class SharedPlayerActivity extends Activity {
         }
     }
 
-    private void recognizeFrame(Bitmap frame) {
+    private void recognizeFrame(Bitmap frame, int generation) {
         Bitmap input = frame;
         if (frame.getWidth() < 850) {
             float scale = Math.min(2.0f, 850f / frame.getWidth());
@@ -371,7 +436,8 @@ public final class SharedPlayerActivity extends Activity {
         long timestamp = SystemClock.elapsedRealtime();
         ocr.recognize(ocrInput, result -> {
             try {
-                if (sampling && !isDestroyed()) processResult(timestamp, result);
+                if (sampling && !readingPaused && generation == captureGeneration
+                        && !isDestroyed()) processResult(timestamp, result);
             } finally {
                 ocrInput.recycle();
                 if (ocrInput != frame) frame.recycle();
@@ -380,7 +446,9 @@ public final class SharedPlayerActivity extends Activity {
         }, error -> {
             ocrInput.recycle();
             if (ocrInput != frame) frame.recycle();
-            if (sampling && !isDestroyed()) status.setText("OCRエラー: " + error.getMessage());
+            if (sampling && !readingPaused && generation == captureGeneration && !isDestroyed()) {
+                status.setText("OCRエラー: " + error.getMessage());
+            }
             busy = false;
         });
     }

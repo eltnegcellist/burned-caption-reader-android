@@ -1,9 +1,11 @@
 package jp.hidemaru.burnedcaptionreader;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -66,8 +68,13 @@ final class ReaderUi {
         view.setMinHeight(dp(context, 54));
         view.setPadding(dp(context, 14), dp(context, 10), dp(context, 14), dp(context, 10));
         view.setTextColor(primary ? Color.WHITE : TEAL);
-        view.setBackground(shape(context, primary ? TEAL : Color.WHITE, 14,
-                primary ? 0 : Color.rgb(199, 219, 225)));
+        view.setBackgroundTintList(null);
+        view.setBackground(new RippleDrawable(ColorStateList.valueOf(
+                primary ? Color.rgb(141, 222, 231) : Color.rgb(210, 232, 235)),
+                shape(context, primary ? TEAL : Color.WHITE, 16,
+                        primary ? 0 : Color.rgb(199, 219, 225)), null));
+        view.setStateListAnimator(null);
+        view.setElevation(0);
         return view;
     }
 }

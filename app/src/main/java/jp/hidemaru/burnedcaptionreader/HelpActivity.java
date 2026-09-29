@@ -34,7 +34,10 @@ public final class HelpActivity extends Activity {
                 "動画のURLを入力するか、ブラウザから共有して開けます。画面共有の設定は不要です。",
                 16, ReaderUi.MUTED, false), ReaderUi.block(this, 12));
 
-        LinearLayout paste = section(root, "01", "URLを入力して開く");
+        LinearLayout start = section(root, "再生の仕方");
+        start.addView(ReaderUi.text(this, "次の2通りから選べます。", 15,
+                ReaderUi.MUTED, false), ReaderUi.block(this, 8));
+        LinearLayout paste = method(start, "方法1  URLを入力する");
         instruction(paste, "ブラウザで見たいYouTube動画のURLをコピーします。");
         instruction(paste, "このアプリを開き、URL欄に貼り付けて「動画を開いて読み上げる」を押します。");
         illustrationLabel(paste, "アプリのトップ画面イメージ");
@@ -43,8 +46,14 @@ public final class HelpActivity extends Activity {
                 ReaderUi.INK, true));
         homePreview.addView(ReaderUi.text(this, "動画を開く", 15,
                 ReaderUi.INK, true), ReaderUi.block(this, 10));
+        homePreview.addView(ReaderUi.text(this, "YouTube動画のURL", 12,
+                ReaderUi.MUTED, false), ReaderUi.block(this, 8));
         previewField(homePreview, "https://www.youtube.com/watch?v=…");
         previewPill(homePreview, "動画を開いて読み上げる  ›", true);
+        homePreview.addView(ReaderUi.text(this,
+                "ブラウザの「共有」から直接開くこともできます。", 12,
+                ReaderUi.MUTED, false), ReaderUi.block(this, 8));
+        previewPill(homePreview, "読み上げ設定  ›", false);
         previewPill(homePreview, "使い方を見る  ›", false);
         Button open = ReaderUi.button(this, "URL入力画面へ  ›", false);
         paste.addView(open, ReaderUi.block(this, 14));
@@ -54,7 +63,7 @@ public final class HelpActivity extends Activity {
             finish();
         });
 
-        LinearLayout share = section(root, "02", "ブラウザから共有して開く");
+        LinearLayout share = method(start, "方法2  ブラウザから共有する");
         instruction(share, "ブラウザでYouTubeの動画ページを表示し、「共有」を押します。");
         instruction(share, "共有先から「動画内字幕リーダー」を選ぶと、その動画がアプリ内で開きます。");
         illustrationLabel(share, "Androidの共有メニューイメージ");
@@ -67,19 +76,27 @@ public final class HelpActivity extends Activity {
                 "共有先に表示されない場合は「リンクをコピー」を選び、上のURL入力をお使いください。共有メニューの見た目はブラウザや端末で異なります。",
                 13, ReaderUi.MUTED, false), ReaderUi.block(this, 14));
 
-        LinearLayout playback = section(root, "03", "再生中の操作");
-        instruction(playback, "動画をタップして再生すると、映像内の日本語字幕を探して読み上げます。");
+        LinearLayout playback = section(root, "再生中の操作");
+        instruction(playback, "動画の再生中は、映像内の日本語字幕を探して読み上げます。");
         instruction(playback, "「読み上げを一時停止」は音声だけ止めます。動画は再生を続けます。");
         instruction(playback, "「設定」は動画を見ながら開けます。「トップ画面に戻る」で再生画面を閉じます。");
         illustrationLabel(playback, "再生画面の操作イメージ");
         LinearLayout playerPreview = preview(playback, ReaderUi.SURFACE);
-        TextView video = ReaderUi.text(this, "▶  動画をタップして再生", 15,
-                Color.WHITE, true);
-        video.setGravity(Gravity.CENTER);
-        video.setMinHeight(dp(92));
-        video.setBackground(ReaderUi.shape(this, ReaderUi.INK, 12, 0));
+        // Represent only the video area's bounds; do not invent a player prompt.
+        android.view.View video = new android.view.View(this);
+        video.setContentDescription("動画表示領域。映像は省略しています");
+        video.setLayoutParams(new LinearLayout.LayoutParams(-1, dp(92)));
+        video.setBackgroundColor(Color.BLACK);
         playerPreview.addView(video);
-        previewPill(playerPreview, "読み上げを一時停止    設定", true);
+        LinearLayout actions = new LinearLayout(this);
+        actions.setOrientation(LinearLayout.HORIZONTAL);
+        playerPreview.addView(actions, ReaderUi.block(this, 10));
+        TextView speech = pill("読み上げを一時停止", true);
+        actions.addView(speech, new LinearLayout.LayoutParams(0, -2, 1.7f));
+        LinearLayout.LayoutParams settingsParams =
+                new LinearLayout.LayoutParams(0, -2, 0.8f);
+        settingsParams.leftMargin = dp(8);
+        actions.addView(pill("設定", false), settingsParams);
         previewPill(playerPreview, "トップ画面に戻る", false);
         playback.addView(ReaderUi.text(this,
                 "全画面表示は動画プレーヤーの全画面ボタンから操作します。YouTubeのCC字幕の表示は読み上げ設定で切り替えられます。",
@@ -94,12 +111,20 @@ public final class HelpActivity extends Activity {
         setContentView(scroll);
     }
 
-    private LinearLayout section(LinearLayout root, String number, String title) {
+    private LinearLayout section(LinearLayout root, String title) {
         LinearLayout card = ReaderUi.card(this);
         root.addView(card, ReaderUi.block(this, 18));
-        card.addView(ReaderUi.text(this, number + "  " + title, 20,
+        card.addView(ReaderUi.text(this, title, 21,
                 ReaderUi.INK, true));
         return card;
+    }
+
+    private LinearLayout method(LinearLayout parent, String title) {
+        LinearLayout group = new LinearLayout(this);
+        group.setOrientation(LinearLayout.VERTICAL);
+        parent.addView(group, ReaderUi.block(this, 22));
+        group.addView(ReaderUi.text(this, title, 17, ReaderUi.TEAL, true));
+        return group;
     }
 
     private void instruction(LinearLayout parent, String sentence) {
@@ -108,7 +133,7 @@ public final class HelpActivity extends Activity {
     }
 
     private void illustrationLabel(LinearLayout parent, String label) {
-        parent.addView(ReaderUi.text(this, label + "（模式図）", 12,
+        parent.addView(ReaderUi.text(this, label + "\n図解です。実画面のキャプチャーではありません。", 12,
                 ReaderUi.MUTED, false), ReaderUi.block(this, 18));
     }
 
@@ -133,13 +158,17 @@ public final class HelpActivity extends Activity {
     }
 
     private void previewPill(LinearLayout parent, String text, boolean primary) {
+        parent.addView(pill(text, primary), ReaderUi.block(this, 8));
+    }
+
+    private TextView pill(String text, boolean primary) {
         TextView pill = ReaderUi.text(this, text, 13,
                 primary ? Color.WHITE : ReaderUi.TEAL, true);
         pill.setGravity(Gravity.CENTER);
         pill.setPadding(dp(8), dp(11), dp(8), dp(11));
         pill.setBackground(ReaderUi.shape(this, primary ? ReaderUi.TEAL : Color.WHITE,
                 12, primary ? 0 : Color.rgb(210, 225, 228)));
-        parent.addView(pill, ReaderUi.block(this, 8));
+        return pill;
     }
 
     private int dp(int value) {

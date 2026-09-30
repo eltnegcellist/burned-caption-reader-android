@@ -10,8 +10,8 @@ android {
         applicationId = "jp.hidemaru.burnedcaptionreader"
         minSdk = 26
         targetSdk = 36
-        versionCode = 30
-        versionName = "0.3.25"
+        versionCode = 31
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "android.app.Instrumentation"
     }

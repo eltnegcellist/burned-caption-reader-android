@@ -71,8 +71,9 @@ public final class SharedPlayerActivity extends Activity {
             if (!sampling) return;
             if (!readingPaused && !busy && player != null) {
                 applyCcPreference();
-                if (fullView != null) copyFullscreenVideo();
-                else locateVideoAndCopy();
+                // Also inspect the watch URL in fullscreen: YouTube can switch
+                // videos without a full page navigation (autoplay / SPA).
+                locateVideoAndCopy();
             }
             main.postDelayed(this, SAMPLE_MS);
         }
@@ -129,6 +130,13 @@ public final class SharedPlayerActivity extends Activity {
             }
         });
         player.setWebViewClient(new WebViewClient() {
+            @Override public void onPageStarted(WebView view, String url,
+                    Bitmap favicon) {
+                captureGeneration++;
+                if (speaker != null) speaker.stop();
+                resetTracks();
+                updateVideoContext(url);
+            }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 if (!request.isForMainFrame()) return false;
                 Uri uri = request.getUrl();
@@ -140,6 +148,7 @@ public final class SharedPlayerActivity extends Activity {
             @Override public void onPageFinished(WebView view, String url) {
                 captureGeneration++;
                 resetTracks();
+                updateVideoContext(url);
                 applyCcPreference();
                 if (!readingPaused) {
                     status.setText("動画をタップして再生してください。字幕領域を検出中…");
@@ -199,6 +208,10 @@ public final class SharedPlayerActivity extends Activity {
         main.removeCallbacks(sampler);
         if (player != null) player.onPause();
         if (speaker != null) speaker.stop();
+        // TTS cancellation releases its ledger reservation. Its stabilizer
+        // must also forget the commit, or the visible unfinished caption can
+        // never be retried after returning. Completed ledger rows are retained.
+        resetTracks();
         super.onPause();
     }
 
@@ -365,7 +378,8 @@ public final class SharedPlayerActivity extends Activity {
         // Returning an array (not a string) keeps WebView's JSON result simple.
         player.evaluateJavascript("(() => {const v=document.querySelector('video');" +
                 "if(!v)return null;const r=v.getBoundingClientRect();" +
-                "return [r.left,r.top,r.right,r.bottom,innerWidth,innerHeight];})()", json -> {
+                "return [r.left,r.top,r.right,r.bottom,innerWidth,innerHeight," +
+                "location.href,v.videoWidth,v.videoHeight];})()", json -> {
             if (!sampling || readingPaused || generation != captureGeneration
                     || player == null) { busy = false; return; }
             try {
@@ -375,6 +389,18 @@ public final class SharedPlayerActivity extends Activity {
                     return;
                 }
                 JSONArray bounds = new JSONArray(json);
+                if (updateVideoContext(bounds.getString(6))) {
+                    busy = false;
+                    return; // Next sample belongs to the new video generation.
+                }
+                if (fullView != null) {
+                    videoPixelWidth = bounds.getInt(7);
+                    videoPixelHeight = bounds.getInt(8);
+                    copyFullscreenVideo();
+                    // The custom view may not have been laid out yet.
+                    if (fullView.getWidth() < 100 || fullView.getHeight() < 80) busy = false;
+                    return;
+                }
                 int width = player.getWidth(), height = player.getHeight();
                 double xScale = width / Math.max(1.0, bounds.getDouble(4));
                 double yScale = height / Math.max(1.0, bounds.getDouble(5));
@@ -523,12 +549,26 @@ public final class SharedPlayerActivity extends Activity {
         });
     }
 
+    private boolean updateVideoContext(String url) {
+        String nextVideoId = YouTubeShareUrl.videoId(url);
+        if (nextVideoId == null || nextVideoId.equals(videoId)) return false;
+        if (speaker != null) speaker.stop();
+        // Identical dialogue in two different videos is new content.
+        ledger.reset();
+        videoId = nextVideoId;
+        captureGeneration++;
+        resetTracks();
+        if (lastRead != null) lastRead.setText("");
+        return true;
+    }
+
     private void resetTracks() {
         tracker.reset();
         stabilizers.clear();
         lastSeen.clear();
         order.reset();
-        // Keep the already spoken rows across page navigation to prevent replay.
+        // Retain completed rows for the same video across interruptions and
+        // layout changes. updateVideoContext clears them for a different video.
     }
 
     private static int clamp(int value, int min, int max) {

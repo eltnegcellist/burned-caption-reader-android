@@ -9,7 +9,8 @@ establish real-device completion or OCR accuracy.
 - Baseline GitHub Actions run 36654929913 succeeded, including replay,
   `:app:testDebugUnitTest`, `:app:assembleDebug`, and stable APK publication.
 - Re-ran all 129 existing Java unit tests locally with JDK 17 and JUnit 4.13.2.
-- After the interruption regressions below, all 132 Java unit tests passed.
+- After interruption and local OCR pipeline regressions, all 141 Java unit tests passed.
+- All four signing configuration tests passed locally.
 - Re-ran the frozen replay: 19 fixture rows; old path emitted 24 rows, current
   ledger 22 rows; cancellation controls passed. One hard case remains unresolved.
   This is a ledger replay, not a video/OCR benchmark.
@@ -26,29 +27,35 @@ establish real-device completion or OCR accuracy.
    Detect a different video URL and clear its previous speech history.
    Sample the URL in fullscreen too, so watch-page SPA/autoplay changes are
    detected without relying exclusively on `onPageFinished`.
-3. Add pure pipeline regressions for retry after cancellation, suppression of
+3. Connect the tested refinement/consensus modules to the current player and
+   restore local diagnostic recording/export to settings.
+4. Flush held speech at the order buffer's deadline even without another OCR
+   result; cancel that timer on detection reset, pause and destruction.
+5. Add pure pipeline regressions for retry after cancellation, suppression of
    completed speech after detection reset, and independent history in a new
    video. Android callback timing still needs device testing.
 
 ## Remaining engineering work (not just device checks)
 
-- **Signing continuity:** CI currently assembles a debug APK with an ephemeral
-  default key. The optional `CAPTION_DEBUG_KEYSTORE` hook exists but the workflow
-  does not supply it. A recoverable, persistent signing key must be configured
-  before guaranteeing future update installs. If the private key for installed
-  v1.0.0 is unavailable, preserving that certificate in a new build is impossible;
-  a one-time reinstall or a separately identified migration build is needed.
-  Do not commit a private keystore into this repository.
-- **Active OCR pipeline:** `SharedPlayerActivity` performs one ML Kit recognition
-  on each captured frame. `OcrRefinementSelector` and `TemporalOcrConsensus` are
-  present and tested but are not used by this active path. Earlier two-stage OCR
-  and consensus claims must not be assumed to describe v1.0.0's active player.
-  Establish screenshot/log evidence before integrating or tuning them.
-- **Diagnostics:** the current home/settings screens do not expose diagnostic
-  export. The recorder exists and TTS writes diagnostic events, but the in-app
-  player does not record its OCR selection pipeline. Old screen-sharing logs do
-  not validate the current player. A minimal export/recording path is needed if
-  detailed repeat/miss diagnosis is to continue on this architecture.
+- **Signing continuity:** the workflow now restores a private keystore from
+  GitHub Secrets and can reject builds without it. See `tools/signing/README.md`.
+  No signing secret was configured by this change; update-compatible installs
+  remain conditional on recovering the existing private key. Without that key,
+  reproducing the installed v1.0.0 certificate is impossible. CI explicitly labels
+  an unconfigured build as using a temporary test certificate.
+- **Active OCR pipeline:** the review branch connects coarse OCR (up to 1100px
+  wide), padded original-frame subtitle crops (long edge up to 2000px),
+  `OcrRefinementSelector`, and per-track `TemporalOcrConsensus`. Tests cover
+  recovery of three ordered rows and prevent old votes from overriding numeric,
+  negative-expression or typewriter changes. This does not validate actual font
+  accuracy. Up to five OCR jobs per frame can slow sampling on-device; inspect
+  `frame_done.processing_ms` in fresh diagnostic data before further tuning.
+- **Diagnostics:** settings now expose explicit recording and document-picker
+  ZIP export. The current player records video-only frames, coarse/refined OCR,
+  selected bands, consensus, stabilization and speech ledger decisions. TTS queue
+  replacement/capacity discards have explicit reasons. Recording is opt-in,
+  bounded to about two minutes/64MB, and may omit images under load. Exact tracker
+  rejection reasons for every raw row are not yet exposed.
 - **Speech tradeoff:** balanced mode completes the current utterance and replaces
   waiting speech; it does not guarantee every caption is read. Latest mode can
   interrupt. Automatic video pause is not wired into the current in-app player.
@@ -72,7 +79,7 @@ Use the same tested build for each check and record WebView/TTS engine versions.
 | CC | Hidden/enabled setting with an English CC video | Hidden CC not mixed into speech; verify visible CC behavior when unhiding |
 | Duration | Play 20–30 minutes | Record heat, crashes, OCR cadence and lag; no growing speech backlog |
 | Lock | Press power button | Known restriction: playback/OCR need not continue while locked |
-| Install update | Compare certificates before installing next version | Matching cert required; current CI does not yet guarantee it |
+| Install update | Compare certificates before installing next version | Matching cert required; configure persistent key first |
 
 Android completion remains conditional on the remaining engineering work and
 device acceptance. Keep v1.0.0 available; do not label this audit branch a finished

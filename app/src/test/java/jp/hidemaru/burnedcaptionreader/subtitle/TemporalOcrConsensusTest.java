@@ -6,6 +6,24 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public final class TemporalOcrConsensusTest {
+    @Test public void changedNumberIsNeverReplacedByOldVotes() {
+        TemporalOcrConsensus c = new TemporalOcrConsensus();
+        c.observe(0, "価格は100円です", 90);
+        c.observe(480, "価格は100円です", 90);
+        assertEquals("価格は200円です", c.observe(960, "価格は200円です", 55).getText());
+    }
+    @Test public void changedNegationIsNeverReplacedByOldVotes() {
+        TemporalOcrConsensus c = new TemporalOcrConsensus();
+        c.observe(0, "本日は利用できます", 90);
+        c.observe(480, "本日は利用できます", 90);
+        assertEquals("本日は利用できません", c.observe(960, "本日は利用できません", 55).getText());
+    }
+    @Test public void typewriterGrowthKeepsNewestCompleteText() {
+        TemporalOcrConsensus c = new TemporalOcrConsensus();
+        c.observe(0, "今日は投資について", 90);
+        c.observe(480, "今日は投資について", 90);
+        assertEquals("今日は投資について説明します", c.observe(960, "今日は投資について説明します", 55).getText());
+    }
     @Test
     public void prefersStableVariantAcrossSmallOcrWobble() {
         TemporalOcrConsensus consensus = new TemporalOcrConsensus();

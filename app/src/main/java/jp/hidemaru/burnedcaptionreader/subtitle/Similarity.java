@@ -3,6 +3,16 @@ package jp.hidemaru.burnedcaptionreader.subtitle;
 public final class Similarity {
     private Similarity() {}
 
+    public static boolean hasMeaningfulTokenChange(String left, String right) {
+        String a = SubtitleNormalizer.comparisonKey(TrailingPunctuation.repair(left, right));
+        String b = SubtitleNormalizer.comparisonKey(TrailingPunctuation.repair(right, left));
+        if (!a.replaceAll("[^0-9]", "").equals(b.replaceAll("[^0-9]", ""))) return true;
+        for (String marker : new String[]{"ない", "ません", "禁止", "不可", "不要", "無効"}) {
+            if (a.contains(marker) != b.contains(marker)) return true;
+        }
+        return false;
+    }
+
     public static int levenshteinDistance(String left, String right) {
         int[] a = left.codePoints().toArray();
         int[] b = right.codePoints().toArray();

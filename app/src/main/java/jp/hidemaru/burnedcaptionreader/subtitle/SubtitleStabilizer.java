@@ -65,6 +65,10 @@ public final class SubtitleStabilizer {
         }
 
         String current = candidate.text;
+        if (Similarity.hasMeaningfulTokenChange(current, text)) {
+            startCandidate(text, confidence, timestamp, timestamp);
+            return null;
+        }
         if (text.equals(current)) {
             recordVariant(text, confidence);
             candidate.observations++;
@@ -191,6 +195,7 @@ public final class SubtitleStabilizer {
     }
 
     private boolean matchesCommitted(long timestamp, String text) {
+        if (Similarity.hasMeaningfulTokenChange(text, lastCommitted.getText())) return false;
         if (lastCommittedSeenAt >= 0L
                 && timestamp - lastCommittedSeenAt >= config.repeatAfterMs) {
             return false;

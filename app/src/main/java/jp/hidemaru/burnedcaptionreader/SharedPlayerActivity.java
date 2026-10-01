@@ -1,6 +1,7 @@
 package jp.hidemaru.burnedcaptionreader;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -36,6 +37,11 @@ import org.json.JSONException;
 import jp.hidemaru.burnedcaptionreader.ocr.MlKitJapaneseOcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
+import jp.hidemaru.burnedcaptionreader.ocr.SubtitleCropPlan;
+import jp.hidemaru.burnedcaptionreader.subtitle.OcrRefinementSelector;
+import jp.hidemaru.burnedcaptionreader.subtitle.TemporalOcrConsensus;
+import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticRecorder;
+import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticExport;
 import jp.hidemaru.burnedcaptionreader.subtitle.AutoSubtitleRegionTracker;
 import jp.hidemaru.burnedcaptionreader.subtitle.RowSpeechLedger;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleEvent;
@@ -65,6 +71,10 @@ public final class SharedPlayerActivity extends Activity {
     private final SubtitleSpeechOrderBuffer order = new SubtitleSpeechOrderBuffer();
     private final SubtitleStabilizer.Config stableConfig = new SubtitleStabilizer.Config();
     private final Map<Integer, SubtitleStabilizer> stabilizers = new HashMap<>();
+    private final Map<Integer, TemporalOcrConsensus> consensus = new HashMap<>();
+    private final OcrRefinementSelector refinement = new OcrRefinementSelector();
+    private DiagnosticRecorder diagnostics;
+    private long frameSequence;
     private final Map<Integer, Long> lastSeen = new HashMap<>();
     private final Runnable sampler = new Runnable() {
         @Override public void run() {
@@ -78,6 +88,7 @@ public final class SharedPlayerActivity extends Activity {
             main.postDelayed(this, SAMPLE_MS);
         }
     };
+    private final Runnable orderFlush = this::flushOrderedSpeech;
     private WebView player;
     private LinearLayout root;
     private LinearLayout controls;
@@ -108,6 +119,7 @@ public final class SharedPlayerActivity extends Activity {
             return;
         }
         preferences = new AppPreferences(this);
+        diagnostics = DiagnosticRecorder.get(this);
         stableConfig.stableMs = preferences.getStableMs();
         hideCc = preferences.isYouTubeCcHidden();
         ocr = new MlKitJapaneseOcrEngine();
@@ -451,51 +463,140 @@ public final class SharedPlayerActivity extends Activity {
         }
     }
 
-    private void recognizeFrame(Bitmap frame, int generation) {
-        Bitmap input = frame;
-        if (frame.getWidth() < 850) {
-            float scale = Math.min(2.0f, 850f / frame.getWidth());
-            input = Bitmap.createScaledBitmap(frame, Math.round(frame.getWidth() * scale),
-                    Math.round(frame.getHeight() * scale), true);
+    private static final class BandText {
+        final AutoSubtitleRegionTracker.Selection selection;
+        final String text;
+        final double confidence;
+        BandText(AutoSubtitleRegionTracker.Selection selection, String text, double confidence) {
+            this.selection = selection; this.text = text; this.confidence = confidence;
         }
-        final Bitmap ocrInput = input;
+    }
+
+    private boolean acceptsFrame(int generation) {
+        return sampling && !readingPaused && generation == captureGeneration && !isDestroyed();
+    }
+
+    private void finishFrame(Bitmap frame) {
+        if (!frame.isRecycled()) frame.recycle();
+        busy = false;
+    }
+
+    private void recognizeFrame(Bitmap frame, int generation) {
         long timestamp = SystemClock.elapsedRealtime();
-        ocr.recognize(ocrInput, result -> {
-            try {
-                if (sampling && !readingPaused && generation == captureGeneration
-                        && !isDestroyed()) processResult(timestamp, result);
-            } finally {
-                ocrInput.recycle();
-                if (ocrInput != frame) frame.recycle();
-                busy = false;
-            }
+        long frameId = ++frameSequence;
+        diagnostics.image("video_frame", frame, "frame_id", frameId,
+                "generation", generation, "video_id", videoId);
+        // Broad detection is bounded; refinement always uses this original frame.
+        float scale = frame.getWidth() > 1100 ? 1100f / frame.getWidth()
+                : Math.min(2f, 850f / frame.getWidth());
+        scale = Math.min(scale, 2000f / frame.getHeight());
+        final Bitmap input;
+        try {
+            input = Bitmap.createScaledBitmap(frame, Math.max(1, Math.round(frame.getWidth() * scale)),
+                    Math.max(1, Math.round(frame.getHeight() * scale)), true);
+        } catch (RuntimeException error) {
+            diagnostics.event("ocr_error", "frame_id", frameId, "stage", "coarse_prepare", "error", error.toString());
+            finishFrame(frame); return;
+        }
+        diagnostics.image("ocr_input", input, "frame_id", frameId, "stage", "coarse");
+        ocr.recognize(input, result -> {
+            if (input != frame) input.recycle();
+            if (!acceptsFrame(generation)) { finishFrame(frame); return; }
+            diagnostics.ocr("ocr_raw", frameId, -1, result);
+            List<AutoSubtitleRegionTracker.Selection> selections = tracker.selectAll(timestamp, result, false, false);
+            diagnostics.event("selection_summary", "frame_id", frameId, "raw_rows", result.getLines().size(),
+                    "selected_bands", selections.size(), "policy", "subtitle_tracker");
+            refineBands(frame, generation, timestamp, frameId, selections, 0, new ArrayList<>());
         }, error -> {
-            ocrInput.recycle();
-            if (ocrInput != frame) frame.recycle();
-            if (sampling && !readingPaused && generation == captureGeneration && !isDestroyed()) {
-                status.setText("OCRエラー: " + error.getMessage());
-            }
-            busy = false;
+            if (input != frame) input.recycle();
+            diagnostics.event("ocr_error", "frame_id", frameId, "stage", "coarse", "error", error.toString());
+            if (acceptsFrame(generation)) status.setText("OCRエラー: " + error.getMessage());
+            finishFrame(frame);
         });
     }
 
-    private void processResult(long timestamp, OcrResult result) {
-        List<AutoSubtitleRegionTracker.Selection> selections =
-                tracker.selectAll(timestamp, result, false, false);
+    private void refineBands(Bitmap frame, int generation, long timestamp, long frameId,
+            List<AutoSubtitleRegionTracker.Selection> selections, int index, List<BandText> bands) {
+        if (!acceptsFrame(generation)) { finishFrame(frame); return; }
+        if (index == selections.size()) {
+            try { processResult(timestamp, frameId, bands); }
+            finally {
+                diagnostics.event("frame_done", "frame_id", frameId,
+                        "processing_ms", SystemClock.elapsedRealtime() - timestamp);
+                finishFrame(frame);
+            }
+            return;
+        }
+        AutoSubtitleRegionTracker.Selection selection = selections.get(index);
+        diagnostics.event("selection", "frame_id", frameId, "track_id", selection.getTrackId(),
+                "text", selection.getText(), "top", selection.getTop(), "bottom", selection.getBottom(),
+                "confidence", selection.getConfidence(), "locked", selection.isLocked());
+        final Bitmap input;
+        try {
+            SubtitleCropPlan plan = SubtitleCropPlan.create(frame.getWidth(), frame.getHeight(),
+                    selection.getTop(), selection.getBottom());
+            input = createRefinementInput(frame, plan);
+        } catch (RuntimeException error) {
+            diagnostics.event("refinement_fallback", "frame_id", frameId, "reason", "crop_error");
+            bands.add(new BandText(selection, selection.getText(), selection.getConfidence()));
+            refineBands(frame, generation, timestamp, frameId, selections, index + 1, bands);
+            return;
+        }
+        diagnostics.image("ocr_input", input, "frame_id", frameId, "track_id", selection.getTrackId(), "stage", "refined");
+        ocr.recognize(input, result -> {
+            if (input != frame) input.recycle();
+            if (!acceptsFrame(generation)) { finishFrame(frame); return; }
+            diagnostics.ocr("ocr_refined", frameId, selection.getTrackId(), result);
+            OcrRefinementSelector.Result chosen = refinement.select(selection.getText(), selection.getConfidence(), result);
+            bands.add(new BandText(selection, chosen.getText(), chosen.getConfidence()));
+            diagnostics.event("refinement_choice", "frame_id", frameId, "track_id", selection.getTrackId(),
+                    "text", chosen.getText(), "confidence", chosen.getConfidence());
+            refineBands(frame, generation, timestamp, frameId, selections, index + 1, bands);
+        }, error -> {
+            if (input != frame) input.recycle();
+            diagnostics.event("refinement_fallback", "frame_id", frameId, "track_id", selection.getTrackId(),
+                    "reason", "ocr_error", "error", error.toString());
+            bands.add(new BandText(selection, selection.getText(), selection.getConfidence()));
+            refineBands(frame, generation, timestamp, frameId, selections, index + 1, bands);
+        });
+    }
+
+    private Bitmap createRefinementInput(Bitmap frame, SubtitleCropPlan plan) {
+        Bitmap crop = Bitmap.createBitmap(frame, 0, plan.top, frame.getWidth(), plan.height);
+        Bitmap output = null;
+        try {
+            output = Bitmap.createScaledBitmap(crop, plan.outputWidth, plan.outputHeight, true);
+            return output;
+        } finally {
+            if (crop != output && crop != frame) crop.recycle();
+        }
+    }
+
+    private void processResult(long timestamp, long frameId, List<BandText> bands) {
         Set<Integer> visible = new HashSet<>();
         List<SubtitleSpeechOrderBuffer.Entry> committed = new ArrayList<>();
         List<SubtitleSpeechOrderBuffer.Band> waiting = new ArrayList<>();
-        for (AutoSubtitleRegionTracker.Selection selection : selections) {
+        for (BandText band : bands) {
+            AutoSubtitleRegionTracker.Selection selection = band.selection;
             // The app reads Japanese burned-in captions. English-only YouTube CC
             // must not become an utterance if the site's overlay changes.
-            if (!JAPANESE.matcher(selection.getText()).find()) continue;
+            if (!JAPANESE.matcher(band.text).find()) {
+                diagnostics.event("selection_excluded", "frame_id", frameId, "track_id", selection.getTrackId(), "reason", "no_japanese");
+                continue;
+            }
             int id = selection.getTrackId();
             visible.add(id);
             lastSeen.put(id, timestamp);
             SubtitleStabilizer stabilizer = stabilizers.computeIfAbsent(id,
                     ignored -> new SubtitleStabilizer(stableConfig));
-            SubtitleEvent event = stabilizer.observe(timestamp,
-                    selection.getText(), selection.getConfidence());
+            TemporalOcrConsensus.Result fused = consensus.computeIfAbsent(id,
+                    ignored -> new TemporalOcrConsensus()).observe(timestamp, band.text,
+                            band.confidence, selection.getText());
+            diagnostics.event("ocr_consensus", "frame_id", frameId, "track_id", id,
+                    "text", fused.getText(), "confidence", fused.getConfidence());
+            SubtitleEvent event = stabilizer.observe(timestamp, fused.getText(), fused.getConfidence());
+            diagnostics.event("stabilizer", "frame_id", frameId, "track_id", id,
+                    "state", stabilizer.getState().name(), "committed", event != null);
             if (event != null) {
                 committed.add(new SubtitleSpeechOrderBuffer.Entry(event,
                         selection.getTop(), selection.getBottom()));
@@ -511,19 +612,40 @@ public final class SharedPlayerActivity extends Activity {
         lastSeen.entrySet().removeIf(entry -> {
             if (timestamp - entry.getValue() <= 8_000L) return false;
             stabilizers.remove(entry.getKey());
+            consensus.remove(entry.getKey());
             return true;
         });
         List<SubtitleSpeechOrderBuffer.Entry> ready = order.offer(timestamp, committed, waiting);
-        if (!selections.isEmpty()) {
+        if (!bands.isEmpty()) {
             StringBuilder current = new StringBuilder();
-            for (AutoSubtitleRegionTracker.Selection selection : selections) {
+            for (BandText band : bands) {
                 if (current.length() > 0) current.append('\n');
-                current.append(selection.getText());
+                current.append(band.text);
             }
             status.setText("動画内で検出した文字:\n" + current);
         } else {
             status.setText("動画内の字幕を探索中");
         }
+        speakReady(timestamp, frameId, ready);
+        scheduleOrderFlush();
+    }
+
+    private void flushOrderedSpeech() {
+        if (!sampling || readingPaused || isDestroyed()) return;
+        long now = SystemClock.elapsedRealtime();
+        speakReady(now, -1, order.drain(now));
+        scheduleOrderFlush();
+    }
+
+    private void scheduleOrderFlush() {
+        main.removeCallbacks(orderFlush);
+        long deadline = order.nextDeadline();
+        if (sampling && !readingPaused && deadline != Long.MAX_VALUE) {
+            main.postDelayed(orderFlush, Math.max(0, deadline - SystemClock.elapsedRealtime()));
+        }
+    }
+
+    private void speakReady(long timestamp, long frameId, List<SubtitleSpeechOrderBuffer.Entry> ready) {
         if (ready.isEmpty()) return;
         StringBuilder combined = new StringBuilder();
         for (SubtitleSpeechOrderBuffer.Entry entry : ready) {
@@ -536,16 +658,27 @@ public final class SharedPlayerActivity extends Activity {
                 ? SpeechEngine.Mode.LATEST : SpeechEngine.Mode.BALANCED;
         RowSpeechLedger.Reservation reservation = ledger.reserve(event, true,
                 mode == SpeechEngine.Mode.LATEST);
+        diagnostics.event("speech_decision", "frame_id", frameId, "event_id", event.getId(),
+                "text", event.getText(), "spoken_rows", ledger.spokenRowCount(),
+                "pending_reservations", ledger.pendingReservationCount(),
+                "decision", reservation == null ? "covered_by_spoken_or_reserved_rows" : "reserved");
         if (reservation == null) return;
         String text = SubtitleNormalizer.toSpeechText(reservation.getText());
         if (text.isEmpty()) { ledger.release(reservation.getId()); return; }
         lastRead.setText("読み上げ: " + reservation.getText());
         speaker.speak(text, mode, preferences.getSpeechRate(), new SpeechEngine.Completion() {
-            @Override public void onStart() { ledger.markInFlight(reservation.getId()); }
+            @Override public void onStart() {
+                ledger.markInFlight(reservation.getId());
+                diagnostics.event("speech_ledger", "reservation_id", reservation.getId(), "state", "in_flight");
+            }
             @Override public void onDone() {
                 ledger.complete(reservation.getId(), SystemClock.elapsedRealtime());
+                diagnostics.event("speech_ledger", "reservation_id", reservation.getId(), "state", "completed");
             }
-            @Override public void onError() { ledger.release(reservation.getId()); }
+            @Override public void onError() {
+                ledger.release(reservation.getId());
+                diagnostics.event("speech_ledger", "reservation_id", reservation.getId(), "state", "released");
+            }
         });
     }
 
@@ -563,8 +696,10 @@ public final class SharedPlayerActivity extends Activity {
     }
 
     private void resetTracks() {
+        main.removeCallbacks(orderFlush);
         tracker.reset();
         stabilizers.clear();
+        consensus.clear();
         lastSeen.clear();
         order.reset();
         // Retain completed rows for the same video across interruptions and
@@ -575,9 +710,15 @@ public final class SharedPlayerActivity extends Activity {
         return Math.max(min, Math.min(max, value));
     }
 
+    @Override protected void onActivityResult(int request, int result, Intent data) {
+        super.onActivityResult(request, result, data);
+        DiagnosticExport.handle(this, request, result, data);
+    }
+
     @Override protected void onDestroy() {
         sampling = false;
         main.removeCallbacks(sampler);
+        main.removeCallbacks(orderFlush);
         if (fullView != null) hideFullscreen();
         if (player != null) {
             player.stopLoading();

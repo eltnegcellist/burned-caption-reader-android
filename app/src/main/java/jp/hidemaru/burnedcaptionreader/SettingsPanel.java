@@ -12,12 +12,17 @@ import android.widget.Switch;
 import android.widget.TextView;
 import java.util.Locale;
 import jp.hidemaru.burnedcaptionreader.tts.SpeechLevel;
+import android.app.Activity;
+import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticExport;
+import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticRecorder;
 
 /** Shared settings view; embedding it keeps video playback and OCR active. */
 final class SettingsPanel extends ScrollView {
     private final AppPreferences preferences;
     private final Runnable onChanged;
     private LinearLayout section;
+    private Switch diagnosticSwitch;
+    private TextView diagnosticStatus;
 
     SettingsPanel(Context context, AppPreferences preferences, Runnable onClose,
             Runnable onChanged, boolean inPlayer) {
@@ -120,10 +125,39 @@ final class SettingsPanel extends ScrollView {
             onChanged.run();
         });
 
+        section = ReaderUi.card(context);
+        page.addView(section, ReaderUi.block(context, 16));
+        section.addView(ReaderUi.text(context, "診断データ", 20, ReaderUi.INK, true));
+        DiagnosticRecorder recorder = DiagnosticRecorder.get(context);
+        diagnosticSwitch = toggle("動画画像と読み上げログを記録", recorder.isRecording());
+        diagnosticStatus = value(recorder.status());
+        diagnosticSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (checked) recorder.start(); else recorder.stop();
+            diagnosticStatus.setText(recorder.status());
+        });
+        note("オンにした後の動画部分の画像とOCR・発話ログを端末内に保存します。"
+                + "直近約2分・最大64MB。外部へ自動送信しません。新しくオンにすると前の記録を消去します。");
+        android.widget.Button export = ReaderUi.button(context, "診断ZIPを書き出す", false);
+        export.setOnClickListener(v -> {
+            if (context instanceof Activity) DiagnosticExport.request((Activity) context);
+        });
+        section.addView(export, ReaderUi.block(context, 12));
+        note("保存先を選びます。画像や字幕が含まれるので、共有前に内容を確認してください。"
+                + "書き出しは記録開始ボタンではありません。");
+
         android.widget.Button back = ReaderUi.button(context,
                 inPlayer ? "動画へ戻る" : "URL入力へ戻る", false);
         back.setOnClickListener(v -> onClose.run());
         page.addView(back, ReaderUi.block(context, 22));
+    }
+
+    @Override public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus && diagnosticSwitch != null) {
+            DiagnosticRecorder recorder = DiagnosticRecorder.get(getContext());
+            diagnosticSwitch.setChecked(recorder.isRecording());
+            diagnosticStatus.setText(recorder.status());
+        }
     }
 
     private Switch toggle(String title, boolean checked) {

@@ -10,19 +10,23 @@ android {
         applicationId = "jp.hidemaru.burnedcaptionreader"
         minSdk = 26
         targetSdk = 36
-        versionCode = 31
-        versionName = "1.0.0"
+        versionCode = 32
+        versionName = "1.0.1-preview"
 
         testInstrumentationRunner = "android.app.Instrumentation"
     }
 
-    // Optional persistent test key. Keep the key outside the repository.
+    if (System.getenv("CAPTION_REQUIRE_PERSISTENT_SIGNING") == "true"
+        && System.getenv("CAPTION_DEBUG_KEYSTORE").isNullOrBlank()) {
+        error("Persistent signing is required; configure CAPTION_SIGNING_KEYSTORE_BASE64 in CI")
+    }
+    // Keep the private key outside the repository; CI restores it from Secrets.
     System.getenv("CAPTION_DEBUG_KEYSTORE")?.let { keyPath ->
         signingConfigs.getByName("debug") {
             storeFile = file(keyPath)
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
+            storePassword = System.getenv("CAPTION_KEYSTORE_PASSWORD") ?: "android"
+            keyAlias = System.getenv("CAPTION_KEY_ALIAS") ?: "androiddebugkey"
+            keyPassword = System.getenv("CAPTION_KEY_PASSWORD") ?: "android"
         }
     }
 

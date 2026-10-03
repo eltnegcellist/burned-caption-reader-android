@@ -27,6 +27,9 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
     @Override public void onStart() {
         Bundle report = new Bundle();
         try {
+            if ("capture-full".equals(arguments.getString("mode")) || "capture-window".equals(arguments.getString("mode"))) {
+                captureFull(report); return;
+            }
             if ("capture".equals(arguments.getString("mode"))) {
                 captureLive(report);
                 return;
@@ -96,6 +99,67 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
             finish(1, report);
         }
     }
+    private void captureFull(Bundle report) throws Exception {
+        String video = arguments.getString("video_id", "");
+        if (!video.matches("[A-Za-z0-9_-]{11}")) throw new IllegalArgumentException("Invalid video ID");
+        int limit = Math.max(120, Math.min(3600, Integer.parseInt(arguments.getString("max_seconds", "1800"))));
+        File root = new File(getTargetContext().getFilesDir(), "full-evaluation"); root.mkdirs();
+        for (File f : root.listFiles()) Files.delete(f.toPath());
+        DiagnosticRecorder recorder = DiagnosticRecorder.get(getTargetContext());
+        recorder.startFullEvaluation();
+        getTargetContext().startActivity(new Intent(Intent.ACTION_SEND).setClassName(getTargetContext(),
+                "jp.hidemaru.burnedcaptionreader.MainActivity").setType("text/plain")
+                .putExtra(Intent.EXTRA_TEXT,"https://www.youtube.com/watch?v=" + video)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        long deadline = SystemClock.elapsedRealtime() + limit * 1000L;
+        int windowSeconds = "capture-window".equals(arguments.getString("mode"))
+                ? Math.max(300, Math.min(1800, Integer.parseInt(arguments.getString("window_seconds", "300")))) : 0;
+        JSONObject last = new JSONObject(); boolean ended = false; boolean windowComplete = false;
+        while (SystemClock.elapsedRealtime() < deadline && recorder.isRecording()) {
+            Thread.sleep(1000);
+            File state = new File(root, "state.json");
+            if (!state.isFile()) continue;
+            last = new JSONObject(new String(Files.readAllBytes(state.toPath()),StandardCharsets.UTF_8));
+            double target = last.optDouble("target_duration_ms");
+            if (windowSeconds > 0 && last.optBoolean("evaluation_started")
+                    && !last.optBoolean("ad_visible") && last.optLong("media_ms") >= windowSeconds * 1000L
+                    && Math.abs(last.optLong("duration_ms") - target) < 2000) { windowComplete = true; break; }
+            JSONObject terminal = last.optJSONObject("ended_event");
+            if (last.optBoolean("evaluation_started") && terminal != null && target > 60000
+                    && Math.abs(terminal.optLong("duration_ms")-target)<2000
+                    && terminal.optLong("media_ms")>=target-1000) { ended=true; break; }
+            if (last.optBoolean("evaluation_started") && last.optBoolean("ended")
+                    && !last.optBoolean("ad_visible") && target > 60000
+                    && Math.abs(last.optLong("duration_ms")-target) < 2000
+                    && last.optLong("media_ms") >= target-1000) { ended = true; break; }
+        }
+        boolean completed = windowSeconds > 0 ? windowComplete : ended;
+        recorder.event("evaluation_end", "completed", completed, "scope", windowSeconds > 0 ? "window" : "full", "last_state", last,
+                "dropped",recorder.droppedCount(),"recorder_status",recorder.status());
+        recorder.stop();
+        awaitRecorderStop();
+        JSONObject summary = new JSONObject().put("video_id",video).put("ended",ended)
+                .put("scope", windowSeconds > 0 ? "window" : "full").put("window_seconds",windowSeconds).put("completed",completed)
+                .put("last_state",last).put("dropped",recorder.droppedCount()).put("recorder_status",recorder.status());
+        Files.write(new File(root,"summary.json").toPath(),summary.toString(2).getBytes(StandardCharsets.UTF_8));
+        report.putString("stream", "Evaluation capture " + (completed ? "complete" : "INCOMPLETE") + ": " + video + "\n");
+        finish(completed && recorder.droppedCount()==0 ? -1 : 1,report);
+    }
+    private void awaitRecorderStop() throws Exception {
+        File root = new File(getTargetContext().getNoBackupFilesDir(),"caption-diagnostics");
+        long deadline = SystemClock.elapsedRealtime()+10000;
+        while(SystemClock.elapsedRealtime()<deadline) {
+            File[] files=root.listFiles((d,n)->n.endsWith(".json"));
+            if(files!=null) {
+                java.util.Arrays.sort(files,java.util.Comparator.comparing(File::getName).reversed());
+                for(int i=0;i<Math.min(16,files.length);i++)
+                    if(new String(Files.readAllBytes(files[i].toPath()),StandardCharsets.UTF_8).contains("\"type\":\"session_stop\"")) return;
+            }
+            Thread.sleep(100);
+        }
+        throw new IllegalStateException("Full evaluation diagnostic flush timeout");
+    }
+
     private void captureLive(Bundle report) throws Exception {
         String video = arguments.getString("video_id", "");
         if (!video.matches("[A-Za-z0-9_-]{11}")) throw new IllegalArgumentException("Invalid video ID");

@@ -110,3 +110,43 @@ retain the old provisional temporal gate. Legacy `selectAll` behavior is unchang
 The replay harness discovers the production candidate entry point by reflection,
 falling back to `selectAll` only for old APKs that lack it. This permits exactly the
 same test APK for both builds; each frame records `selection_api` for audit.
+
+## Longer debug-only capture
+
+Normal diagnostics retain a bounded tail. For a five-minute verification window,
+use the debug APK's `capture-window` mode rather than increasing the ordinary
+user recording duration:
+
+```sh
+adb -s emulator-5554 shell am instrument -w -r \
+  -e mode capture-window -e video_id VIDEO_ID_11_CHARACTERS \
+  -e max_seconds 900 -e window_seconds 305 \
+  jp.hidemaru.burnedcaptionreader.test/jp.hidemaru.burnedcaptionreader.evaluation.ImageEvaluationInstrumentation
+```
+
+First inspect the actual player screen, tap any mute/skip affordance, and verify
+that controls no longer obscure the captions. Only then create the local gate:
+
+```sh
+adb -s emulator-5554 shell run-as jp.hidemaru.burnedcaptionreader \
+  touch files/full-evaluation/start-from-zero
+```
+
+The probe waits for unmuted, playing, non-ad media, rewinds to zero, and records
+positions in `files/full-evaluation/state.json`. The gate is a manual visual
+approval of the current player; a tap alone is not proof that an overlay cleared.
+The post-rewind seek controls still require excluding the initial obscured frames.
+Independent reference PNGs are requested roughly once a second even when OCR is
+busy. Only reference images are saved; OCR stage metadata remains in JSON.
+The explicit debug store preserves old records up to 3 GiB/200,000 records, then
+fails without discarding existing evidence. Image omission counters remain fatal
+to capture success. `summary.json` distinguishes window completion from native
+video end. `capture-full` requires a matching native end event instead of a window.
+Neither mode establishes all-video-frame coverage. Inspect ad and overlay images
+before selecting evaluation input, and report requested/retained/scored counts
+separately. Delete collected screenshots and image archives after validation when
+requested; retain result JSON, reference hashes, and code, and state that identical
+OCR replay then needs recapture.
+
+The three five-minute results and limitations are in
+[`docs/2026-10-03-five-minute-evaluation.md`](../../docs/2026-10-03-five-minute-evaluation.md).

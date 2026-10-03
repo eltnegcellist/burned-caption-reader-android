@@ -19,8 +19,14 @@ public final class DiagnosticStore {
     private final Deque<File> retained = new ArrayDeque<>();
     private long retainedBytes;
     private boolean loaded;
+    private final boolean preserveAll;
 
     public DiagnosticStore(File directory, long maxAgeMs, long maxBytes, int maxRecords) {
+        this(directory, maxAgeMs, maxBytes, maxRecords, false);
+    }
+
+    public DiagnosticStore(File directory, long maxAgeMs, long maxBytes, int maxRecords, boolean preserveAll) {
+        this.preserveAll = preserveAll;
         this.directory = directory;
         this.maxAgeMs = maxAgeMs;
         this.maxBytes = maxBytes;
@@ -45,6 +51,9 @@ public final class DiagnosticStore {
             }
             loaded = true;
         }
+        if (preserveAll && (retainedBytes + json.getBytes(StandardCharsets.UTF_8).length
+                + (png == null ? 0 : png.length) > maxBytes || retained.size() >= maxRecords))
+            throw new IOException("Full evaluation capacity exceeded; existing evidence preserved");
         File image = new File(directory, id + ".png");
         File record = new File(directory, id + ".json");
         File temporary = new File(directory, id + ".tmp");
@@ -74,6 +83,7 @@ public final class DiagnosticStore {
     }
 
     private void prune(long now) throws IOException {
+        if (preserveAll) return;
         while (!retained.isEmpty()) {
             File file = retained.peekFirst();
             if (now - file.lastModified() <= maxAgeMs && retainedBytes <= maxBytes && retained.size() <= maxRecords) break;

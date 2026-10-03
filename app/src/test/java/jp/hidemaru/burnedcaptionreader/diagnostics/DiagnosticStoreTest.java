@@ -80,4 +80,25 @@ public class DiagnosticStoreTest {
         } catch (IOException expected) { }
         store.clear(); directory.delete();
     }
+    @Test public void fullEvaluationDoesNotExpireOldImages() throws Exception {
+        File directory=Files.createTempDirectory("full-capture").toFile();
+        var store=new DiagnosticStore(directory,500,1000,10,true);
+        store.write("0001",1000,"{}",new byte[]{1});
+        store.write("0002",600000,"{}",new byte[]{2});
+        var files=exported(store);
+        assertTrue(files.containsKey("images/0001.png"));
+        assertTrue(files.containsKey("images/0002.png"));
+        store.clear(); directory.delete();
+    }
+    @Test public void fullEvaluationFailsBeforeDiscardingEvidenceAtCapacity() throws Exception {
+        File directory=Files.createTempDirectory("full-capture-capacity").toFile();
+        var store=new DiagnosticStore(directory,500,5,10,true);
+        store.write("0001",1000,"{}",new byte[]{1});
+        try { store.write("0002",2000,"{}",new byte[]{2}); fail("Capacity failure required"); }
+        catch(IOException expected) { assertTrue(expected.getMessage().contains("preserved")); }
+        var files=exported(store);
+        assertTrue(files.containsKey("images/0001.png"));
+        assertFalse(files.containsKey("images/0002.png"));
+        store.clear(); directory.delete();
+    }
 }

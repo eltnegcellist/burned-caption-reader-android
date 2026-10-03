@@ -76,10 +76,39 @@ public final class SharedPlayerActivity extends Activity {
     private final OcrRefinementSelector refinement = new OcrRefinementSelector();
     private DiagnosticRecorder diagnostics;
     private long frameSequence;
+    private Rect evaluationRect;
+    private boolean referenceBusy;
+    private long referenceSequence;
+    private long lastReferenceCapture;
+    private long lastPlaybackProbe;
+    private long evaluationMediaMs = -1;
+    private boolean evaluationStarted;
+    private long evaluationMediaObservedAt;
+    private long evaluationDurationMs;
+    private boolean evaluationAd;
+    private final EvaluationPlaybackProbe evaluationProbe = new EvaluationPlaybackProbe();
     private final Map<Integer, Long> lastSeen = new HashMap<>();
     private final Runnable sampler = new Runnable() {
         @Override public void run() {
             if (!sampling) return;
+            if (diagnostics != null && diagnostics.isFullEvaluation()) {
+                if (SystemClock.elapsedRealtime() - lastPlaybackProbe >= 1000) {
+                    lastPlaybackProbe = SystemClock.elapsedRealtime();
+                    evaluationProbe.sample(SharedPlayerActivity.this, player, diagnostics, state -> {
+                        if (state.optBoolean("rewound")) {
+                            captureGeneration++;
+                            if (speaker != null) speaker.stop();
+                            ledger.reset(); resetTracks();
+                        }
+                        evaluationMediaMs = state.optLong("media_ms", -1);
+                        evaluationStarted = state.optBoolean("evaluation_started");
+                        evaluationMediaObservedAt = state.optLong("mono_ms");
+                        evaluationDurationMs = state.optLong("duration_ms");
+                        evaluationAd = state.optBoolean("ad_visible");
+                    });
+                }
+                captureEvaluationReference();
+            }
             if (!readingPaused && !busy && player != null) {
                 applyCcPreference();
                 // Also inspect the watch URL in fullscreen: YouTube can switch
@@ -442,6 +471,7 @@ public final class SharedPlayerActivity extends Activity {
     }
 
     private void copyWindowFrame(Rect rect) {
+        evaluationRect = new Rect(rect);
         busy = true;
         final int generation = captureGeneration;
         try {
@@ -461,6 +491,33 @@ public final class SharedPlayerActivity extends Activity {
         } catch (RuntimeException error) {
             busy = false;
             if (sampling) status.setText("動画画像の取得に失敗しました");
+        }
+    }
+
+    private void captureEvaluationReference() {
+        if (!evaluationStarted || referenceBusy || evaluationRect == null || isDestroyed()) return;
+        long now = SystemClock.elapsedRealtime();
+        if (now-lastReferenceCapture < 900) return;
+        lastReferenceCapture = now;
+        referenceBusy = true;
+        final long referenceId = ++referenceSequence;
+        final long media = evaluationMediaMs;
+        try {
+            Bitmap frame = Bitmap.createBitmap(evaluationRect.width(), evaluationRect.height(), Bitmap.Config.ARGB_8888);
+            PixelCopy.request(getWindow(), evaluationRect, frame, result -> {
+                try {
+                    if (result == PixelCopy.SUCCESS && !isDestroyed())
+                        diagnostics.image("reference_frame", frame, "reference_id", referenceId,
+                                "media_ms", media, "video_id", videoId,
+                                "media_observed_mono_ms", evaluationMediaObservedAt,
+                                "duration_ms", evaluationDurationMs, "ad_visible", evaluationAd,
+                                "generation", captureGeneration);
+                    else diagnostics.event("reference_error", "reference_id", referenceId, "pixelcopy", result);
+                } finally { frame.recycle(); referenceBusy = false; }
+            }, main);
+        } catch (RuntimeException e) {
+            referenceBusy = false;
+            diagnostics.event("reference_error", "reference_id", referenceId, "error", e.toString());
         }
     }
 

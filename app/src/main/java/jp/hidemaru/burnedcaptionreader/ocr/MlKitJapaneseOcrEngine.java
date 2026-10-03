@@ -62,6 +62,7 @@ public final class MlKitJapaneseOcrEngine implements OcrEngine {
             text.append(value);
             double lineConfidenceTotal = 0.0;
             int lineConfidenceCount = 0;
+            List<OcrLine> symbols = new ArrayList<>();
             for (Text.Element element : line.getElements()) {
                 Float confidence = element.getConfidence();
                 if (confidence != null) {
@@ -69,6 +70,15 @@ public final class MlKitJapaneseOcrEngine implements OcrEngine {
                     confidenceCount++;
                     lineConfidenceTotal += confidence * 100.0;
                     lineConfidenceCount++;
+                }
+                for (Text.Symbol symbol : element.getSymbols()) {
+                    Rect symbolBox = symbol.getBoundingBox();
+                    if (symbolBox != null) symbols.add(new OcrLine(indexed.blockIndex,
+                            symbol.getText(), confidence == null ? UNKNOWN_CONFIDENCE : confidence * 100.0,
+                            symbolBox.left / (float) Math.max(1, imageWidth),
+                            symbolBox.top / (float) Math.max(1, imageHeight),
+                            symbolBox.right / (float) Math.max(1, imageWidth),
+                            symbolBox.bottom / (float) Math.max(1, imageHeight)));
                 }
             }
             Rect box = line.getBoundingBox();
@@ -79,7 +89,9 @@ public final class MlKitJapaneseOcrEngine implements OcrEngine {
                         box.left / (float) Math.max(1, imageWidth),
                         box.top / (float) Math.max(1, imageHeight),
                         box.right / (float) Math.max(1, imageWidth),
-                        box.bottom / (float) Math.max(1, imageHeight)));
+                        box.bottom / (float) Math.max(1, imageHeight),
+                        OcrLineSegmenter.separatedParts(value, symbols,
+                                imageWidth / (float) Math.max(1, imageHeight))));
             }
         }
         double confidence = confidenceCount == 0

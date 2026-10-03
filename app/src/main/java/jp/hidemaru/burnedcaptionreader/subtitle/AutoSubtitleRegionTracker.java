@@ -225,8 +225,10 @@ public final class AutoSubtitleRegionTracker {
     private List<Candidate> buildCandidates(OcrResult result, boolean portraitVideoViewport, boolean recognitionCandidates) {
         Map<Integer, Candidate> grouped = new HashMap<>();
         List<OcrLine> eligibleLines = new ArrayList<>();
-        for (OcrLine line : result.getLines()) {
-            if (recognitionCandidates && isParallelCompactLabel(line, result.getLines())) continue;
+        List<OcrLine> sourceLines = recognitionCandidates
+                ? SceneTextFilter.captionsOnly(result.getLines()) : result.getLines();
+        for (OcrLine line : sourceLines) {
+            if (recognitionCandidates && isParallelCompactLabel(line, sourceLines)) continue;
             String text = SubtitleNormalizer.normalize(line.getText());
             if (text.isEmpty() || line.getHeight() < 0.008f) continue;
             boolean japaneseLine = JAPANESE_TEXT.matcher(text).find();

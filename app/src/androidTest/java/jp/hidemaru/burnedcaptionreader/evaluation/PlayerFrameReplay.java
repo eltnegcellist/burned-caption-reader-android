@@ -76,8 +76,29 @@ final class PlayerFrameReplay {
         });
         emit(now, order.offer(now, committed, waiting));
         return new JSONObject().put("ocr_text", String.join("\n", texts)).put("bands", bands)
+                .put("raw_rows", rawRows(raw))
                 .put("raw_text", raw.getText()).put("selection_api", candidateSelector == null ? "selectAll" : "selectForRecognition")
                 .put("ocr_jobs", 1 + selected.size());
+    }
+    private JSONArray rawRows(OcrResult raw) throws Exception {
+        JSONArray rows = new JSONArray();
+        for (OcrLine row : raw.getLines()) {
+            JSONObject value = rowGeometry(row);
+            // One harness must still run against APKs predating geometry metadata.
+            try {
+                Object parts = row.getClass().getMethod("getSeparatedParts").invoke(row);
+                JSONArray values = new JSONArray();
+                for (Object part : (List<?>) parts) values.put(rowGeometry((OcrLine) part));
+                if (values.length() > 0) value.put("separated_parts", values);
+            } catch (NoSuchMethodException legacy) { /* No character-gap evidence in old APKs. */ }
+            rows.put(value);
+        }
+        return rows;
+    }
+    private JSONObject rowGeometry(OcrLine row) throws JSONException {
+        return new JSONObject().put("text", row.getText()).put("confidence", row.getConfidence())
+                .put("block", row.getBlockIndex()).put("left", row.getLeft()).put("top", row.getTop())
+                .put("right", row.getRight()).put("bottom", row.getBottom());
     }
     private void flushBefore(long now) throws JSONException {
         long deadline = order.nextDeadline();

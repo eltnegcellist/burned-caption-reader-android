@@ -152,13 +152,23 @@ public final class DiagnosticRecorder {
         if (!recording) return;
         JSONArray rows = new JSONArray();
         try {
-            for (OcrLine row : result.getLines()) rows.put(new JSONObject()
-                    .put("text", row.getText()).put("confidence", finite(row.getConfidence()))
-                    .put("block", row.getBlockIndex()).put("left", row.getLeft()).put("top", row.getTop())
-                    .put("right", row.getRight()).put("bottom", row.getBottom()));
+            for (OcrLine row : result.getLines()) {
+                JSONObject value = rowGeometry(row);
+                if (!row.getSeparatedParts().isEmpty()) {
+                    JSONArray parts = new JSONArray();
+                    for (OcrLine part : row.getSeparatedParts()) parts.put(rowGeometry(part));
+                    value.put("separated_parts", parts);
+                }
+                rows.put(value);
+            }
             event(stage, "frame_id", frameId, "track_id", trackId, "text", result.getText(),
                     "confidence", finite(result.getConfidence()), "rows", rows);
         } catch (Exception e) { dropped.incrementAndGet(); }
+    }
+    private JSONObject rowGeometry(OcrLine row) throws org.json.JSONException {
+        return new JSONObject().put("text", row.getText()).put("confidence", finite(row.getConfidence()))
+                .put("block", row.getBlockIndex()).put("left", row.getLeft()).put("top", row.getTop())
+                .put("right", row.getRight()).put("bottom", row.getBottom());
     }
     private Object finite(double number) { return Double.isFinite(number) ? number : JSONObject.NULL; }
     private String version() {

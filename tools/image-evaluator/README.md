@@ -150,3 +150,6 @@ OCR replay then needs recapture.
 
 The three five-minute results and limitations are in
 [`docs/2026-10-03-five-minute-evaluation.md`](../../docs/2026-10-03-five-minute-evaluation.md).
+
+The follow-up two other-author windows, including the recovered iCloud-interrupted replay, are in
+[`docs/2026-10-04-other-authors-five-minute-evaluation.md`](../../docs/2026-10-04-other-authors-five-minute-evaluation.md).

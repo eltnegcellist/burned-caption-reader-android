@@ -13,7 +13,7 @@ android {
         versionCode = 32
         versionName = "1.0.1-preview"
 
-        testInstrumentationRunner = "android.app.Instrumentation"
+        testInstrumentationRunner = "jp.hidemaru.burnedcaptionreader.evaluation.ImageEvaluationInstrumentation"
     }
 
     if (System.getenv("CAPTION_REQUIRE_PERSISTENT_SIGNING") == "true"

@@ -500,7 +500,7 @@ public final class SharedPlayerActivity extends Activity {
             if (input != frame) input.recycle();
             if (!acceptsFrame(generation)) { finishFrame(frame); return; }
             diagnostics.ocr("ocr_raw", frameId, -1, result);
-            List<AutoSubtitleRegionTracker.Selection> selections = tracker.selectAll(timestamp, result, false, false);
+            List<AutoSubtitleRegionTracker.Selection> selections = tracker.selectForRecognition(timestamp, result);
             diagnostics.event("selection_summary", "frame_id", frameId, "raw_rows", result.getLines().size(),
                     "selected_bands", selections.size(), "policy", "subtitle_tracker");
             refineBands(frame, generation, timestamp, frameId, selections, 0, new ArrayList<>());

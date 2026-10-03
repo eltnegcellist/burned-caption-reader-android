@@ -86,7 +86,12 @@ adb -s emulator-5554 exec-out run-as jp.hidemaru.burnedcaptionreader \
 This opens the normal share flow, starts the existing bounded local recorder, and
 stops after 20–90 seconds. Its worker must publish `session_stop` before the test
 exits. Playback still requires UI inspection: dismiss autoplay mute affordances,
-verify captions are unobscured, and wait for controls to disappear. The record cap
+verify captions are unobscured, and wait for controls to disappear. A tap command succeeding does not prove that the mute affordance disappeared.
+Save a screenshot after the tap, visually verify its absence, record device
+monotonic uptime, and inspect every included original frame before annotating.
+Exclude all pre-verification/obscured frames and ads; discard a session with no
+verified unobscured interval. Record exclusions and verification evidence with
+the dataset. The record cap
 may retain only the session tail. Capture uses normal streamed playback and local
 PixelCopy, never downloaded videos, transcript/CC APIs, or external OCR. The
 recorder is opt-in and disabled after the capture.
@@ -95,3 +100,13 @@ Synthetic images verify the harness only:
 `python3 tools/image-evaluator/make_smoke.py /path/to/smoke --font /path/to/Japanese-font`.
 They retain synthetic provenance and `human_verified: false`. The published v1.0.0
 and diagnostic-free ledger replay remain separate baselines.
+
+
+The shared player now calls `selectForRecognition`: qualified caption candidates
+reach refinement without consuming an extra temporal observation; speech still
+requires the unchanged consensus, stabilizer, order buffer and ledger. Compact
+parallel noun labels are excluded before grouping. Small single-row rescue bands
+retain the old provisional temporal gate. Legacy `selectAll` behavior is unchanged.
+The replay harness discovers the production candidate entry point by reflection,
+falling back to `selectAll` only for old APKs that lack it. This permits exactly the
+same test APK for both builds; each frame records `selection_api` for audit.

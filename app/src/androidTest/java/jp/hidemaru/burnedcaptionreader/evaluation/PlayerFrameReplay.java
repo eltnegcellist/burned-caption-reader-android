@@ -1,6 +1,7 @@
 package jp.hidemaru.burnedcaptionreader.evaluation;
 
 import android.graphics.Bitmap;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.regex.Pattern;
 import org.json.*;
@@ -11,6 +12,16 @@ import jp.hidemaru.burnedcaptionreader.subtitle.*;
 final class PlayerFrameReplay {
     interface Recognize { OcrResult run(Bitmap input) throws Exception; }
     private final AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
+    private final Method candidateSelector = recognitionSelector();
+    private static Method recognitionSelector() {
+        try { return AutoSubtitleRegionTracker.class.getMethod("selectForRecognition", long.class, OcrResult.class); }
+        catch (NoSuchMethodException baseline) { return null; }
+    }
+    @SuppressWarnings("unchecked")
+    private List<AutoSubtitleRegionTracker.Selection> select(long now, OcrResult raw) throws Exception {
+        return candidateSelector == null ? tracker.selectAll(now, raw, false, false)
+                : (List<AutoSubtitleRegionTracker.Selection>) candidateSelector.invoke(tracker, now, raw);
+    }
     private final OcrRefinementSelector selector = new OcrRefinementSelector();
     private final Map<Integer, TemporalOcrConsensus> consensus = new HashMap<>();
     private final Map<Integer, SubtitleStabilizer> stabilizers = new HashMap<>();
@@ -26,7 +37,7 @@ final class PlayerFrameReplay {
         OcrResult raw;
         try { raw = recognize.run(coarse); }
         finally { if (coarse != frame) coarse.recycle(); }
-        List<AutoSubtitleRegionTracker.Selection> selected = tracker.selectAll(now, raw, false, false);
+        List<AutoSubtitleRegionTracker.Selection> selected = select(now, raw);
         JSONArray bands = new JSONArray();
         List<String> texts = new ArrayList<>();
         List<SubtitleSpeechOrderBuffer.Entry> committed = new ArrayList<>();
@@ -65,7 +76,8 @@ final class PlayerFrameReplay {
         });
         emit(now, order.offer(now, committed, waiting));
         return new JSONObject().put("ocr_text", String.join("\n", texts)).put("bands", bands)
-                .put("raw_text", raw.getText()).put("ocr_jobs", 1 + selected.size());
+                .put("raw_text", raw.getText()).put("selection_api", candidateSelector == null ? "selectAll" : "selectForRecognition")
+                .put("ocr_jobs", 1 + selected.size());
     }
     private void flushBefore(long now) throws JSONException {
         long deadline = order.nextDeadline();

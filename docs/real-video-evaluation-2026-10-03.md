@@ -77,6 +77,15 @@ min338, median1071, max1437. These descriptive live values are **not** a same-in
 speedup comparison with the older session, and do not establish S25 speed or heat.
 The last in-flight request at instrumented shutdown is not counted as completed.
 
+A final video2 landscape custom-view session saved twenty 1920×1080 original
+video images after entering fullscreen. Its fullscreen portion completed26 frames
+and recorded five TTS submissions/starts/completions, one queued request and no
+retained OCR/TTS errors or discard events. Some original images were omitted by
+the bounded recorder. Fullscreen `processing_ms`: min1139, median2549.5, max3757.
+The initial Android fullscreen tutorial was dismissed; the unobscured landscape
+screenshot and local archive are retained. This checks pipeline connectivity in a
+second layout; it is not a frozen-input portrait-versus-landscape quality comparison.
+
 The replay executes production components with simulated immediate TTS completion
 and stableMs300. It does not execute Activity asynchronous scheduling/lifecycle,
 PixelCopy, audio, Balanced queue replacement or cancellation. See

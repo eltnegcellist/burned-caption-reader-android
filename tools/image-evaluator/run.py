@@ -71,6 +71,7 @@ result = json.loads(output.stdout)
 result["device_serial"] = args.device
 result["input_manifest_sha256"] = hashlib.sha256((args.dataset / "dataset.json").read_bytes()).hexdigest()
 result["apk_sha256"] = hashlib.sha256(app_apk.read_bytes()).hexdigest()
+result["test_apk_sha256"] = hashlib.sha256(test_apk.read_bytes()).hexdigest()
 args.output.parent.mkdir(parents=True, exist_ok=True)
 args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 print(f"Saved evaluation results: {args.output}")

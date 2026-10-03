@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare raw OCR results only when input and reference are identical."""
+"""Compare evaluated captions only when input, metric and reference are identical."""
 import argparse
 import json
 from pathlib import Path
@@ -9,8 +9,8 @@ parser.add_argument("baseline", type=Path)
 parser.add_argument("candidate", type=Path)
 args = parser.parse_args()
 baseline, candidate = [json.loads(path.read_text(encoding="utf-8")) for path in (args.baseline, args.candidate)]
-for field in ("input_manifest_sha256", "dataset", "source", "scope", "reference_characters", "device_serial"):
-    if baseline[field] != candidate[field]:
+for field in ("input_manifest_sha256", "dataset", "source", "scope", "reference_characters", "device_serial", "metric", "ground_truth_source", "human_verified"):
+    if baseline.get(field) != candidate.get(field):
         parser.error("Cannot compare different " + field)
 if len(baseline["frames"]) != len(candidate["frames"]):
     parser.error("Different frame count")
@@ -19,6 +19,12 @@ for before, after in zip(baseline["frames"], candidate["frames"]):
         parser.error("Frame/reference mismatch")
 print(json.dumps({
     "scope": baseline["scope"], "source": baseline["source"],
+    "metric": baseline.get("metric"), "human_verified": baseline.get("human_verified"),
+    "ground_truth_source": baseline.get("ground_truth_source"),
+    "baseline_ocr_jobs": sum(f.get("stages", {}).get("ocr_jobs", 0) for f in baseline["frames"]),
+    "candidate_ocr_jobs": sum(f.get("stages", {}).get("ocr_jobs", 0) for f in candidate["frames"]),
+    "baseline_speech_requests": len(baseline.get("speech", [])),
+    "candidate_speech_requests": len(candidate.get("speech", [])),
     "baseline_label": baseline["label"], "candidate_label": candidate["label"],
     "baseline_cer": baseline["cer"], "candidate_cer": candidate["cer"],
     "edit_distance_delta": candidate["edit_distance"] - baseline["edit_distance"],

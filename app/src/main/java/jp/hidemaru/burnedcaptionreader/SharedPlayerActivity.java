@@ -38,6 +38,7 @@ import jp.hidemaru.burnedcaptionreader.ocr.MlKitJapaneseOcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
 import jp.hidemaru.burnedcaptionreader.ocr.SubtitleCropPlan;
+import jp.hidemaru.burnedcaptionreader.ocr.OcrBitmapInputs;
 import jp.hidemaru.burnedcaptionreader.subtitle.OcrRefinementSelector;
 import jp.hidemaru.burnedcaptionreader.subtitle.TemporalOcrConsensus;
 import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticRecorder;
@@ -487,13 +488,9 @@ public final class SharedPlayerActivity extends Activity {
         diagnostics.image("video_frame", frame, "frame_id", frameId,
                 "generation", generation, "video_id", videoId);
         // Broad detection is bounded; refinement always uses this original frame.
-        float scale = frame.getWidth() > 1100 ? 1100f / frame.getWidth()
-                : Math.min(2f, 850f / frame.getWidth());
-        scale = Math.min(scale, 2000f / frame.getHeight());
         final Bitmap input;
         try {
-            input = Bitmap.createScaledBitmap(frame, Math.max(1, Math.round(frame.getWidth() * scale)),
-                    Math.max(1, Math.round(frame.getHeight() * scale)), true);
+            input = OcrBitmapInputs.coarse(frame);
         } catch (RuntimeException error) {
             diagnostics.event("ocr_error", "frame_id", frameId, "stage", "coarse_prepare", "error", error.toString());
             finishFrame(frame); return;
@@ -535,7 +532,7 @@ public final class SharedPlayerActivity extends Activity {
         try {
             SubtitleCropPlan plan = SubtitleCropPlan.create(frame.getWidth(), frame.getHeight(),
                     selection.getTop(), selection.getBottom());
-            input = createRefinementInput(frame, plan);
+            input = OcrBitmapInputs.refined(frame, plan);
         } catch (RuntimeException error) {
             diagnostics.event("refinement_fallback", "frame_id", frameId, "reason", "crop_error");
             bands.add(new BandText(selection, selection.getText(), selection.getConfidence()));
@@ -559,17 +556,6 @@ public final class SharedPlayerActivity extends Activity {
             bands.add(new BandText(selection, selection.getText(), selection.getConfidence()));
             refineBands(frame, generation, timestamp, frameId, selections, index + 1, bands);
         });
-    }
-
-    private Bitmap createRefinementInput(Bitmap frame, SubtitleCropPlan plan) {
-        Bitmap crop = Bitmap.createBitmap(frame, 0, plan.top, frame.getWidth(), plan.height);
-        Bitmap output = null;
-        try {
-            output = Bitmap.createScaledBitmap(crop, plan.outputWidth, plan.outputHeight, true);
-            return output;
-        } finally {
-            if (crop != output && crop != frame) crop.recycle();
-        }
     }
 
     private void processResult(long timestamp, long frameId, List<BandText> bands) {

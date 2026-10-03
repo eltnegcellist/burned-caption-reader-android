@@ -1,5 +1,7 @@
 # Mac evaluation checkpoint — 2026-10-03 (JST)
 
+Historical first checkpoint. Superseded by [real-video evaluation](real-video-evaluation-2026-10-03.md).
+
 Repository starting points were fetched, rather than assumed from the handoff:
 main `16cc675a8f0b2326d8f4dba91389decad6a26f06`, draft/open PR #27 head
 `f64c198d25d95e30a1eed0dc5d4e2301359d18b4`. The evaluation branch merges main's

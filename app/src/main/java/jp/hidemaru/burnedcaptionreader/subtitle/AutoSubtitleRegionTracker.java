@@ -77,6 +77,9 @@ public final class AutoSubtitleRegionTracker {
         float meanLeft;
         float meanCenterX;
         float meanRight;
+        float meanTop;
+        float meanRowHeight;
+        int spatialRows;
         float meanBottom;
         float meanHeight;
         Candidate current;
@@ -89,6 +92,7 @@ public final class AutoSubtitleRegionTracker {
 
     private static final int LANE_COUNT = 24;
     private static final int MAX_ACTIVE_LANES = 4;
+    private static final float TWO_ROW_MAX_HEIGHT = .34f;
     private static final long LOCK_MISSING_MS = 2_800L;
     private static final long LANE_EXPIRES_MS = 8_000L;
     private static final long PROVISIONAL_MAX_STATIC_MS = 2_500L;
@@ -252,7 +256,12 @@ public final class AutoSubtitleRegionTracker {
             candidate.confidence = confidenceTotal / Math.max(1, candidate.lines.size());
             String key = SubtitleNormalizer.comparisonKey(candidate.text);
             int length = key.codePointCount(0, key.length());
-            if (length < 2 || length > 140 || candidate.height() > 0.34f) continue;
+            // The old fixed two-row budget split large three-row captions into
+            // 2+1 lanes. Both padded re-OCR jobs then included the same bottom row.
+            // Only spatially validated triples receive a third row's height budget.
+            float heightBudget = candidate.spatialGroup && candidate.lines.size() == 3
+                    ? TWO_ROW_MAX_HEIGHT * 1.5f : TWO_ROW_MAX_HEIGHT;
+            if (length < 2 || length > 140 || candidate.height() > heightBudget) continue;
             candidate.textLength = length;
             candidate.japanese = JAPANESE_TEXT.matcher(candidate.text).find();
             candidate.lane = laneFor(candidate.centerY());
@@ -354,8 +363,17 @@ public final class AutoSubtitleRegionTracker {
             return false;
         }
 
+        // The third row must continue the existing row spacing. Otherwise a
+        // document/object label below two dialogue rows can fill the extra budget.
+        if (cluster.size() == 2) {
+            float previousGap = previous.getTop() - cluster.get(0).getBottom();
+            if (Math.abs(verticalGap - previousGap) > Math.max(.020f, referenceHeight * .50f)) {
+                return false;
+            }
+        }
         float groupTop = cluster.get(0).getTop();
-        if (next.getBottom() - groupTop > 0.34f) return false;
+        float heightBudget = TWO_ROW_MAX_HEIGHT * Math.max(2, cluster.size() + 1) / 2f;
+        if (next.getBottom() - groupTop > heightBudget) return false;
 
         float horizontalOverlap = Math.max(0f,
                 Math.min(previous.getRight(), next.getRight())
@@ -494,13 +512,31 @@ public final class AutoSubtitleRegionTracker {
         if (state.geometrySamples == 0) return distance(candidate.lane, state.lane) <= 1;
         float baselineTolerance = Math.max(0.030f, state.meanHeight * 0.55f);
         float heightTolerance = Math.max(0.018f, state.meanHeight * 0.42f);
-        if (Math.abs(candidate.bottom - state.meanBottom) > baselineTolerance) return false;
-        if (Math.abs(candidate.height() - state.meanHeight) > heightTolerance) return false;
+        boolean sameBand = Math.abs(candidate.bottom - state.meanBottom) <= baselineTolerance
+                && Math.abs(candidate.height() - state.meanHeight) <= heightTolerance;
+        if (!sameBand && !followsSpatialRowCountChange(state, candidate)) return false;
 
         float anchorShift = Math.min(Math.abs(candidate.left - state.meanLeft),
                 Math.min(Math.abs(candidate.centerX() - state.meanCenterX),
                         Math.abs(candidate.right - state.meanRight)));
         return anchorShift <= 0.050f;
+    }
+
+    /** Preserve a top-anchored dialogue lane when two rows become three or back. */
+    private boolean followsSpatialRowCountChange(LaneState state, Candidate candidate) {
+        int rows = candidate.lines.size();
+        if (!candidate.spatialGroup || rows < 2 || rows > 3
+                || state.spatialRows < 2 || state.spatialRows > 3
+                || rows == state.spatialRows) return false;
+        float rowHeight = averageRowHeight(candidate);
+        return Math.abs(candidate.top - state.meanTop) <= Math.max(.018f, state.meanRowHeight * .30f)
+                && Math.abs(rowHeight - state.meanRowHeight) <= state.meanRowHeight * .25f;
+    }
+
+    private float averageRowHeight(Candidate candidate) {
+        float total = 0f;
+        for (OcrLine line : candidate.lines) total += line.getHeight();
+        return total / candidate.lines.size();
     }
 
     private double geometryDistance(LaneState state, Candidate candidate) {
@@ -509,9 +545,13 @@ public final class AutoSubtitleRegionTracker {
                 Math.min(Math.abs(candidate.centerX() - state.meanCenterX),
                         Math.abs(candidate.right - state.meanRight)));
         float heightScale = Math.max(0.02f, state.meanHeight);
-        return Math.abs(candidate.bottom - state.meanBottom) / heightScale
-                + Math.abs(candidate.height() - state.meanHeight) / heightScale
-                + anchorShift / 0.05f;
+        double distance = Math.abs(candidate.bottom - state.meanBottom) / heightScale
+                + Math.abs(candidate.height() - state.meanHeight) / heightScale;
+        if (followsSpatialRowCountChange(state, candidate)) {
+            distance = Math.min(distance, Math.abs(candidate.top - state.meanTop) / heightScale
+                    + Math.abs(averageRowHeight(candidate) - state.meanRowHeight) / heightScale);
+        }
+        return distance + anchorShift / 0.05f;
     }
 
     private void updateGeometry(LaneState state, Candidate candidate) {
@@ -520,6 +560,9 @@ public final class AutoSubtitleRegionTracker {
         state.meanLeft = weightedMean(state.meanLeft, candidate.left, previousWeight, totalWeight);
         state.meanCenterX = weightedMean(state.meanCenterX, candidate.centerX(), previousWeight, totalWeight);
         state.meanRight = weightedMean(state.meanRight, candidate.right, previousWeight, totalWeight);
+        state.meanTop = weightedMean(state.meanTop, candidate.top, previousWeight, totalWeight);
+        state.meanRowHeight = weightedMean(state.meanRowHeight, averageRowHeight(candidate), previousWeight, totalWeight);
+        state.spatialRows = candidate.spatialGroup ? candidate.lines.size() : 0;
         state.meanBottom = weightedMean(state.meanBottom, candidate.bottom, previousWeight, totalWeight);
         state.meanHeight = weightedMean(state.meanHeight, candidate.height(), previousWeight, totalWeight);
         state.geometrySamples++;

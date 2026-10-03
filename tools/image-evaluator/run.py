@@ -13,6 +13,9 @@ parser.add_argument("output", type=Path)
 parser.add_argument("--adb", required=True)
 parser.add_argument("--device", required=True)
 parser.add_argument("--label", required=True, help="Git SHA or build label")
+parser.add_argument("--mode", choices=["raw", "player-replay"], default="raw")
+parser.add_argument("--app-apk", type=Path)
+parser.add_argument("--test-apk", type=Path)
 args = parser.parse_args()
 if not re.fullmatch(r"[A-Za-z0-9._/-]+", args.label):
     parser.error("Label must contain only letters, digits, dot, underscore, slash or hyphen")
@@ -20,7 +23,8 @@ if not args.device.startswith("emulator-"):
     parser.error("Only explicit emulator targets are supported; real-device installs need separate review")
 dataset = json.loads((args.dataset / "dataset.json").read_text(encoding="utf-8"))
 synthetic = dataset.get("source") == "synthetic" and dataset.get("ground_truth_source") == "synthetic_render_spec"
-if (dataset.get("human_verified") is not True and not synthetic) or not dataset.get("frames"):
+visual_review = dataset.get("ground_truth_source") == "codex_visual_review" and dataset.get("reference_verified_from_pixels") is True
+if (dataset.get("human_verified") is not True and not synthetic and not visual_review) or not dataset.get("frames"):
     parser.error("Nonempty manually verified dataset required")
 previous = -1
 for frame in dataset["frames"]:
@@ -38,8 +42,10 @@ package = "jp.hidemaru.burnedcaptionreader"
 def adb(*command, **kwargs):
     return subprocess.run([args.adb, "-s", args.device, *command], check=True, **kwargs)
 root = Path(__file__).resolve().parents[2]
-adb("install", "-r", str(root / "app/build/outputs/apk/debug/app-debug.apk"))
-adb("install", "-r", str(root / "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"))
+app_apk = args.app_apk or root / "app/build/outputs/apk/debug/app-debug.apk"
+test_apk = args.test_apk or root / "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
+adb("install", "-r", str(app_apk))
+adb("install", "-r", str(test_apk))
 # Transfer through stdin to avoid Android shared-storage permission/version differences.
 adb("shell", "run-as", package, "mkdir", "-p", "files/image-evaluation/images")
 def copy(local, remote):
@@ -53,6 +59,7 @@ payload = json.dumps(dataset, ensure_ascii=False).encode("utf-8")
 adb("shell", f"run-as {package} sh -c 'cat > files/image-evaluation/dataset.json'", input=payload)
 adb("shell", "run-as", package, "rm", "-f", "files/image-evaluation/results.json")
 run = adb("shell", "am", "instrument", "-w", "-r", "-e", "label", args.label,
+          "-e", "mode", args.mode,
           package + ".test/jp.hidemaru.burnedcaptionreader.evaluation.ImageEvaluationInstrumentation",
           stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 log = run.stdout.decode("utf-8")
@@ -63,7 +70,7 @@ output = adb("exec-out", "run-as", package, "cat", "files/image-evaluation/resul
 result = json.loads(output.stdout)
 result["device_serial"] = args.device
 result["input_manifest_sha256"] = hashlib.sha256((args.dataset / "dataset.json").read_bytes()).hexdigest()
-result["apk_sha256"] = hashlib.sha256((root / "app/build/outputs/apk/debug/app-debug.apk").read_bytes()).hexdigest()
+result["apk_sha256"] = hashlib.sha256(app_apk.read_bytes()).hexdigest()
 args.output.parent.mkdir(parents=True, exist_ok=True)
 args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-print(f"Saved raw OCR results: {args.output}")
+print(f"Saved evaluation results: {args.output}")

@@ -1,64 +1,97 @@
-# Android image OCR evaluation
+# Android frame evaluation
 
-This entry point runs the application's **actual `MlKitJapaneseOcrEngine` on Android**.
-It measures raw image OCR only: code-point edit distance / reference characters
-(CER, including whitespace and punctuation), per-frame OCR text, timestamp gaps,
-and measured OCR processing time. It does not score caption selection, temporal
-fusion, TTS, audio, or real-time performance. Original full video frames include
-non-caption text; annotate all visible text for raw OCR CER. A caption-only
-reference is useful for inspecting output, but must not be called raw OCR CER.
+The instrumentation calls the production `MlKitJapaneseOcrEngine` on Android.
+Keep two scopes separate:
 
-## Prepare real input
+- `raw` (default): all visible text, raw code-point CER including whitespace and
+  punctuation. Annotate all text for this metric, not only captions.
+- `player-replay`: shared production bitmap preparation, caption tracker,
+  same-original-frame crop and re-OCR, refinement selection, temporal consensus,
+  stabilizer (stableMs=300), order buffer, and row ledger. References contain only
+  intended Japanese captions. `caption_comparison_key_cer` scores per-frame
+  selected text after `SubtitleNormalizer.comparisonKey`; omitted captions count
+  as deletions, extra selected text as insertions. This is **not raw OCR CER**.
+  Results also expose broad OCR, every refinement band, job count, and emitted
+  speech-request text/timestamps.
+
+The replay starts with empty state and uses retained original timestamps. Order
+flushes occur at logical deadlines between frames. TTS completes immediately in
+this simulation. It does not exercise Activity callbacks, PixelCopy, real-time
+scheduling, TTS queue/cancellation/audio, pause/resume, or heat. Sparse retained
+frames may miss observations that occurred during live playback. Its speech
+requests are not a measure of words audibly spoken or a complete live omission
+rate. Live diagnostics must be reviewed separately.
+
+## Prepare frozen input
 
 ```sh
 python3 tools/image-evaluator/prepare.py /path/to/diagnostics.zip /path/to/dataset
 ```
 
-Only saved `video_frame` images from the current PixelCopy diagnostics are accepted.
-Images remain local. Inspect each image and enter `expected_text` in `dataset.json`
-in top-to-bottom / left-to-right order. Never copy OCR predictions into ground
-truth. Use `""` for no text. Set `human_verified` to true only after inspection;
-assign `split` to `development` or `held_out` and keep held-out data out of tuning.
-`sha256` freezes each image. Missing images remain missing; timestamps expose gaps.
-Do not infer capture completeness from these retained frames.
+Only original `video_frame` images from PixelCopy diagnostics are imported. Images
+remain local. Independently inspect pixels and enter `expected_text` in reading
+order; never copy OCR predictions into references. Use `""` for no target text.
+Set `human_verified: true` only after human inspection. A Codex visual transcription
+must instead explicitly retain `human_verified: false`,
+`ground_truth_source: codex_visual_review`, `reference_verified_from_pixels: true`,
+and a note that human audit is pending. Such results are provisional.
 
-## Build and run
+Assign `split: development` or `held_out`. Freeze labels before evaluating a
+held-out input and keep it out of tuning. Frame SHA-256 and manifest SHA-256 freeze
+both original pixels and annotations. Missing retained images remain missing;
+timestamps expose gaps. Do not infer capture completeness from retained frames.
+Exclude frames with mute buttons/player controls obscuring target captions.
 
-Build with JDK 17, Gradle 8.13 and Android SDK 36:
+## Build and compare
+
+Use JDK17, Gradle8.13, SDK36:
 
 ```sh
 gradle :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest
 python3 tools/image-evaluator/run.py /path/to/dataset /path/to/baseline.json \
-  --adb /path/to/sdk/platform-tools/adb --device emulator-5554 --label BASELINE_GIT_SHA
+  --adb /path/to/sdk/platform-tools/adb --device emulator-5554 \
+  --mode player-replay --label BASELINE_GIT_SHA \
+  --app-apk /path/to/baseline-app-debug.apk
 ```
 
-The runner installs only on the explicitly named emulator. It refuses real-device
-serials. Dataset files are copied to debug app-private storage using `run-as`;
-the custom instrumentation produces JSON results, failing on unreadable images,
-missing references, unordered timestamps, OCR errors, or timeout. It removes a
-previous result before running so stale output cannot appear to pass.
+The runner installs only on the explicitly named emulator, never a physical-device
+serial. It copies data into debug app-private storage via `run-as`, rejects changed
+image hashes/missing references/unordered timestamps, and removes the previous
+result before running. OCR errors, timeout, or failed instrumentation fail the run.
+`--test-apk` optionally selects the harness APK. The same harness can exercise the
+baseline and candidate app APKs if their production component APIs are compatible.
 
-Run the candidate build against the same dataset and emulator. Result JSON stores
-the original manifest hash, APK hash, and supplied build label. Compare predictions
-and total edit distance with the same reference-character count. Device OCR time
-includes cold model initialization and should be reported separately from steady
-state. This runner preserves timestamps as metadata; it does **not** replay the
-tracking pipeline or schedule images in real time.
+Repeat against the candidate APK with the **identical dataset and emulator**:
 
 ```sh
-python3 tools/image-evaluator/compare.py /path/to/baseline.json /path/to/candidate.json
+python3 tools/image-evaluator/compare.py baseline.json candidate.json
 ```
 
-Comparison rejects mismatched manifest hashes, device serials, references, frame
-counts, timestamps and evaluation scopes. Negative edit-distance delta is better
-raw OCR on this dataset; it says nothing about speech omissions or duplicates.
+Comparison rejects different manifest hashes, references, timestamps, frame count,
+device, scope, metric, or annotation provenance. Negative edit-distance delta is
+better for the stated metric; it does not by itself establish better audible
+speech. Processing times include model initialization and emulator effects;
+replay times must not be compared with live diagnostic `processing_ms` as speedups.
 
-Synthetic images may verify this harness but do not establish real caption quality.
-With Pillow installed, generate a separate smoke dataset using
+## Live diagnostic capture (test APK only)
+
+```sh
+adb -s emulator-5554 shell am instrument -w -r \
+  -e mode capture -e video_id VIDEO_ID_11_CHARACTERS -e seconds 60 \
+  jp.hidemaru.burnedcaptionreader.test/jp.hidemaru.burnedcaptionreader.evaluation.ImageEvaluationInstrumentation
+adb -s emulator-5554 exec-out run-as jp.hidemaru.burnedcaptionreader \
+  tar -cf - no_backup/caption-diagnostics > diagnostics.tar
+```
+
+This opens the normal share flow, starts the existing bounded local recorder, and
+stops after 20–90 seconds. Its worker must publish `session_stop` before the test
+exits. Playback still requires UI inspection: dismiss autoplay mute affordances,
+verify captions are unobscured, and wait for controls to disappear. The record cap
+may retain only the session tail. Capture uses normal streamed playback and local
+PixelCopy, never downloaded videos, transcript/CC APIs, or external OCR. The
+recorder is opt-in and disabled after the capture.
+
+Synthetic images verify the harness only:
 `python3 tools/image-evaluator/make_smoke.py /path/to/smoke --font /path/to/Japanese-font`.
-It explicitly records `source: synthetic`, `human_verified: false` and
-`ground_truth_source: synthetic_render_spec`, so generated text is never represented
-as a human annotation of a real frame.
-The published v1.0.0 and existing diagnostic-free ledger replay remain separate
-baselines. Do not publish a quality-improvement claim from raw OCR or synthetic
-results alone.
+They retain synthetic provenance and `human_verified: false`. The published v1.0.0
+and diagnostic-free ledger replay remain separate baselines.

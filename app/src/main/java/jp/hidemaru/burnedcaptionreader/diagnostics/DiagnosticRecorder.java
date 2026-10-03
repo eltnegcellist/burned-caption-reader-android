@@ -28,10 +28,12 @@ public final class DiagnosticRecorder {
         return instance;
     }
     private final Context context;
-    private final DiagnosticStore store;
+    private DiagnosticStore store;
+    private volatile boolean fullEvaluation;
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final Semaphore tasks = new Semaphore(128);
     private final Semaphore images = new Semaphore(2);
+    private final Semaphore evaluationImages = new Semaphore(4);
     private final AtomicLong sequence = new AtomicLong(System.currentTimeMillis());
     private final AtomicLong dropped = new AtomicLong();
     private volatile boolean recording;
@@ -44,6 +46,19 @@ public final class DiagnosticRecorder {
         store = new DiagnosticStore(new File(context.getNoBackupFilesDir(), "caption-diagnostics"),
                 120_000, 64L * 1024 * 1024, 2000);
     }
+    public boolean isFullEvaluation() { return fullEvaluation; }
+    public long droppedCount() { return dropped.get(); }
+
+    public synchronized void startFullEvaluation() {
+        if ((context.getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) == 0)
+            throw new IllegalStateException("Evaluation capture requires a debuggable APK");
+        if (recording || exporting) throw new IllegalStateException("Recorder already active");
+        fullEvaluation = true;
+        worker.execute(() -> store = new DiagnosticStore(new File(context.getNoBackupFilesDir(),
+                "caption-diagnostics"), 7_200_000, 3L * 1024 * 1024 * 1024, 200000, true));
+        startSession();
+    }
+
     public boolean isRecording() { return recording; }
     public boolean isExporting() { return exporting; }
     public String status() {
@@ -53,6 +68,12 @@ public final class DiagnosticRecorder {
     }
     public synchronized void start() {
         if (exporting || recording) return;
+        fullEvaluation = false;
+        worker.execute(() -> store = new DiagnosticStore(new File(context.getNoBackupFilesDir(),
+                "caption-diagnostics"), 120_000, 64L * 1024 * 1024, 2000));
+        startSession();
+    }
+    private void startSession() {
         epoch++;
         error = "";
         dropped.set(0);
@@ -62,7 +83,7 @@ public final class DiagnosticRecorder {
                 "android", Build.VERSION.RELEASE, "app_version", version());
     }
     public synchronized void stop() {
-        event("session_stop");
+        event("session_stop", "full_evaluation", fullEvaluation, "dropped", dropped.get(), "error", error);
         recording = false;
     }
     public synchronized void clear() {
@@ -71,13 +92,19 @@ public final class DiagnosticRecorder {
         worker.execute(() -> { try { store.clear(); error = ""; dropped.set(0); } catch (Exception e) { fail(e); } });
     }
     public synchronized void event(String type, Object... pairs) { record(type, null, pairs); }
-    public synchronized void image(String type, Bitmap bitmap, Object... pairs) { record(type, bitmap, pairs); }
+    public synchronized void image(String type, Bitmap bitmap, Object... pairs) {
+        // Full evaluation preserves independent reference frames, not duplicate
+        // coarse/refined PNGs. OCR text and boxes remain in ordinary events.
+        if (fullEvaluation && !"reference_frame".equals(type)) { record(type, null, pairs); return; }
+        record(type, bitmap, pairs);
+    }
 
     private void record(String type, Bitmap bitmap, Object... pairs) {
         if (!recording) return;
         if (!tasks.tryAcquire()) { dropped.incrementAndGet(); return; }
         Bitmap copy = null;
         boolean imagePermit = false;
+        Semaphore imageSlots = fullEvaluation ? evaluationImages : images;
         try {
             String id = String.format(Locale.ROOT, "%020d", sequence.incrementAndGet());
             long wall = System.currentTimeMillis();
@@ -87,7 +114,7 @@ public final class DiagnosticRecorder {
             for (int i = 0; i + 1 < pairs.length; i += 2) data.put(String.valueOf(pairs[i]), pairs[i + 1]);
             if (bitmap != null) {
                 data.put("width", bitmap.getWidth()).put("height", bitmap.getHeight());
-                if ((long) bitmap.getWidth() * bitmap.getHeight() <= 8_000_000 && images.tryAcquire()) {
+                if ((long) bitmap.getWidth() * bitmap.getHeight() <= 8_000_000 && imageSlots.tryAcquire()) {
                     imagePermit = true;
                     copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
                 }
@@ -108,13 +135,13 @@ public final class DiagnosticRecorder {
                 } catch (Exception e) { fail(e); }
                 finally {
                     if (owned != null) owned.recycle();
-                    if (releaseImage) images.release();
+                    if (releaseImage) imageSlots.release();
                     tasks.release();
                 }
             });
         } catch (Exception | OutOfMemoryError e) {
             if (copy != null) copy.recycle();
-            if (imagePermit) images.release();
+            if (imagePermit) imageSlots.release();
             tasks.release();
             dropped.incrementAndGet();
             error = "診断記録を一部省略しました: " + e.getClass().getSimpleName();
@@ -151,7 +178,9 @@ public final class DiagnosticRecorder {
                 if (output == null) throw new java.io.IOException("保存先を開けません");
                 String manifest = new JSONObject().put("schema_version", 1).put("app_version", version())
                         .put("dropped_records_or_images", dropped.get()).put("last_error", error)
-                        .put("max_age_ms", 120000).put("max_bytes", 64L * 1024 * 1024)
+                        .put("max_age_ms", fullEvaluation ? 7200000 : 120000)
+                        .put("max_bytes", (fullEvaluation ? 3072L : 64L) * 1024 * 1024)
+                        .put("full_evaluation", fullEvaluation)
                         .put("exported_wall_ms", System.currentTimeMillis()).toString();
                 store.export(output, manifest);
             } catch (Exception e) { result = "書き出し失敗: " + e.getMessage(); }

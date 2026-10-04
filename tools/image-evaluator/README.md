@@ -132,7 +132,7 @@ adb -s emulator-5554 shell run-as jp.hidemaru.burnedcaptionreader \
   touch files/full-evaluation/start-from-zero
 ```
 
-The probe waits for unmuted, playing, non-ad media, rewinds to zero, and records
+The probe waits for unmuted, playing, non-ad media, seeks to the requested start, and records
 positions in `files/full-evaluation/state.json`. The gate is a manual visual
 approval of the current player; a tap alone is not proof that an overlay cleared.
 The post-rewind seek controls still require excluding the initial obscured frames.
@@ -153,3 +153,19 @@ The three five-minute results and limitations are in
 
 The follow-up two other-author windows, including the recovered iCloud-interrupted replay, are in
 [`docs/2026-10-04-other-authors-five-minute-evaluation.md`](../../docs/2026-10-04-other-authors-five-minute-evaluation.md).
+
+### Fixed middle windows
+
+Pass `-e start_seconds 600` to capture a 305-second window beginning at 10:00.
+After visually verifying that mute and player controls are absent, write the
+matching ASCII integer into `files/full-evaluation/start-from-zero` instead of
+creating an empty file. An empty gate retains the legacy zero start. Values
+must be whole seconds from 0 through 86400; invalid gate contents do not start
+capture. The recorded `window_start_ms` and summary `window_start_seconds` must
+match the requested offset. Completion requires reaching offset plus the window
+duration on the correct non-ad video. Fixed sample times must also include this
+offset; exclude initial seek controls by pixel review. Select windows before
+viewing their OCR results and freeze all references before comparison.
+
+The glyph-size/document-filter iteration and two fixed middle-video windows are in
+[`docs/2026-10-04-document-layout-evaluation.md`](../../docs/2026-10-04-document-layout-evaluation.md).

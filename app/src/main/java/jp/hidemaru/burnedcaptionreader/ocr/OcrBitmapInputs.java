@@ -22,4 +22,16 @@ public final class OcrBitmapInputs {
             if (crop != output && crop != frame) crop.recycle();
         }
     }
+
+    /** Alternative pixels for an already bounded refinement crop. Input remains owned by caller. */
+    public static Bitmap whiteCore(Bitmap input) {
+        int[] pixels = new int[input.getWidth() * input.getHeight()];
+        input.getPixels(pixels, 0, input.getWidth(), 0, 0, input.getWidth(), input.getHeight());
+        for (int i = 0; i < pixels.length; i++) {
+            int color = pixels[i], red = (color >> 16) & 255, green = (color >> 8) & 255, blue = color & 255;
+            int low = Math.min(red, Math.min(green, blue)), high = Math.max(red, Math.max(green, blue));
+            pixels[i] = low >= 210 && high - low <= 45 ? 0xff000000 : 0xffffffff;
+        }
+        return Bitmap.createBitmap(pixels, input.getWidth(), input.getHeight(), Bitmap.Config.ARGB_8888);
+    }
 }

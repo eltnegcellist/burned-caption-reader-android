@@ -26,6 +26,11 @@ final class PlayerFrameReplay {
                 : (List<AutoSubtitleRegionTracker.Selection>) candidateSelector.invoke(tracker, now, raw);
     }
     private final OcrRefinementSelector selector = new OcrRefinementSelector();
+    private final Method adaptiveSelector = adaptiveSelector();
+    private static Method adaptiveSelector() {
+        try { return OcrRefinementSelector.class.getMethod("select", String.class, double.class, OcrResult.class, OcrResult.class); }
+        catch (NoSuchMethodException baseline) { return null; }
+    }
     private final Map<Integer, TemporalOcrConsensus> consensus = new HashMap<>();
     private final Map<Integer, SubtitleStabilizer> stabilizers = new HashMap<>();
     private final Map<Integer, Long> lastSeen = new HashMap<>();
@@ -53,16 +58,29 @@ final class PlayerFrameReplay {
         List<SubtitleSpeechOrderBuffer.Entry> committed = new ArrayList<>();
         List<SubtitleSpeechOrderBuffer.Band> waiting = new ArrayList<>();
         Set<Integer> visible = new HashSet<>();
+        int ocrJobs = 1;
         for (AutoSubtitleRegionTracker.Selection band : selected) {
             SubtitleCropPlan plan = SubtitleCropPlan.create(frame.getWidth(), frame.getHeight(), band.getTop(), band.getBottom());
             Bitmap refined = OcrBitmapInputs.refined(frame, plan);
             OcrResult rerun;
-            try { rerun = recognize.run(refined); }
-            finally { if (refined != frame) refined.recycle(); }
-            OcrRefinementSelector.Result chosen = selector.select(band.getText(), band.getConfidence(), rerun);
-            bands.put(new JSONObject().put("track_id", band.getTrackId()).put("top", band.getTop())
+            OcrResult masked = null;
+            OcrRefinementSelector.Result chosen;
+            try {
+                rerun = recognize.run(refined); ocrJobs++;
+                chosen = selector.select(band.getText(), band.getConfidence(), rerun);
+                if (adaptiveSelector != null && (boolean) OcrRefinementSelector.class
+                        .getMethod("shouldTryWhiteCore", OcrRefinementSelector.Result.class).invoke(selector, chosen)) {
+                    Bitmap mask = (Bitmap) OcrBitmapInputs.class.getMethod("whiteCore", Bitmap.class).invoke(null, refined);
+                    try { masked = recognize.run(mask); ocrJobs++; }
+                    finally { if (mask != frame && mask != refined) mask.recycle(); }
+                    chosen = (OcrRefinementSelector.Result) adaptiveSelector.invoke(selector, band.getText(), band.getConfidence(), rerun, masked);
+                }
+            } finally { if (refined != frame) refined.recycle(); }
+            JSONObject stages = new JSONObject().put("track_id", band.getTrackId()).put("top", band.getTop())
                     .put("bottom", band.getBottom()).put("coarse", band.getText())
-                    .put("refined", rerun.getText()).put("selected", chosen.getText()));
+                    .put("refined", rerun.getText()).put("selected", chosen.getText());
+            if (masked != null) stages.put("white_core", masked.getText());
+            bands.put(stages);
             texts.add(chosen.getText());
             if (!JAPANESE.matcher(chosen.getText()).find()) continue;
             int id = band.getTrackId(); visible.add(id); lastSeen.put(id, now);
@@ -88,7 +106,7 @@ final class PlayerFrameReplay {
         return new JSONObject().put("ocr_text", String.join("\n", texts)).put("bands", bands)
                 .put("raw_rows", rawRows(raw))
                 .put("raw_text", raw.getText()).put("selection_api", candidateSelector == null ? "selectAll" : "selectForRecognition")
-                .put("ocr_jobs", 1 + selected.size());
+                .put("ocr_jobs", ocrJobs);
     }
     private JSONArray rawRows(OcrResult raw) throws Exception {
         JSONArray rows = new JSONArray();

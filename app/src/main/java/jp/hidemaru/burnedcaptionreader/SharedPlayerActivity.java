@@ -598,14 +598,38 @@ public final class SharedPlayerActivity extends Activity {
         }
         diagnostics.image("ocr_input", input, "frame_id", frameId, "track_id", selection.getTrackId(), "stage", "refined");
         ocr.recognize(input, result -> {
-            if (input != frame) input.recycle();
-            if (!acceptsFrame(generation)) { finishFrame(frame); return; }
+            if (!acceptsFrame(generation)) {
+                if (input != frame) input.recycle();
+                finishFrame(frame); return;
+            }
             diagnostics.ocr("ocr_refined", frameId, selection.getTrackId(), result);
-            OcrRefinementSelector.Result chosen = refinement.select(selection.getText(), selection.getConfidence(), result);
-            bands.add(new BandText(selection, chosen.getText(), chosen.getConfidence()));
-            diagnostics.event("refinement_choice", "frame_id", frameId, "track_id", selection.getTrackId(),
-                    "text", chosen.getText(), "confidence", chosen.getConfidence());
-            refineBands(frame, generation, timestamp, frameId, selections, index + 1, bands);
+            OcrRefinementSelector.Result regular = refinement.select(selection.getText(), selection.getConfidence(), result);
+            Bitmap white = null;
+            try {
+                if (refinement.shouldTryWhiteCore(regular)) white = OcrBitmapInputs.whiteCore(input);
+            } catch (RuntimeException error) {
+                diagnostics.event("refinement_fallback", "frame_id", frameId, "track_id", selection.getTrackId(),
+                        "reason", "white_core_prepare_error", "error", error.toString());
+            } finally { if (input != frame) input.recycle(); }
+            if (white == null) {
+                acceptRefinement(frame, generation, timestamp, frameId, selections, index, bands, selection, regular);
+                return;
+            }
+            final Bitmap mask = white;
+            diagnostics.image("ocr_input", mask, "frame_id", frameId, "track_id", selection.getTrackId(), "stage", "white_core");
+            ocr.recognize(mask, alternate -> {
+                mask.recycle();
+                if (!acceptsFrame(generation)) { finishFrame(frame); return; }
+                diagnostics.ocr("ocr_white_core", frameId, selection.getTrackId(), alternate);
+                OcrRefinementSelector.Result chosen = refinement.select(selection.getText(), selection.getConfidence(), result, alternate);
+                acceptRefinement(frame, generation, timestamp, frameId, selections, index, bands, selection, chosen);
+            }, error -> {
+                mask.recycle();
+                diagnostics.event("refinement_fallback", "frame_id", frameId, "track_id", selection.getTrackId(),
+                        "reason", "white_core_ocr_error", "error", error.toString());
+                if (!acceptsFrame(generation)) { finishFrame(frame); return; }
+                acceptRefinement(frame, generation, timestamp, frameId, selections, index, bands, selection, regular);
+            });
         }, error -> {
             if (input != frame) input.recycle();
             diagnostics.event("refinement_fallback", "frame_id", frameId, "track_id", selection.getTrackId(),
@@ -613,6 +637,15 @@ public final class SharedPlayerActivity extends Activity {
             bands.add(new BandText(selection, selection.getText(), selection.getConfidence()));
             refineBands(frame, generation, timestamp, frameId, selections, index + 1, bands);
         });
+    }
+
+    private void acceptRefinement(Bitmap frame, int generation, long timestamp, long frameId,
+            List<AutoSubtitleRegionTracker.Selection> selections, int index, List<BandText> bands,
+            AutoSubtitleRegionTracker.Selection selection, OcrRefinementSelector.Result chosen) {
+        bands.add(new BandText(selection, chosen.getText(), chosen.getConfidence()));
+        diagnostics.event("refinement_choice", "frame_id", frameId, "track_id", selection.getTrackId(),
+                "text", chosen.getText(), "confidence", chosen.getConfidence());
+        refineBands(frame, generation, timestamp, frameId, selections, index + 1, bands);
     }
 
     private void processResult(long timestamp, long frameId, List<BandText> bands) {

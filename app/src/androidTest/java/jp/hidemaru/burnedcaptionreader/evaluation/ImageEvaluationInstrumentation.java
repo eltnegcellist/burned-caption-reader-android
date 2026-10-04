@@ -50,7 +50,17 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
             int edits = 0, characters = 0;
             MlKitJapaneseOcrEngine engine = new MlKitJapaneseOcrEngine();
             boolean playerMode = "player-replay".equals(arguments.getString("mode"));
-            PlayerFrameReplay replay = new PlayerFrameReplay();
+            boolean cropMode = "caption-crops".equals(arguments.getString("mode"));
+            if (cropMode && !dataset.optBoolean("manual_caption_regions"))
+                throw new IllegalArgumentException("Pixel-reviewed manual caption regions required");
+            int diagnosticCoarseWidth = Integer.parseInt(arguments.getString("coarse_width", "0"));
+            if (diagnosticCoarseWidth != 0 && diagnosticCoarseWidth != 1100)
+                throw new IllegalArgumentException("Invalid diagnostic coarse width");
+            if (diagnosticCoarseWidth != 0 && !playerMode)
+                throw new IllegalArgumentException("Coarse width override requires player replay");
+            if (!cropMode && !"original".equals(arguments.getString("crop_preparation", "original")))
+                throw new IllegalArgumentException("Crop preparation requires manual crop mode");
+            PlayerFrameReplay replay = new PlayerFrameReplay(diagnosticCoarseWidth);
             try {
                 for (int i = 0; i < frames.length(); i++) {
                     JSONObject row = frames.getJSONObject(i);
@@ -63,12 +73,14 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
                     long started = SystemClock.elapsedRealtime();
                     JSONObject stages;
                     if (playerMode) stages = replay.process(bitmap, timestamp, input -> recognize(engine, input));
+                    else if (cropMode) stages = CaptionRegionDiagnostic.process(bitmap, row,
+                            arguments.getString("crop_preparation", "original"), input -> recognize(engine, input));
                     else stages = new JSONObject().put("ocr_text", recognize(engine, bitmap).getText());
                     bitmap.recycle();
                     String expected = row.getString("expected_text");
                     String actual = stages.getString("ocr_text");
-                    String referenceKey = playerMode ? SubtitleNormalizer.comparisonKey(expected) : expected;
-                    String actualKey = playerMode ? SubtitleNormalizer.comparisonKey(actual) : actual;
+                    String referenceKey = playerMode || cropMode ? SubtitleNormalizer.comparisonKey(expected) : expected;
+                    String actualKey = playerMode || cropMode ? SubtitleNormalizer.comparisonKey(actual) : actual;
                     int distance = Similarity.levenshteinDistance(referenceKey, actualKey);
                     int length = referenceKey.codePointCount(0, referenceKey.length());
                     edits += distance; characters += length;
@@ -82,8 +94,10 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
             } finally { engine.close(); }
             replay.finish(previous);
             JSONObject output = new JSONObject().put("schema_version", 1)
-                    .put("scope", playerMode ? "player_components_immediate_tts" : "raw_image_ocr_only")
-                    .put("metric", playerMode ? "caption_comparison_key_cer" : "raw_codepoint_cer")
+                    .put("scope", playerMode ? (diagnosticCoarseWidth == 0 ? "player_components_immediate_tts" : "player_components_diagnostic_coarse_width") : cropMode ? "manual_caption_regions_only" : "raw_image_ocr_only")
+                    .put("metric", playerMode || cropMode ? "caption_comparison_key_cer" : "raw_codepoint_cer")
+                    .put("diagnostic_coarse_width", diagnosticCoarseWidth)
+                    .put("crop_preparation", cropMode ? arguments.getString("crop_preparation", "original") : JSONObject.NULL)
                     .put("ground_truth_source", dataset.optString("ground_truth_source", "human_review"))
                     .put("human_verified", dataset.optBoolean("human_verified"))
                     .put("speech", playerMode ? replay.speech : new JSONArray())

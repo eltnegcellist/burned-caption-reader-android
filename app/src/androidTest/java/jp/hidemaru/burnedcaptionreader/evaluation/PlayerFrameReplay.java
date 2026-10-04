@@ -11,6 +11,9 @@ import jp.hidemaru.burnedcaptionreader.subtitle.*;
 /** Timestamp-driven component replay. TTS completes immediately; no live timing claims. */
 final class PlayerFrameReplay {
     interface Recognize { OcrResult run(Bitmap input) throws Exception; }
+    private final int diagnosticCoarseWidth;
+    PlayerFrameReplay() { this(0); }
+    PlayerFrameReplay(int diagnosticCoarseWidth) { this.diagnosticCoarseWidth = diagnosticCoarseWidth; }
     private final AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
     private final Method candidateSelector = recognitionSelector();
     private static Method recognitionSelector() {
@@ -33,7 +36,14 @@ final class PlayerFrameReplay {
 
     JSONObject process(Bitmap frame, long now, Recognize recognize) throws Exception {
         flushBefore(now);
-        Bitmap coarse = OcrBitmapInputs.coarse(frame);
+        Bitmap coarse;
+        if (diagnosticCoarseWidth == 0) coarse = OcrBitmapInputs.coarse(frame);
+        else {
+            float scale = Math.min(2f, diagnosticCoarseWidth / (float) frame.getWidth());
+            scale = Math.min(scale, 2000f / frame.getHeight());
+            coarse = Bitmap.createScaledBitmap(frame, Math.max(1, Math.round(frame.getWidth()*scale)),
+                    Math.max(1, Math.round(frame.getHeight()*scale)), true);
+        }
         OcrResult raw;
         try { raw = recognize.run(coarse); }
         finally { if (coarse != frame) coarse.recycle(); }

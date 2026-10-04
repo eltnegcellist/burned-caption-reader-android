@@ -1,7 +1,7 @@
 # Android frame evaluation
 
 The instrumentation calls the production `MlKitJapaneseOcrEngine` on Android.
-Keep two scopes separate:
+Keep these scopes separate:
 
 - `raw` (default): all visible text, raw code-point CER including whitespace and
   punctuation. Annotate all text for this metric, not only captions.
@@ -13,6 +13,30 @@ Keep two scopes separate:
   as deletions, extra selected text as insertions. This is **not raw OCR CER**.
   Results also expose broad OCR, every refinement band, job count, and emitted
   speech-request text/timestamps.
+- `caption-crops`: diagnostic OCR of pixel-reviewed manual caption rectangles,
+  in the listed reading order. This bypasses automatic region selection and
+  emits no speech. It uses the same caption comparison key as `player-replay`,
+  but its CER **is not automatic application accuracy**. A blank frame with an
+  empty region list returns empty text by construction and cannot establish
+  freedom from automatic false positives.
+
+For `caption-crops`, set `manual_caption_regions: true` and put
+`caption_regions: [[left, top, right, bottom], ...]` on every frame. Coordinates
+are normalized to the original image, must be finite and satisfy
+`0 <= left < right <= 1`, `0 <= top < bottom <= 1`. Use `[]` for blank frames.
+Freeze both references and rectangles before comparing preparations. They may
+still contain background writing inside the rectangle, so this is not a perfect
+OCR lower bound. `--crop-preparation` selects `original`, `double`, `white-core`,
+or `dark-core`. The latter two double the crop (bounded to 2000 pixels) and turn
+near-neutral bright/dark pixels into black ink on white. Colored caption cores
+can disappear; never choose the best preparation per frame using the reference.
+
+`--coarse-width 1100` in `player-replay` replaces only the first bitmap resizing
+step for a diagnostic. It writes `player_components_diagnostic_coarse_width`,
+which must not be labelled an app candidate or mixed with normal replay results.
+Zero preserves the production path. Production pixels and OCR are unchanged by
+these test-only options. `python3 tools/image-evaluator/test_run.py` verifies
+that invalid diagnostic provenance/options/rectangles fail before installation.
 
 The replay starts with empty state and uses retained original timestamps. Order
 flushes occur at logical deadlines between frames. TTS completes immediately in

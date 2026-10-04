@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import math
 import re
 import subprocess
 from pathlib import Path
@@ -13,10 +14,16 @@ parser.add_argument("output", type=Path)
 parser.add_argument("--adb", required=True)
 parser.add_argument("--device", required=True)
 parser.add_argument("--label", required=True, help="Git SHA or build label")
-parser.add_argument("--mode", choices=["raw", "player-replay"], default="raw")
+parser.add_argument("--mode", choices=["raw", "player-replay", "caption-crops"], default="raw")
+parser.add_argument("--crop-preparation", choices=["original", "double", "white-core", "dark-core"], default="original", help="Diagnostic manual-caption-region preparation; never automatic detection")
+parser.add_argument("--coarse-width", type=int, choices=[0,1100], default=0, help="Test-only pipeline override, not automatic application performance")
 parser.add_argument("--app-apk", type=Path)
 parser.add_argument("--test-apk", type=Path)
 args = parser.parse_args()
+if args.coarse_width and args.mode != "player-replay":
+    parser.error("Coarse width override requires player-replay diagnostic mode")
+if args.crop_preparation != "original" and args.mode != "caption-crops":
+    parser.error("Crop preparation requires caption-crops diagnostic mode")
 if not re.fullmatch(r"[A-Za-z0-9._/-]+", args.label):
     parser.error("Label must contain only letters, digits, dot, underscore, slash or hyphen")
 if not args.device.startswith("emulator-"):
@@ -26,8 +33,20 @@ synthetic = dataset.get("source") == "synthetic" and dataset.get("ground_truth_s
 visual_review = dataset.get("ground_truth_source") == "codex_visual_review" and dataset.get("reference_verified_from_pixels") is True
 if (dataset.get("human_verified") is not True and not synthetic and not visual_review) or not dataset.get("frames"):
     parser.error("Nonempty manually verified dataset required")
+if args.mode == "caption-crops" and dataset.get("manual_caption_regions") is not True:
+    parser.error("Diagnostic mode requires manually reviewed caption regions; not automatic recognition")
 previous = -1
 for frame in dataset["frames"]:
+    if args.mode == "caption-crops":
+        boxes = frame.get("caption_regions")
+        if not isinstance(boxes, list):
+            parser.error("Each diagnostic frame requires caption_regions, including [] for blanks")
+        for box in boxes:
+            if (not isinstance(box, list) or len(box) != 4
+                    or any(type(v) not in (int, float) or not math.isfinite(v) for v in box)
+                    or not 0 <= box[0] < box[2] <= 1
+                    or not 0 <= box[1] < box[3] <= 1):
+                parser.error("Invalid normalized manual caption rectangle")
     if not isinstance(frame.get("expected_text"), str):
         parser.error("Each expected_text must be manually entered; use empty string for no text")
     path = (args.dataset / frame["image"]).resolve()
@@ -59,7 +78,7 @@ payload = json.dumps(dataset, ensure_ascii=False).encode("utf-8")
 adb("shell", f"run-as {package} sh -c 'cat > files/image-evaluation/dataset.json'", input=payload)
 adb("shell", "run-as", package, "rm", "-f", "files/image-evaluation/results.json")
 run = adb("shell", "am", "instrument", "-w", "-r", "-e", "label", args.label,
-          "-e", "mode", args.mode,
+          "-e", "mode", args.mode, "-e", "crop_preparation", args.crop_preparation, "-e", "coarse_width", str(args.coarse_width),
           package + ".test/jp.hidemaru.burnedcaptionreader.evaluation.ImageEvaluationInstrumentation",
           stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 log = run.stdout.decode("utf-8")

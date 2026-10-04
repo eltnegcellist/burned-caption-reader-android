@@ -50,7 +50,7 @@ final class SceneTextFilter {
             if (isSeparatedNameplateRow(line, lines)) continue;
             result.add(line);
         }
-        return EmbeddedUiTextFilter.captionsOnly(result);
+        return DocumentTextFilter.captionsOnly(EmbeddedUiTextFilter.captionsOnly(result));
     }
 
     private static boolean isSeparatedNameplateRow(OcrLine line, List<OcrLine> all) {
@@ -62,12 +62,12 @@ final class SceneTextFilter {
             if (part.getWidth() > .34f || part.getHeight() > .12f
                     || !COMPACT_JAPANESE.matcher(key).matches() || !HAN_OR_KATAKANA.matcher(key).find()
                     || SENTENCE_END.matcher(key).find() || REACTION_PUNCTUATION.matcher(part.getText()).find()) return false;
-            height = Math.max(height, part.getHeight());
+            height = Math.max(height, part.getGlyphHeight());
         }
         // Separate small labels from an independently visible, larger caption.
         // Do not suppress a sole spaced headline or equally sized dialogue row.
         for (OcrLine other : all) {
-            if (other == line || other.getWidth() < .50f || other.getHeight() < height * 1.25f
+            if (other == line || other.getWidth() < .50f || other.getGlyphHeight() < height * 1.25f
                     || !HAN_OR_KATAKANA.matcher(other.getText()).find()) continue;
             float overlap = Math.min(line.getBottom(), other.getBottom()) - Math.max(line.getTop(), other.getTop());
             if (overlap <= 0) return true;

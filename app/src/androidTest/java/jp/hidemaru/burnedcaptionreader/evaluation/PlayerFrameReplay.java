@@ -96,9 +96,13 @@ final class PlayerFrameReplay {
         return rows;
     }
     private JSONObject rowGeometry(OcrLine row) throws JSONException {
-        return new JSONObject().put("text", row.getText()).put("confidence", row.getConfidence())
+        JSONObject value = new JSONObject().put("text", row.getText()).put("confidence", row.getConfidence())
                 .put("block", row.getBlockIndex()).put("left", row.getLeft()).put("top", row.getTop())
                 .put("right", row.getRight()).put("bottom", row.getBottom());
+        try {
+            value.put("glyph_height", row.getClass().getMethod("getGlyphHeight").invoke(row));
+        } catch (ReflectiveOperationException legacy) { /* Legacy APKs retain union-box height. */ }
+        return value;
     }
     private void flushBefore(long now) throws JSONException {
         long deadline = order.nextDeadline();

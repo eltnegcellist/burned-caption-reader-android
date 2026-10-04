@@ -39,6 +39,15 @@ public class OcrLineSegmenterTest {
         assertTrue(OcrLineSegmenter.separatedParts("先方さん担当者", boxes, 1.8f).isEmpty());
     }
 
+    @Test public void completeElementBoxesCanProvideGapEvidenceWithoutSymbols() {
+        var boxes=List.of(new OcrLine(0,"担当者",90,.1f,.8f,.25f,.88f),
+                new OcrLine(0,"先方さん",90,.50f,.8f,.70f,.88f));
+        var parts=OcrLineSegmenter.separatedParts("担当者先方さん",boxes,1.8f);
+        assertEquals(2,parts.size());
+        assertEquals("担当者",parts.get(0).getText());
+        assertTrue(OcrLineSegmenter.separatedParts("担当者別の人先方さん",boxes,1.8f).isEmpty());
+    }
+
     @Test public void imageAspectRatioMakesSamePixelGapDecision() {
         List<OcrLine> wide = symbols("先方", .1f, .3f);
         wide.addAll(symbols("担当者", .24f, .3f));

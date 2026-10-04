@@ -63,8 +63,16 @@ public final class MlKitJapaneseOcrEngine implements OcrEngine {
             double lineConfidenceTotal = 0.0;
             int lineConfidenceCount = 0;
             List<OcrLine> symbols = new ArrayList<>();
+            List<OcrLine> elements = new ArrayList<>();
             for (Text.Element element : line.getElements()) {
                 Float confidence = element.getConfidence();
+                Rect elementBox = element.getBoundingBox();
+                if (elementBox != null) elements.add(new OcrLine(indexed.blockIndex,
+                        element.getText(), confidence == null ? UNKNOWN_CONFIDENCE : confidence * 100.0,
+                        elementBox.left / (float) Math.max(1, imageWidth),
+                        elementBox.top / (float) Math.max(1, imageHeight),
+                        elementBox.right / (float) Math.max(1, imageWidth),
+                        elementBox.bottom / (float) Math.max(1, imageHeight)));
                 if (confidence != null) {
                     confidenceTotal += confidence * 100.0;
                     confidenceCount++;
@@ -85,13 +93,18 @@ public final class MlKitJapaneseOcrEngine implements OcrEngine {
             if (box != null) {
                 double lineConfidence = lineConfidenceCount == 0
                         ? UNKNOWN_CONFIDENCE : lineConfidenceTotal / lineConfidenceCount;
+                float aspect = imageWidth / (float) Math.max(1, imageHeight);
+                List<OcrLine> parts = OcrLineSegmenter.separatedParts(value, symbols, aspect);
+                // Some ML Kit lines provide elements but incomplete/absent symbols.
+                // The same complete-text and physical-gap checks apply to this fallback.
+                if (parts.isEmpty()) parts = OcrLineSegmenter.separatedParts(value, elements, aspect);
                 recognizedLines.add(new OcrLine(indexed.blockIndex, value, lineConfidence,
                         box.left / (float) Math.max(1, imageWidth),
                         box.top / (float) Math.max(1, imageHeight),
                         box.right / (float) Math.max(1, imageWidth),
                         box.bottom / (float) Math.max(1, imageHeight),
-                        OcrLineSegmenter.separatedParts(value, symbols,
-                                imageWidth / (float) Math.max(1, imageHeight))));
+                        parts, GlyphGeometry.medianHeight(symbols, elements,
+                                box.height() / (float) Math.max(1, imageHeight))));
             }
         }
         double confidence = confidenceCount == 0

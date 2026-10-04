@@ -168,7 +168,8 @@ public final class DiagnosticRecorder {
     private JSONObject rowGeometry(OcrLine row) throws org.json.JSONException {
         return new JSONObject().put("text", row.getText()).put("confidence", finite(row.getConfidence()))
                 .put("block", row.getBlockIndex()).put("left", row.getLeft()).put("top", row.getTop())
-                .put("right", row.getRight()).put("bottom", row.getBottom());
+                .put("right", row.getRight()).put("bottom", row.getBottom())
+                .put("glyph_height", row.getGlyphHeight());
     }
     private Object finite(double number) { return Double.isFinite(number) ? number : JSONObject.NULL; }
     private String version() {

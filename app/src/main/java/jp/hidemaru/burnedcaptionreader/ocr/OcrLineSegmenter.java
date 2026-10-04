@@ -54,7 +54,9 @@ public final class OcrLineSegmenter {
                 right = Math.max(right, value.getRight()); bottom = Math.max(bottom, value.getBottom());
             }
             parts.add(new OcrLine(values.get(0).getBlockIndex(), text.toString(),
-                    confidence / values.size(), left, top, right, bottom));
+                    confidence / values.size(), left, top, right, bottom,
+                    Collections.emptyList(), GlyphGeometry.medianHeight(values,
+                            Collections.emptyList(), bottom - top)));
         }
         return parts;
     }

@@ -114,6 +114,8 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
         long deadline = SystemClock.elapsedRealtime() + limit * 1000L;
         int windowSeconds = "capture-window".equals(arguments.getString("mode"))
                 ? Math.max(300, Math.min(1800, Integer.parseInt(arguments.getString("window_seconds", "300")))) : 0;
+        int windowStartSeconds = Math.max(0, Math.min(86400,
+                Integer.parseInt(arguments.getString("start_seconds", "0"))));
         JSONObject last = new JSONObject(); boolean ended = false; boolean windowComplete = false;
         while (SystemClock.elapsedRealtime() < deadline && recorder.isRecording()) {
             Thread.sleep(1000);
@@ -122,7 +124,8 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
             last = new JSONObject(new String(Files.readAllBytes(state.toPath()),StandardCharsets.UTF_8));
             double target = last.optDouble("target_duration_ms");
             if (windowSeconds > 0 && last.optBoolean("evaluation_started")
-                    && !last.optBoolean("ad_visible") && last.optLong("media_ms") >= windowSeconds * 1000L
+                    && last.optLong("window_start_ms") == windowStartSeconds * 1000L
+                    && !last.optBoolean("ad_visible") && last.optLong("media_ms") >= (windowStartSeconds + windowSeconds) * 1000L
                     && Math.abs(last.optLong("duration_ms") - target) < 2000) { windowComplete = true; break; }
             JSONObject terminal = last.optJSONObject("ended_event");
             if (last.optBoolean("evaluation_started") && terminal != null && target > 60000
@@ -139,7 +142,8 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
         recorder.stop();
         awaitRecorderStop();
         JSONObject summary = new JSONObject().put("video_id",video).put("ended",ended)
-                .put("scope", windowSeconds > 0 ? "window" : "full").put("window_seconds",windowSeconds).put("completed",completed)
+                .put("scope", windowSeconds > 0 ? "window" : "full").put("window_seconds",windowSeconds)
+                .put("window_start_seconds",windowStartSeconds).put("completed",completed)
                 .put("last_state",last).put("dropped",recorder.droppedCount()).put("recorder_status",recorder.status());
         Files.write(new File(root,"summary.json").toPath(),summary.toString(2).getBytes(StandardCharsets.UTF_8));
         report.putString("stream", "Evaluation capture " + (completed ? "complete" : "INCOMPLETE") + ": " + video + "\n");

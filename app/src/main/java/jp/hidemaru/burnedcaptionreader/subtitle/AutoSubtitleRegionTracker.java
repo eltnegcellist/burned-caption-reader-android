@@ -279,7 +279,7 @@ public final class AutoSubtitleRegionTracker {
             // 2+1 lanes. Both padded re-OCR jobs then included the same bottom row.
             // Only spatially validated triples receive a third row's height budget.
             float heightBudget = candidate.spatialGroup && candidate.lines.size() == 3
-                    ? TWO_ROW_MAX_HEIGHT * 1.5f : TWO_ROW_MAX_HEIGHT;
+                    ? 0.60f : TWO_ROW_MAX_HEIGHT;
             if (length < 2 || length > 140 || candidate.height() > heightBudget) continue;
             candidate.textLength = length;
             candidate.japanese = JAPANESE_TEXT.matcher(candidate.text).find();
@@ -414,7 +414,7 @@ public final class AutoSubtitleRegionTracker {
             }
         }
         float groupTop = cluster.get(0).getTop();
-        float heightBudget = TWO_ROW_MAX_HEIGHT * Math.max(2, cluster.size() + 1) / 2f;
+        float heightBudget = cluster.size() == 2 ? .60f : TWO_ROW_MAX_HEIGHT;
         if (next.getBottom() - groupTop > heightBudget) return false;
 
         float horizontalOverlap = Math.max(0f,

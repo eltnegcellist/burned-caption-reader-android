@@ -23,6 +23,11 @@ public class OcrLineSegmenterTest {
         assertEquals("担当者", parts.get(1).getText());
     }
 
+    @Test public void moderatePhysicalGapBetweenLabelsIsRetainedAsEvidence() {
+        List<OcrLine> boxes = symbols("先方", .1f, .8f);
+        boxes.addAll(symbols("担当者", .208f, .8f));
+        assertEquals(2, OcrLineSegmenter.separatedParts("先方担当者", boxes, 1.8f).size());
+    }
     @Test public void ordinaryCharacterSpacingIsNotSegmentationEvidence() {
         assertTrue(OcrLineSegmenter.separatedParts("字幕を読みます",
                 symbols("字幕を読みます", .1f, .3f), 1.8f).isEmpty());

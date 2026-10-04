@@ -27,7 +27,7 @@ public final class OcrLineSegmenter {
             if (previous != null) {
                 float height = Math.max(previous.getHeight(), symbol.getHeight());
                 float gap = symbol.getLeft() - previous.getRight();
-                if (gap > height * .85f / imageAspectRatio) {
+                if (gap > height * .60f / imageAspectRatio) {
                     float overlap = Math.min(previous.getBottom(), symbol.getBottom())
                             - Math.max(previous.getTop(), symbol.getTop());
                     if (overlap < Math.min(previous.getHeight(), symbol.getHeight()) * .40f)

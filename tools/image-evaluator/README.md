@@ -216,3 +216,8 @@ establish physical-device latency or thermal behavior.
 The scoped manual-region diagnostics, frozen implementation and two new held-out
 five-minute windows are in
 [`docs/2026-10-05-white-core-evaluation.md`](../../docs/2026-10-05-white-core-evaluation.md).
+
+Two additional frozen-source five-minute windows from one other publisher are in
+[`docs/2026-10-05-other-author-white-core-evaluation.md`](../../docs/2026-10-05-other-author-white-core-evaluation.md).
+Both final readings were unchanged across all 240 replay images while OCR jobs
+increased by 27–30%; these windows add no evidence of a new-publisher benefit.

@@ -193,3 +193,26 @@ viewing their OCR results and freeze all references before comparison.
 
 The glyph-size/document-filter iteration and two fixed middle-video windows are in
 [`docs/2026-10-04-document-layout-evaluation.md`](../../docs/2026-10-04-document-layout-evaluation.md).
+
+### Conditional white-core refinement
+
+The player may now make one additional OCR call per uncertain band on white-core
+pixels from the same bounded refinement crop. It tries this only when the normal
+chosen Japanese reading has confidence below 75. The alternative must be a
+successful refinement rather than its coarse fallback, have confidence at least
+70 and at least 15 points above the normal choice, preserve the number of rows,
+retain the comparison-key length within 85–120%, and reach text similarity 0.80.
+Empty or conflicting results leave the normal choice intact. This does not
+recover bands that the first OCR/tracker missed, remove already selected object
+writing, or establish better audio.
+
+The replay discovers the overload and bitmap helper by reflection, and runs the
+same production decision on compatible candidate APKs. Older APKs retain their
+original path with no additional call. Results record `white_core` on bands that
+tried it and include these attempts in `ocr_jobs`. Additional jobs have a device
+cost even when the alternative is rejected; emulator processing times do not
+establish physical-device latency or thermal behavior.
+
+The scoped manual-region diagnostics, frozen implementation and two new held-out
+five-minute windows are in
+[`docs/2026-10-05-white-core-evaluation.md`](../../docs/2026-10-05-white-core-evaluation.md).

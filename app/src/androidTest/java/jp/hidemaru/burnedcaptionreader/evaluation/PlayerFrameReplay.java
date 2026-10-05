@@ -52,13 +52,27 @@ final class PlayerFrameReplay {
         OcrResult raw;
         try { raw = recognize.run(coarse); }
         finally { if (coarse != frame) coarse.recycle(); }
-        List<AutoSubtitleRegionTracker.Selection> selected = select(now, raw);
+        OcrResult detection = raw;
+        OcrResult strip = null;
+        int ocrJobs = 1;
+        try {
+            Method method = OcrBitmapInputs.class.getMethod("stripRecoveryPlan", Bitmap.class, OcrResult.class);
+            SubtitleCropPlan plan = (SubtitleCropPlan) method.invoke(null, frame, raw);
+            if (plan != null) {
+                Bitmap crop = OcrBitmapInputs.refined(frame, plan);
+                try { strip = recognize.run(crop); ocrJobs++; }
+                finally { if (crop != frame) crop.recycle(); }
+                detection = (OcrResult) Class.forName("jp.hidemaru.burnedcaptionreader.ocr.CaptionStripRecovery")
+                        .getMethod("merge", OcrResult.class, OcrResult.class, SubtitleCropPlan.class, int.class)
+                        .invoke(null, raw, strip, plan, frame.getHeight());
+            }
+        } catch (NoSuchMethodException legacy) { /* Same harness preserves old APK's detection path. */ }
+        List<AutoSubtitleRegionTracker.Selection> selected = select(now, detection);
         JSONArray bands = new JSONArray();
         List<String> texts = new ArrayList<>();
         List<SubtitleSpeechOrderBuffer.Entry> committed = new ArrayList<>();
         List<SubtitleSpeechOrderBuffer.Band> waiting = new ArrayList<>();
         Set<Integer> visible = new HashSet<>();
-        int ocrJobs = 1;
         for (AutoSubtitleRegionTracker.Selection band : selected) {
             SubtitleCropPlan plan = SubtitleCropPlan.create(frame.getWidth(), frame.getHeight(), band.getTop(), band.getBottom());
             Bitmap refined = OcrBitmapInputs.refined(frame, plan);
@@ -105,7 +119,8 @@ final class PlayerFrameReplay {
         emit(now, order.offer(now, committed, waiting));
         return new JSONObject().put("ocr_text", String.join("\n", texts)).put("bands", bands)
                 .put("raw_rows", rawRows(raw))
-                .put("raw_text", raw.getText()).put("selection_api", candidateSelector == null ? "selectAll" : "selectForRecognition")
+                .put("raw_text", raw.getText()).put("recognition_rows", rawRows(detection))
+                .put("strip_recovery", strip == null ? JSONObject.NULL : strip.getText()).put("selection_api", candidateSelector == null ? "selectAll" : "selectForRecognition")
                 .put("ocr_jobs", ocrJobs);
     }
     private JSONArray rawRows(OcrResult raw) throws Exception {

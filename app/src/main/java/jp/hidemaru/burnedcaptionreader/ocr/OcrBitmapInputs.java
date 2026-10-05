@@ -12,6 +12,14 @@ public final class OcrBitmapInputs {
         return Bitmap.createScaledBitmap(frame, Math.max(1, Math.round(frame.getWidth() * scale)),
                 Math.max(1, Math.round(frame.getHeight() * scale)), true);
     }
+    /** One extra detection call only for pixel-supported lower-strip misses. */
+    public static SubtitleCropPlan stripRecoveryPlan(Bitmap frame, OcrResult raw) {
+        int[] pixels = new int[frame.getWidth() * frame.getHeight()];
+        frame.getPixels(pixels, 0, frame.getWidth(), 0, 0, frame.getWidth(), frame.getHeight());
+        CaptionStripRecovery.Region region = CaptionStripRecovery.find(pixels, frame.getWidth(), frame.getHeight());
+        return CaptionStripRecovery.needsRecovery(region, raw)
+                ? SubtitleCropPlan.create(frame.getWidth(), frame.getHeight(), region.top, region.bottom) : null;
+    }
     public static Bitmap refined(Bitmap frame, SubtitleCropPlan plan) {
         Bitmap crop = Bitmap.createBitmap(frame, 0, plan.top, frame.getWidth(), plan.height);
         Bitmap output = null;

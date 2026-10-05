@@ -221,3 +221,24 @@ Two additional frozen-source five-minute windows from one other publisher are in
 [`docs/2026-10-05-other-author-white-core-evaluation.md`](../../docs/2026-10-05-other-author-white-core-evaluation.md).
 Both final readings were unchanged across all 240 replay images while OCR jobs
 increased by 27–30%; these windows add no evidence of a new-publisher benefit.
+
+### Pixel-supported lower-strip recovery
+
+If first-pass OCR misses Japanese in a dark lower strip, the production bitmap
+helper can find neutral text-like pixels with dark margins and prepare one
+ordinary enlarged crop. Only sufficiently confident, localized Japanese rows
+are remapped into original-frame coordinates before caption tracking. Existing
+Japanese rows prevent a redundant attempt; empty or rejected recovery keeps the
+original rows. This covers a narrow visual layout, not arbitrary caption styles.
+
+The replay discovers `stripRecoveryPlan` and its merge helper by reflection,
+preserving old APK behavior when the method is absent. `raw_text`/`raw_rows`
+always contain the original first pass; `recognition_rows` include accepted
+recovery, and `strip_recovery` records the attempted crop text or null. All calls
+count toward `ocr_jobs`. A baseline replay with both old and shared harnesses
+checks their parity separately from candidate accuracy.
+
+Repeated numeric columns with aligned compact labels provide corroborating
+evidence for excluding a table before caption grouping. Bottom narration and
+sentence-like reactions remain eligible. The rule uses geometry rather than
+video identifiers or a publisher-specific word list.

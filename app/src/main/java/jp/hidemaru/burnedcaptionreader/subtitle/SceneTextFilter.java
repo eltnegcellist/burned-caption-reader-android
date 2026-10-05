@@ -50,7 +50,7 @@ final class SceneTextFilter {
             if (isSeparatedNameplateRow(line, lines)) continue;
             result.add(line);
         }
-        return DocumentTextFilter.captionsOnly(EmbeddedUiTextFilter.captionsOnly(result));
+        return DocumentTextFilter.captionsOnly(TableTextFilter.captionsOnly(EmbeddedUiTextFilter.captionsOnly(result)));
     }
 
     private static boolean isSeparatedNameplateRow(OcrLine line, List<OcrLine> all) {

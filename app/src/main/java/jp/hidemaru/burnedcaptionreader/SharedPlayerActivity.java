@@ -39,6 +39,7 @@ import jp.hidemaru.burnedcaptionreader.ocr.OcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
 import jp.hidemaru.burnedcaptionreader.ocr.SubtitleCropPlan;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrBitmapInputs;
+import jp.hidemaru.burnedcaptionreader.ocr.CaptionStripRecovery;
 import jp.hidemaru.burnedcaptionreader.subtitle.OcrRefinementSelector;
 import jp.hidemaru.burnedcaptionreader.subtitle.TemporalOcrConsensus;
 import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticRecorder;
@@ -557,16 +558,47 @@ public final class SharedPlayerActivity extends Activity {
             if (input != frame) input.recycle();
             if (!acceptsFrame(generation)) { finishFrame(frame); return; }
             diagnostics.ocr("ocr_raw", frameId, -1, result);
-            List<AutoSubtitleRegionTracker.Selection> selections = tracker.selectForRecognition(timestamp, result);
-            diagnostics.event("selection_summary", "frame_id", frameId, "raw_rows", result.getLines().size(),
-                    "selected_bands", selections.size(), "policy", "subtitle_tracker");
-            refineBands(frame, generation, timestamp, frameId, selections, 0, new ArrayList<>());
+            recoverStrip(frame, generation, timestamp, frameId, result);
         }, error -> {
             if (input != frame) input.recycle();
             diagnostics.event("ocr_error", "frame_id", frameId, "stage", "coarse", "error", error.toString());
             if (acceptsFrame(generation)) status.setText("OCRエラー: " + error.getMessage());
             finishFrame(frame);
         });
+    }
+
+    private void recoverStrip(Bitmap frame, int generation, long timestamp, long frameId, OcrResult raw) {
+        Bitmap input = null;
+        SubtitleCropPlan plan = null;
+        try {
+            plan = OcrBitmapInputs.stripRecoveryPlan(frame, raw);
+            if (plan != null) input = OcrBitmapInputs.refined(frame, plan);
+        } catch (RuntimeException error) {
+            diagnostics.event("strip_recovery_fallback", "frame_id", frameId, "reason", "prepare_error");
+        }
+        if (input == null) { selectBands(frame, generation, timestamp, frameId, raw); return; }
+        final Bitmap crop = input;
+        final SubtitleCropPlan region = plan;
+        diagnostics.image("ocr_input", crop, "frame_id", frameId, "stage", "strip_recovery");
+        ocr.recognize(crop, result -> {
+            if (crop != frame) crop.recycle();
+            if (!acceptsFrame(generation)) { finishFrame(frame); return; }
+            diagnostics.ocr("ocr_strip_recovery", frameId, -1, result);
+            selectBands(frame, generation, timestamp, frameId,
+                    CaptionStripRecovery.merge(raw, result, region, frame.getHeight()));
+        }, error -> {
+            if (crop != frame) crop.recycle();
+            diagnostics.event("strip_recovery_fallback", "frame_id", frameId, "reason", "ocr_error");
+            if (!acceptsFrame(generation)) { finishFrame(frame); return; }
+            selectBands(frame, generation, timestamp, frameId, raw);
+        });
+    }
+
+    private void selectBands(Bitmap frame, int generation, long timestamp, long frameId, OcrResult raw) {
+        List<AutoSubtitleRegionTracker.Selection> selections = tracker.selectForRecognition(timestamp, raw);
+        diagnostics.event("selection_summary", "frame_id", frameId, "raw_rows", raw.getLines().size(),
+                "selected_bands", selections.size(), "policy", "subtitle_tracker");
+        refineBands(frame, generation, timestamp, frameId, selections, 0, new ArrayList<>());
     }
 
     private void refineBands(Bitmap frame, int generation, long timestamp, long frameId,

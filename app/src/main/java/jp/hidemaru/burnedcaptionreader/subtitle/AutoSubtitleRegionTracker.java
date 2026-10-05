@@ -77,6 +77,9 @@ public final class AutoSubtitleRegionTracker {
         float meanLeft;
         float meanCenterX;
         float meanRight;
+        float meanTop;
+        float meanRowHeight;
+        int spatialRows;
         float meanBottom;
         float meanHeight;
         Candidate current;
@@ -89,6 +92,7 @@ public final class AutoSubtitleRegionTracker {
 
     private static final int LANE_COUNT = 24;
     private static final int MAX_ACTIVE_LANES = 4;
+    private static final float TWO_ROW_MAX_HEIGHT = .34f;
     private static final long LOCK_MISSING_MS = 2_800L;
     private static final long LANE_EXPIRES_MS = 8_000L;
     private static final long PROVISIONAL_MAX_STATIC_MS = 2_500L;
@@ -144,11 +148,27 @@ public final class AutoSubtitleRegionTracker {
     public synchronized List<Selection> selectAll(long timestamp, OcrResult result,
                                                   boolean portraitVideoViewport,
                                                   boolean sceneChanged) {
+        return selectBands(timestamp, result, portraitVideoViewport, sceneChanged, false);
+    }
+
+    /**
+     * Geometrically qualified candidates for refinement and temporal stabilization.
+     * These are NOT speech commits. The shared player already requires independent
+     * repeated observations in SubtitleStabilizer; delaying both stages can leave
+     * only one usable observation before a provisional lane expires.
+     * Legacy selectAll retains its stronger temporal gate for its existing callers.
+     */
+    public synchronized List<Selection> selectForRecognition(long timestamp, OcrResult result) {
+        return selectBands(timestamp, result, false, false, true);
+    }
+
+    private List<Selection> selectBands(long timestamp, OcrResult result,
+            boolean portraitVideoViewport, boolean sceneChanged, boolean recognitionCandidates) {
         if (sceneChanged) {
             lanes.clear();
             lockedLanes.clear();
         }
-        List<Candidate> candidates = buildCandidates(result, portraitVideoViewport);
+        List<Candidate> candidates = buildCandidates(result, portraitVideoViewport, recognitionCandidates);
         expireOldLanes(timestamp);
         for (LaneState lane : lanes) {
             lane.seenThisFrame = false;
@@ -182,7 +202,7 @@ public final class AutoSubtitleRegionTracker {
             }
         }
 
-        for (LaneState lane : provisionalLanes(timestamp)) {
+        for (LaneState lane : provisionalLanes(timestamp, recognitionCandidates)) {
             if (selected.size() >= MAX_ACTIVE_LANES) break;
             if (!lockedLanes.contains(lane) && canAddSelectedLane(lane, selected)) {
                 selected.add(lane);
@@ -202,10 +222,13 @@ public final class AutoSubtitleRegionTracker {
         lockedLanes.clear();
     }
 
-    private List<Candidate> buildCandidates(OcrResult result, boolean portraitVideoViewport) {
+    private List<Candidate> buildCandidates(OcrResult result, boolean portraitVideoViewport, boolean recognitionCandidates) {
         Map<Integer, Candidate> grouped = new HashMap<>();
         List<OcrLine> eligibleLines = new ArrayList<>();
-        for (OcrLine line : result.getLines()) {
+        List<OcrLine> sourceLines = recognitionCandidates
+                ? SceneTextFilter.captionsOnly(result.getLines()) : result.getLines();
+        for (OcrLine line : sourceLines) {
+            if (recognitionCandidates && isParallelCompactLabel(line, sourceLines)) continue;
             String text = SubtitleNormalizer.normalize(line.getText());
             if (text.isEmpty() || line.getHeight() < 0.008f) continue;
             boolean japaneseLine = JAPANESE_TEXT.matcher(text).find();
@@ -252,7 +275,12 @@ public final class AutoSubtitleRegionTracker {
             candidate.confidence = confidenceTotal / Math.max(1, candidate.lines.size());
             String key = SubtitleNormalizer.comparisonKey(candidate.text);
             int length = key.codePointCount(0, key.length());
-            if (length < 2 || length > 140 || candidate.height() > 0.34f) continue;
+            // The old fixed two-row budget split large three-row captions into
+            // 2+1 lanes. Both padded re-OCR jobs then included the same bottom row.
+            // Only spatially validated triples receive a third row's height budget.
+            float heightBudget = candidate.spatialGroup && candidate.lines.size() == 3
+                    ? 0.60f : TWO_ROW_MAX_HEIGHT;
+            if (length < 2 || length > 140 || candidate.height() > heightBudget) continue;
             candidate.textLength = length;
             candidate.japanese = JAPANESE_TEXT.matcher(candidate.text).find();
             candidate.lane = laneFor(candidate.centerY());
@@ -310,6 +338,29 @@ public final class AutoSubtitleRegionTracker {
         return false;
     }
 
+    // Short noun labels placed beside each other are nameplates or diagram headers.
+    // Remove them BEFORE row grouping, so a nearby reaction cannot turn a label
+    // into the second row of a supposed caption. No video/title-specific words.
+    private boolean isParallelCompactLabel(OcrLine line, List<OcrLine> all) {
+        if (!isCompactNounLabel(line)) return false;
+        for (OcrLine other : all) {
+            if (other == line || !isCompactNounLabel(other)) continue;
+            float height = Math.max(line.getHeight(), other.getHeight());
+            if (Math.min(line.getHeight(), other.getHeight()) < height * .65f) continue;
+            if (Math.abs(line.getCenterY() - other.getCenterY()) > height * 1.15f) continue;
+            float horizontalGap = Math.max(other.getLeft() - line.getRight(),
+                    line.getLeft() - other.getRight());
+            if (horizontalGap >= .08f) return true;
+        }
+        return false;
+    }
+
+    private boolean isCompactNounLabel(OcrLine line) {
+        return line.getWidth() <= .34f && line.getHeight() <= .12f
+                && SubtitleNormalizer.comparisonKey(line.getText())
+                        .matches("お?[\\p{IsHan}\\p{IsKatakana}ー]{2,12}");
+    }
+
     private List<Candidate> buildSpatialLineGroups(List<OcrLine> eligibleLines) {
         List<OcrLine> japaneseLines = new ArrayList<>();
         for (OcrLine line : eligibleLines) {
@@ -354,8 +405,17 @@ public final class AutoSubtitleRegionTracker {
             return false;
         }
 
+        // The third row must continue the existing row spacing. Otherwise a
+        // document/object label below two dialogue rows can fill the extra budget.
+        if (cluster.size() == 2) {
+            float previousGap = previous.getTop() - cluster.get(0).getBottom();
+            if (Math.abs(verticalGap - previousGap) > Math.max(.020f, referenceHeight * .50f)) {
+                return false;
+            }
+        }
         float groupTop = cluster.get(0).getTop();
-        if (next.getBottom() - groupTop > 0.34f) return false;
+        float heightBudget = cluster.size() == 2 ? .60f : TWO_ROW_MAX_HEIGHT;
+        if (next.getBottom() - groupTop > heightBudget) return false;
 
         float horizontalOverlap = Math.max(0f,
                 Math.min(previous.getRight(), next.getRight())
@@ -494,13 +554,31 @@ public final class AutoSubtitleRegionTracker {
         if (state.geometrySamples == 0) return distance(candidate.lane, state.lane) <= 1;
         float baselineTolerance = Math.max(0.030f, state.meanHeight * 0.55f);
         float heightTolerance = Math.max(0.018f, state.meanHeight * 0.42f);
-        if (Math.abs(candidate.bottom - state.meanBottom) > baselineTolerance) return false;
-        if (Math.abs(candidate.height() - state.meanHeight) > heightTolerance) return false;
+        boolean sameBand = Math.abs(candidate.bottom - state.meanBottom) <= baselineTolerance
+                && Math.abs(candidate.height() - state.meanHeight) <= heightTolerance;
+        if (!sameBand && !followsSpatialRowCountChange(state, candidate)) return false;
 
         float anchorShift = Math.min(Math.abs(candidate.left - state.meanLeft),
                 Math.min(Math.abs(candidate.centerX() - state.meanCenterX),
                         Math.abs(candidate.right - state.meanRight)));
         return anchorShift <= 0.050f;
+    }
+
+    /** Preserve a top-anchored dialogue lane when two rows become three or back. */
+    private boolean followsSpatialRowCountChange(LaneState state, Candidate candidate) {
+        int rows = candidate.lines.size();
+        if (!candidate.spatialGroup || rows < 2 || rows > 3
+                || state.spatialRows < 2 || state.spatialRows > 3
+                || rows == state.spatialRows) return false;
+        float rowHeight = averageRowHeight(candidate);
+        return Math.abs(candidate.top - state.meanTop) <= Math.max(.018f, state.meanRowHeight * .30f)
+                && Math.abs(rowHeight - state.meanRowHeight) <= state.meanRowHeight * .25f;
+    }
+
+    private float averageRowHeight(Candidate candidate) {
+        float total = 0f;
+        for (OcrLine line : candidate.lines) total += line.getHeight();
+        return total / candidate.lines.size();
     }
 
     private double geometryDistance(LaneState state, Candidate candidate) {
@@ -509,9 +587,13 @@ public final class AutoSubtitleRegionTracker {
                 Math.min(Math.abs(candidate.centerX() - state.meanCenterX),
                         Math.abs(candidate.right - state.meanRight)));
         float heightScale = Math.max(0.02f, state.meanHeight);
-        return Math.abs(candidate.bottom - state.meanBottom) / heightScale
-                + Math.abs(candidate.height() - state.meanHeight) / heightScale
-                + anchorShift / 0.05f;
+        double distance = Math.abs(candidate.bottom - state.meanBottom) / heightScale
+                + Math.abs(candidate.height() - state.meanHeight) / heightScale;
+        if (followsSpatialRowCountChange(state, candidate)) {
+            distance = Math.min(distance, Math.abs(candidate.top - state.meanTop) / heightScale
+                    + Math.abs(averageRowHeight(candidate) - state.meanRowHeight) / heightScale);
+        }
+        return distance + anchorShift / 0.05f;
     }
 
     private void updateGeometry(LaneState state, Candidate candidate) {
@@ -520,6 +602,9 @@ public final class AutoSubtitleRegionTracker {
         state.meanLeft = weightedMean(state.meanLeft, candidate.left, previousWeight, totalWeight);
         state.meanCenterX = weightedMean(state.meanCenterX, candidate.centerX(), previousWeight, totalWeight);
         state.meanRight = weightedMean(state.meanRight, candidate.right, previousWeight, totalWeight);
+        state.meanTop = weightedMean(state.meanTop, candidate.top, previousWeight, totalWeight);
+        state.meanRowHeight = weightedMean(state.meanRowHeight, averageRowHeight(candidate), previousWeight, totalWeight);
+        state.spatialRows = candidate.spatialGroup ? candidate.lines.size() : 0;
         state.meanBottom = weightedMean(state.meanBottom, candidate.bottom, previousWeight, totalWeight);
         state.meanHeight = weightedMean(state.meanHeight, candidate.height(), previousWeight, totalWeight);
         state.geometrySamples++;
@@ -541,15 +626,17 @@ public final class AutoSubtitleRegionTracker {
         return confirmed;
     }
 
-    private List<LaneState> provisionalLanes(long timestamp) {
+    private List<LaneState> provisionalLanes(long timestamp, boolean recognitionCandidates) {
         List<LaneState> provisional = new ArrayList<>();
         for (LaneState lane : lanes) {
             Candidate candidate = lane.current;
             if (!lane.seenThisFrame || candidate == null || lane.transitions > 0) continue;
-            if (lane.observations < 2 || lane.stableObservations < 2) continue;
-            if (isShortReaction(candidate) && candidate.confidence < 35 && lane.stableObservations < 3) continue;
-            if (timestamp - lane.textSince < 300L
-                    || timestamp - lane.firstSeenAt > PROVISIONAL_MAX_STATIC_MS) continue;
+            if (!recognitionCandidates || !isEarlyRecognitionShape(candidate)) {
+                if (lane.observations < 2 || lane.stableObservations < 2) continue;
+                if (isShortReaction(candidate) && candidate.confidence < 35 && lane.stableObservations < 3) continue;
+                if (timestamp - lane.textSince < 300L
+                        || timestamp - lane.firstSeenAt > PROVISIONAL_MAX_STATIC_MS) continue;
+            }
             if (!isStrongCaptionShape(candidate) && !isUpperCaptionRescueShape(candidate)) continue;
             candidate.finalScore = laneScore(timestamp, lane, candidate);
             provisional.add(lane);
@@ -624,6 +711,12 @@ public final class AutoSubtitleRegionTracker {
         String b = SubtitleNormalizer.comparisonKey(right.text);
         return a.contains(b) || b.contains(a)
                 || Similarity.areEquivalent(left.text, right.text, 0.84);
+    }
+
+    private boolean isEarlyRecognitionShape(Candidate candidate) {
+        return isStrongCaptionShape(candidate) && (candidate.spatialGroup
+                && candidate.lines.size() >= 2 || candidate.height() >= .065f
+                || candidate.width() >= .60f && candidate.textLength >= 12);
     }
 
     private boolean isStrongCaptionShape(Candidate candidate) {

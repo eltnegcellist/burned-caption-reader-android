@@ -193,6 +193,12 @@ public final class TemporalOcrConsensus {
     }
 
     private boolean sameCaption(String previous, String current) {
+        // Historical votes must never revert a new number, negation, or a
+        // typewriter extension to an older caption.
+        String a = SubtitleNormalizer.comparisonKey(previous);
+        String b = SubtitleNormalizer.comparisonKey(current);
+        if (Similarity.hasMeaningfulTokenChange(previous, current)) return false;
+        if (b.length() > a.length() && b.startsWith(a)) return false;
         return Similarity.textSimilarity(previous, current) >= SAME_CAPTION_THRESHOLD
                 || Similarity.isPrefixRelation(previous, current)
                 || Similarity.isMultilineVariant(previous, current, 0.50);

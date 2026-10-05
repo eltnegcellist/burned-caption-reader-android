@@ -18,17 +18,37 @@ public final class OcrRefinementSelector {
     public static final class Result {
         private final String text;
         private final double confidence;
+        private final boolean refined;
         Result(String text, double confidence) {
+            this(text, confidence, true);
+        }
+        Result(String text, double confidence, boolean refined) {
             this.text = text;
             this.confidence = confidence;
+            this.refined = refined;
         }
         public String getText() { return text; }
         public double getConfidence() { return confidence; }
     }
 
+    /** White-core OCR is a same-frame alternative, never permission to lose colored captions. */
+    public Result select(String originalText, double originalConfidence, OcrResult refined, OcrResult whiteCore) {
+        Result regular = select(originalText, originalConfidence, refined);
+        if (whiteCore == null || !shouldTryWhiteCore(regular)) return regular;
+        Result alternative = select(originalText, originalConfidence, whiteCore);
+        if (!alternative.refined || alternative.confidence < Math.max(70, regular.confidence + 15)
+                || alternative.text.split("\n").length != regular.text.split("\n").length
+                || !preservesText(regular.text, alternative.text)) return regular;
+        return alternative;
+    }
+
+    public boolean shouldTryWhiteCore(Result regular) {
+        return regular.confidence < 75 && JAPANESE.matcher(regular.text).find();
+    }
+
     public Result select(String originalText, double originalConfidence, OcrResult refined) {
         String original = SubtitleNormalizer.normalize(originalText);
-        Result fallback = new Result(original, confidence(originalConfidence));
+        Result fallback = new Result(original, confidence(originalConfidence), false);
         if (original.isEmpty()) return fallback;
         String[] originalRows = original.split("\n");
         List<OcrLine> lines = new ArrayList<>();

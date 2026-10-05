@@ -76,7 +76,7 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
             diagnostics.event("tts_init", "status", status);
             if (closed || status != TextToSpeech.SUCCESS) {
                 initializationFailed = status != TextToSpeech.SUCCESS;
-                synchronized (AndroidTtsSpeaker.this) { failPending(); }
+                synchronized (AndroidTtsSpeaker.this) { failPending("initialization_failed"); }
                 return;
             }
             textToSpeech.setLanguage(Locale.JAPAN);
@@ -130,7 +130,7 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
                 "mode", mode.name(), "rate", rate, "ready", ready);
         if (!ready) {
             diagnostics.event("tts_queued", "utterance_id", speech.id, "previous_queue_size", pending.size(), "mode", mode.name());
-            if (mode == Mode.BALANCED || mode == Mode.LATEST) failPending();
+            if (mode == Mode.BALANCED || mode == Mode.LATEST) failPending("replaced_by_newer_speech");
             failEvicted(pending.offer(speech, mode));
             return;
         }
@@ -139,14 +139,14 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
             if (activeCompletion != null) activeCompletion.onError();
             activeUtteranceId = null;
             activeCompletion = null;
-            failPending();
+            failPending("replaced_by_newer_speech");
             textToSpeech.stop();
             speakNow(speech);
         } else if (activeUtteranceId == null) {
             speakNow(speech);
         } else {
             diagnostics.event("tts_queued", "utterance_id", speech.id, "previous_queue_size", pending.size(), "mode", mode.name());
-            if (mode == Mode.BALANCED) failPending();
+            if (mode == Mode.BALANCED) failPending("replaced_by_newer_speech");
             failEvicted(pending.offer(speech, mode));
         }
     }
@@ -238,7 +238,7 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
     @Override
     public synchronized void stop() {
         diagnostics.event("tts_stop_requested", "active_id", activeUtteranceId);
-        failPending();
+        failPending("stop_requested");
         if (activeCompletion != null) activeCompletion.onError();
         activeUtteranceId = null;
         activeCompletion = null;
@@ -251,7 +251,7 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
         diagnostics.event("tts_close", "active_id", activeUtteranceId);
         closed = true;
         ready = false;
-        failPending();
+        failPending("speaker_closed");
         if (activeCompletion != null) activeCompletion.onError();
         activeUtteranceId = null;
         activeCompletion = null;
@@ -265,14 +265,17 @@ public final class AndroidTtsSpeaker implements SpeechEngine {
         listener = null;
     }
 
-    private void failPending() {
+    private void failPending(String reason) {
         PendingSpeech value;
         while ((value = pending.poll()) != null) {
+            diagnostics.event("tts_discard", "utterance_id", value.id, "text", value.text, "reason", reason);
             if (value.completion != null) value.completion.onError();
         }
     }
 
     private void failEvicted(PendingSpeech value) {
-        if (value != null && value.completion != null) value.completion.onError();
+        if (value == null) return;
+        diagnostics.event("tts_discard", "utterance_id", value.id, "text", value.text, "reason", "queue_capacity");
+        if (value.completion != null) value.completion.onError();
     }
 }

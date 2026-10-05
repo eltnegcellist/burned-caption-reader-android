@@ -107,4 +107,46 @@ public class OcrRefinementSelectorTest {
     @Test public void emptyRefinementKeepsOriginal() {
         assertEquals(TOP, choose(TOP));
     }
+
+    private OcrResult reading(String text, double confidence) {
+        return new OcrResult(text, confidence, Arrays.asList(row(text, confidence, .1f)));
+    }
+    @Test public void whiteCoreCorrectsLowConfidenceGlyphsWithStrongAgreement() {
+        String misread = TOP.replace("社員", "杜員");
+        assertEquals(TOP, selector.select(misread, 40, reading(misread, 50), reading(TOP, 85)).getText());
+    }
+    @Test public void emptyWhiteCorePreservesColoredCaption() {
+        assertEquals(TOP, selector.select(TOP, 40, reading(TOP, 50), new OcrResult("", 55)).getText());
+    }
+    @Test public void failedWhiteCoreCannotPromoteItsCoarseFallback() {
+        String bad = "完全に関係ない文字列です";
+        // Coarse fallback has confidence 95, but it is not a successful alternative OCR.
+        String changed = TOP.replace("社員", "杜員");
+        assertEquals(changed, selector.select(TOP, 95, reading(changed, 70), reading(bad, 99)).getText());
+    }
+    @Test public void whiteCoreRequiresFifteenPointImprovement() {
+        String changed = TOP.replace("社員", "杜員");
+        assertEquals(changed, selector.select(changed, 40, reading(changed, 60), reading(TOP, 74)).getText());
+        assertEquals(TOP, selector.select(changed, 40, reading(changed, 60), reading(TOP, 75)).getText());
+    }
+    @Test public void whiteCoreRequiresMinimumSeventyConfidence() {
+        String changed = TOP.replace("社員", "杜員");
+        assertEquals(changed, selector.select(changed, 30, reading(changed, 40), reading(TOP, 69)).getText());
+    }
+    @Test public void alreadyStrongReadingSkipsWhiteCore() {
+        OcrRefinementSelector.Result regular = selector.select(TOP, 40, reading(TOP, 75));
+        assertFalse(selector.shouldTryWhiteCore(regular));
+        String changed = TOP.replace("社員", "杜員");
+        assertEquals(changed, selector.select(changed, 40, reading(changed, 75), reading(TOP, 99)).getText());
+    }
+    @Test public void whiteCoreDoesNotRestoreAnotherBandThroughAdaptiveChoice() {
+        String original = MIDDLE + "\n" + BOTTOM;
+        OcrResult regular = new OcrResult(original, 50, Arrays.asList(row(MIDDLE, 50, .27f), row(BOTTOM, 50, .44f)));
+        OcrResult white = new OcrResult(full(), 95, Arrays.asList(row(TOP, 95, .1f), row(MIDDLE, 95, .27f), row(BOTTOM, 95, .44f)));
+        assertEquals(normalized(original), selector.select(original, 40, regular, white).getText());
+    }
+    @Test public void emptyAndNonJapaneseReadingsSkipWhiteCore() {
+        assertFalse(selector.shouldTryWhiteCore(selector.select("", 40, new OcrResult("", 40))));
+        assertFalse(selector.shouldTryWhiteCore(selector.select("ONLY ENGLISH", 40, new OcrResult("ONLY ENGLISH", 40))));
+    }
 }

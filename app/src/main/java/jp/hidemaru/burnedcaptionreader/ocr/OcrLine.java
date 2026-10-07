@@ -15,6 +15,7 @@ public final class OcrLine {
     private final float bottom;
     private final List<OcrLine> separatedParts;
     private final float glyphHeight;
+    private final double modelProbability;
 
     public OcrLine(int blockIndex, String text, double confidence,
                    float left, float top, float right, float bottom) {
@@ -29,6 +30,14 @@ public final class OcrLine {
     public OcrLine(int blockIndex, String text, double confidence,
                    float left, float top, float right, float bottom,
                    List<OcrLine> separatedParts, float glyphHeight) {
+        this(blockIndex, text, confidence, left, top, right, bottom, separatedParts, glyphHeight, -1);
+    }
+
+    public OcrLine(int blockIndex, String text, double confidence,
+                   float left, float top, float right, float bottom,
+                   List<OcrLine> separatedParts, float glyphHeight, double modelProbability) {
+        this.modelProbability = Double.isFinite(modelProbability) && modelProbability >= 0 && modelProbability <= 1
+                ? modelProbability : -1;
         this.blockIndex = blockIndex;
         this.text = text == null ? "" : text;
         this.confidence = confidence;
@@ -39,6 +48,9 @@ public final class OcrLine {
         this.separatedParts = Collections.unmodifiableList(new ArrayList<>(separatedParts));
         this.glyphHeight = Float.isFinite(glyphHeight) && glyphHeight > 0 ? clamp(glyphHeight) : 0;
     }
+
+    /** PP probability of this accepted row, or -1 for ML Kit/fallback rows. */
+    public double getModelProbability() { return modelProbability; }
 
     public int getBlockIndex() { return blockIndex; }
     public String getText() { return text; }

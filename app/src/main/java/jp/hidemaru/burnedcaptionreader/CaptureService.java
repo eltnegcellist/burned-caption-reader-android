@@ -30,7 +30,7 @@ import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 import jp.hidemaru.burnedcaptionreader.capture.SceneChangeDetector;
-import jp.hidemaru.burnedcaptionreader.ocr.MlKitJapaneseOcrEngine;
+import jp.hidemaru.burnedcaptionreader.ocr.HybridCaptionOcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
 import jp.hidemaru.burnedcaptionreader.subtitle.AutoSubtitleRegionTracker;
@@ -121,7 +121,7 @@ public final class CaptureService extends Service {
         preferences = new AppPreferences(this);
         diagnostics = DiagnosticRecorder.get(this);
         diagnostics.event("capture_service_start");
-        ocrEngine = new MlKitJapaneseOcrEngine();
+        ocrEngine = new HybridCaptionOcrEngine(this);
         speechEngine = new AndroidTtsSpeaker(this);
         browserMediaController = new BrowserMediaController(this);
         speechEngine.setListener(speaking -> {
@@ -275,7 +275,7 @@ public final class CaptureService extends Service {
                 "automatic", automatic, "scene_changed", sceneChanged,
                 "rate", preferences.getSpeechRate(), "stable_ms", preferences.getStableMs(),
                 "roi_version", roiVersion, "capture_width", captureWidth, "capture_height", captureHeight);
-        ocrEngine.recognize(detectionBitmap,
+        ocrEngine.recognizeRegion(detectionBitmap, !automatic,
                 result -> {
                     diagnostics.ocr("ocr_raw", timestamp, -1, result);
                     if (automatic) {
@@ -369,7 +369,7 @@ public final class CaptureService extends Service {
         diagnostics.image("refinement_input", prepared, "frame_id", timestamp,
                 "track_id", selection.getTrackId(), "selection_top", selection.getTop(),
                 "selection_bottom", selection.getBottom(), "original", selection.getText());
-        ocrEngine.recognize(prepared,
+        ocrEngine.refine(prepared,
                 refinedResult -> {
                     diagnostics.ocr("ocr_refined", timestamp, selection.getTrackId(), refinedResult);
                     try {

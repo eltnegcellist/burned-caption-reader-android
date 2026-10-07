@@ -10,8 +10,8 @@ android {
         applicationId = "jp.hidemaru.burnedcaptionreader"
         minSdk = 26
         targetSdk = 36
-        versionCode = 32
-        versionName = "1.0.1-preview"
+        versionCode = 33
+        versionName = "1.0.2-preview"
 
         testInstrumentationRunner = "jp.hidemaru.burnedcaptionreader.evaluation.ImageEvaluationInstrumentation"
     }
@@ -28,6 +28,13 @@ android {
             keyAlias = System.getenv("CAPTION_KEY_ALIAS") ?: "androiddebugkey"
             keyPassword = System.getenv("CAPTION_KEY_PASSWORD") ?: "android"
         }
+    }
+
+    androidResources { noCompress += "onnx" }
+
+    // Optional single-ABI APK for a particular device/emulator; default keeps all ABIs.
+    providers.gradleProperty("captionAbis").orNull?.let { abis ->
+        defaultConfig.ndk.abiFilters.addAll(abis.split(","))
     }
 
     buildTypes {
@@ -54,5 +61,6 @@ android {
 
 dependencies {
     implementation("com.google.mlkit:text-recognition-japanese:16.0.1")
+    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.30.0")
     testImplementation("junit:junit:4.13.2")
 }

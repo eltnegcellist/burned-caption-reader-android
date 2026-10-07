@@ -16,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import jp.hidemaru.burnedcaptionreader.ocr.MlKitJapaneseOcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
+import jp.hidemaru.burnedcaptionreader.ocr.OcrEngine;
 import jp.hidemaru.burnedcaptionreader.subtitle.Similarity;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleNormalizer;
 import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticRecorder;
@@ -27,6 +28,11 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
     @Override public void onStart() {
         Bundle report = new Bundle();
         try {
+            if ("ppocr-smoke".equals(arguments.getString("mode"))) {
+                JSONObject result = PpOcrNativeSmoke.run(getTargetContext());
+                Files.write(new File(getTargetContext().getFilesDir(), "ppocr-smoke.json").toPath(), result.toString(2).getBytes(StandardCharsets.UTF_8));
+                report.putString("stream", "PP-OCR native integration PASS\n"); finish(-1, report); return;
+            }
             if ("capture-full".equals(arguments.getString("mode")) || "capture-window".equals(arguments.getString("mode"))) {
                 captureFull(report); return;
             }
@@ -48,8 +54,8 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
             JSONArray results = new JSONArray();
             long previous = -1;
             int edits = 0, characters = 0;
-            MlKitJapaneseOcrEngine engine = new MlKitJapaneseOcrEngine();
             boolean playerMode = "player-replay".equals(arguments.getString("mode"));
+            OcrEngine engine = playerMode ? productionEngine() : new MlKitJapaneseOcrEngine();
             boolean cropMode = "caption-crops".equals(arguments.getString("mode"));
             if (cropMode && !dataset.optBoolean("manual_caption_regions"))
                 throw new IllegalArgumentException("Pixel-reviewed manual caption regions required");
@@ -72,7 +78,10 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
                     if (bitmap == null) throw new IllegalArgumentException("Unreadable image: " + source.getName());
                     long started = SystemClock.elapsedRealtime();
                     JSONObject stages;
-                    if (playerMode) stages = replay.process(bitmap, timestamp, input -> recognize(engine, input));
+                    if (playerMode) stages = replay.process(bitmap, timestamp, new PlayerFrameReplay.Recognize() {
+                        public OcrResult run(Bitmap input) throws Exception { return recognize(engine, input); }
+                        public OcrResult refine(Bitmap input) throws Exception { return recognizeRefined(engine, input); }
+                    });
                     else if (cropMode) stages = CaptionRegionDiagnostic.process(bitmap, row,
                             arguments.getString("crop_preparation", "original"), input -> recognize(engine, input));
                     else stages = new JSONObject().put("ocr_text", recognize(engine, bitmap).getText());
@@ -209,12 +218,30 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
         report.putString("stream", "Capture complete: " + video + " seconds=" + seconds + "\n");
         finish(-1, report);
     }
-    private OcrResult recognize(MlKitJapaneseOcrEngine engine, Bitmap bitmap) throws Exception {
+    private OcrResult recognize(OcrEngine engine, Bitmap bitmap) throws Exception {
+        return recognize(engine, bitmap, false);
+    }
+    private OcrResult recognizeRefined(OcrEngine engine, Bitmap bitmap) throws Exception {
+        return recognize(engine, bitmap, true);
+    }
+    private OcrEngine productionEngine() throws Exception {
+        try { return (OcrEngine) Class.forName("jp.hidemaru.burnedcaptionreader.ocr.HybridCaptionOcrEngine")
+                .getConstructor(android.content.Context.class).newInstance(getTargetContext()); }
+        catch (ClassNotFoundException oldApk) { return new MlKitJapaneseOcrEngine(); }
+    }
+    private OcrResult recognize(OcrEngine engine, Bitmap bitmap, boolean refinement) throws Exception {
         CountDownLatch done = new CountDownLatch(1);
         AtomicReference<OcrResult> result = new AtomicReference<>();
         AtomicReference<Exception> failure = new AtomicReference<>();
-        engine.recognize(bitmap, value -> { result.set(value); done.countDown(); },
-                error -> { failure.set(error); done.countDown(); });
+        java.util.function.Consumer<OcrResult> success = value -> { result.set(value); done.countDown(); };
+        java.util.function.Consumer<Exception> error = value -> { failure.set(value); done.countDown(); };
+        boolean invoked = false;
+        if (refinement) {
+            try { engine.getClass().getMethod("refine", Bitmap.class, java.util.function.Consumer.class, java.util.function.Consumer.class)
+                    .invoke(engine, bitmap, success, error); invoked = true; }
+            catch (NoSuchMethodException oldApk) { /* Same harness uses legacy recognize. */ }
+        }
+        if (!invoked) engine.recognize(bitmap, success, error);
         // On timeout, the process exits via finish; do not recycle a bitmap still in use.
         if (!done.await(60, TimeUnit.SECONDS)) {
             Bundle report = new Bundle(); report.putString("stream", "Image evaluation FAILED: OCR timeout\n");

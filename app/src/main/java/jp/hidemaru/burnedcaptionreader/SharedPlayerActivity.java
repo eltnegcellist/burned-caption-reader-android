@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
-import jp.hidemaru.burnedcaptionreader.ocr.MlKitJapaneseOcrEngine;
+import jp.hidemaru.burnedcaptionreader.ocr.HybridCaptionOcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
 import jp.hidemaru.burnedcaptionreader.ocr.SubtitleCropPlan;
@@ -153,7 +153,7 @@ public final class SharedPlayerActivity extends Activity {
         diagnostics = DiagnosticRecorder.get(this);
         stableConfig.stableMs = preferences.getStableMs();
         hideCc = preferences.isYouTubeCcHidden();
-        ocr = new MlKitJapaneseOcrEngine();
+        ocr = new HybridCaptionOcrEngine(this);
         speaker = new AndroidTtsSpeaker(this);
         getWindow().getDecorView().setKeepScreenOn(preferences.isKeepScreenOn());
         root = new LinearLayout(this);
@@ -629,7 +629,7 @@ public final class SharedPlayerActivity extends Activity {
             return;
         }
         diagnostics.image("ocr_input", input, "frame_id", frameId, "track_id", selection.getTrackId(), "stage", "refined");
-        ocr.recognize(input, result -> {
+        ocr.refine(input, result -> {
             if (!acceptsFrame(generation)) {
                 if (input != frame) input.recycle();
                 finishFrame(frame); return;
@@ -638,7 +638,7 @@ public final class SharedPlayerActivity extends Activity {
             OcrRefinementSelector.Result regular = refinement.select(selection.getText(), selection.getConfidence(), result);
             Bitmap white = null;
             try {
-                if (refinement.shouldTryWhiteCore(regular)) white = OcrBitmapInputs.whiteCore(input);
+                if (!"ppocrv5".equals(result.getBackend()) && refinement.shouldTryWhiteCore(regular)) white = OcrBitmapInputs.whiteCore(input);
             } catch (RuntimeException error) {
                 diagnostics.event("refinement_fallback", "frame_id", frameId, "track_id", selection.getTrackId(),
                         "reason", "white_core_prepare_error", "error", error.toString());
@@ -649,7 +649,7 @@ public final class SharedPlayerActivity extends Activity {
             }
             final Bitmap mask = white;
             diagnostics.image("ocr_input", mask, "frame_id", frameId, "track_id", selection.getTrackId(), "stage", "white_core");
-            ocr.recognize(mask, alternate -> {
+            ocr.refine(mask, alternate -> {
                 mask.recycle();
                 if (!acceptsFrame(generation)) { finishFrame(frame); return; }
                 diagnostics.ocr("ocr_white_core", frameId, selection.getTrackId(), alternate);

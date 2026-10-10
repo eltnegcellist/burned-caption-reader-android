@@ -162,14 +162,15 @@ public final class DiagnosticRecorder {
                 rows.put(value);
             }
             event(stage, "frame_id", frameId, "track_id", trackId, "text", result.getText(),
-                    "confidence", finite(result.getConfidence()), "rows", rows);
+                    "confidence", finite(result.getConfidence()), "rows", rows,
+                    "backend", result.getBackend(), "model_probability", result.getModelProbability());
         } catch (Exception e) { dropped.incrementAndGet(); }
     }
     private JSONObject rowGeometry(OcrLine row) throws org.json.JSONException {
         return new JSONObject().put("text", row.getText()).put("confidence", finite(row.getConfidence()))
                 .put("block", row.getBlockIndex()).put("left", row.getLeft()).put("top", row.getTop())
                 .put("right", row.getRight()).put("bottom", row.getBottom())
-                .put("glyph_height", row.getGlyphHeight());
+                .put("glyph_height", row.getGlyphHeight()).put("model_probability", row.getModelProbability());
     }
     private Object finite(double number) { return Double.isFinite(number) ? number : JSONObject.NULL; }
     private String version() {

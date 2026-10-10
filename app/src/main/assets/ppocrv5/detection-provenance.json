@@ -1,0 +1,36 @@
+{
+  "model_revision": "e6f4fa85f00e168c862bc462aebca69eef9b3d3d",
+  "postprocess_source_commit": "dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf",
+  "files": {
+    "inference.onnx": {
+      "url": "https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_det_onnx/resolve/e6f4fa85f00e168c862bc462aebca69eef9b3d3d/inference.onnx",
+      "bytes": 4826518,
+      "sha256": "a431985659dc921974177a95adcfbb90fd9e51989a5e04d70d0b75f597b6e61d"
+    },
+    "inference.yml": {
+      "url": "https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_det_onnx/resolve/e6f4fa85f00e168c862bc462aebca69eef9b3d3d/inference.yml",
+      "bytes": 903,
+      "sha256": "98069072e1b6b37d727fd9d9f11725faa46d6ea0de012f2ed26caea011c37699"
+    },
+    "README.md": {
+      "url": "https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_det_onnx/resolve/e6f4fa85f00e168c862bc462aebca69eef9b3d3d/README.md",
+      "bytes": 1828,
+      "sha256": "951c155673ac6c15feb85857c9024a62266e5956d15319ce578a8f508f399d66"
+    },
+    "official-db-postprocess.py": {
+      "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/ppocr/postprocess/db_postprocess.py",
+      "bytes": 9852,
+      "sha256": "a7123cfab47c9f326f9442f4e3ec963694c53a12556fc13eb541169a8e66b67f"
+    },
+    "official-operators.py": {
+      "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/ppocr/data/imaug/operators.py",
+      "bytes": 23106,
+      "sha256": "46190b708d4044ba282dabd08dd78b8ab67f0580372a3f5d6fad08f5d0dbabf6"
+    },
+    "PaddleOCR-LICENSE.txt": {
+      "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/LICENSE",
+      "bytes": 11376,
+      "sha256": "3840c5c0c61c294264d2dd77b8777be6ddd90121ef4e0e64abcd22edea581d6e"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+package jp.hidemaru.burnedcaptionreader.evaluation;
+import android.content.*;import android.content.res.AssetManager;import android.graphics.*;import android.os.*;import java.util.*;import java.util.concurrent.*;import java.util.concurrent.atomic.*;import org.json.*;import jp.hidemaru.burnedcaptionreader.ocr.*;
+final class PpDetectionNativeSmoke {
+ static JSONObject run(Context context)throws Exception{
+  Bitmap b=Bitmap.createBitmap(1000,600,Bitmap.Config.ARGB_8888);Canvas c=new Canvas(b);c.drawColor(Color.DKGRAY);Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);p.setTextSize(52);p.setTypeface(Typeface.create("sans-serif",Typeface.BOLD));String[]texts={"動画の字幕です","文字を読み取ります","最後の字幕です"};
+  for(int i=0;i<texts.length;i++){p.setColor(Color.BLACK);p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(8);c.drawText(texts[i],100,100+130*i,p);p.setStyle(Paint.Style.FILL);p.setColor(Color.WHITE);c.drawText(texts[i],100,100+130*i,p);}
+  JSONObject output=new JSONObject();long start=SystemClock.elapsedRealtime();
+  try(PpOcrTextDetector det=new PpOcrTextDetector(context);PpOcrRecognizer rec=new PpOcrRecognizer(context)){List<PpOcrDbPostProcessor.Box>boxes=det.detect(b);JSONArray rows=new JSONArray();for(PpOcrDbPostProcessor.Box box:boxes){Bitmap crop=PpOcrTextDetector.crop(b,box);try{PpOcrCtcDecoder.Reading read=rec.recognizeLine(crop);rows.put(new JSONObject().put("text",read.text).put("probability",read.probability).put("left",box.left).put("top",box.top).put("right",box.right).put("bottom",box.bottom));}finally{crop.recycle();}}if(boxes.size()<3)throw new AssertionError("Native detector missed synthetic rows");output.put("rows",rows);}
+  OcrResult empty=new OcrResult("",55,Collections.emptyList());OcrEngine original=new OcrEngine(){public void recognize(Bitmap bitmap,java.util.function.Consumer<OcrResult>s,java.util.function.Consumer<Exception>e){s.accept(empty);}public void close(){}};
+  try(HybridCaptionOcrEngine engine=new HybridCaptionOcrEngine(context,original,true)){OcrResult result=recognize(engine,b);if(result.getLines().size()<2)throw new AssertionError("Native rescue failed: "+engine.getDetectionStatus());output.put("native_rescue",result.getText()).put("status",engine.getDetectionStatus());}
+  Context missing=new ContextWrapper(context){@Override public Context getApplicationContext(){return this;}@Override public AssetManager getAssets(){throw new IllegalStateException("test unavailable detection assets");}};
+  try(HybridCaptionOcrEngine engine=new HybridCaptionOcrEngine(missing,original,true)){if(recognize(engine,b)!=empty||recognize(engine,b)!=empty)throw new AssertionError("Detector failure changed existing OCR result");output.put("missing_detector_fallback_exact_original",true);}
+  b.recycle();return output.put("processing_ms",SystemClock.elapsedRealtime()-start).put("pss_kb",Debug.getPss()).put("scope","Native Android synthetic detector+reader+fallback; no video or audio claim");
+ }
+ private static OcrResult recognize(OcrEngine engine,Bitmap b)throws Exception{CountDownLatch l=new CountDownLatch(1);AtomicReference<OcrResult>r=new AtomicReference<>();AtomicReference<Exception>e=new AtomicReference<>();engine.recognize(b,v->{r.set(v);l.countDown();},v->{e.set(v);l.countDown();});if(!l.await(60,TimeUnit.SECONDS))throw new Exception("Native detector timeout");if(e.get()!=null)throw e.get();return r.get();}
+}

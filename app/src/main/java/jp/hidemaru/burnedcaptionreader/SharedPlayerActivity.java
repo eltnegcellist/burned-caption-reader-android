@@ -34,7 +34,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
-import jp.hidemaru.burnedcaptionreader.ocr.HybridCaptionOcrEngine;
+import jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrEngines;
+import jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
 import jp.hidemaru.burnedcaptionreader.ocr.SubtitleCropPlan;
@@ -92,6 +93,7 @@ public final class SharedPlayerActivity extends Activity {
     private final Runnable sampler = new Runnable() {
         @Override public void run() {
             if (!sampling) return;
+            applyOcrModeIfIdle();
             if (diagnostics != null && diagnostics.isFullEvaluation()) {
                 if (SystemClock.elapsedRealtime() - lastPlaybackProbe >= 1000) {
                     lastPlaybackProbe = SystemClock.elapsedRealtime();
@@ -134,6 +136,7 @@ public final class SharedPlayerActivity extends Activity {
     private int videoPixelHeight;
     private boolean hideCc = true;
     private OcrEngine ocr;
+    private CaptionOcrMode ocrMode;
     private SpeechEngine speaker;
     private AppPreferences preferences;
     private String videoId;
@@ -153,7 +156,8 @@ public final class SharedPlayerActivity extends Activity {
         diagnostics = DiagnosticRecorder.get(this);
         stableConfig.stableMs = preferences.getStableMs();
         hideCc = preferences.isYouTubeCcHidden();
-        ocr = new HybridCaptionOcrEngine(this);
+        ocrMode = preferences.getOcrMode();
+        ocr = CaptionOcrEngines.create(this, ocrMode);
         speaker = new AndroidTtsSpeaker(this);
         getWindow().getDecorView().setKeepScreenOn(preferences.isKeepScreenOn());
         root = new LinearLayout(this);
@@ -372,7 +376,26 @@ public final class SharedPlayerActivity extends Activity {
         controls.setVisibility(View.VISIBLE);
     }
 
+    /** Never close an engine while it still owns an in-flight bitmap. */
+    private void applyOcrModeIfIdle() {
+        if (busy || preferences == null) return;
+        CaptionOcrMode selected = preferences.getOcrMode();
+        if (selected == ocrMode) return;
+        OcrEngine replacement = CaptionOcrEngines.create(this, selected);
+        OcrEngine previous = ocr;
+        captureGeneration++;
+        ocr = replacement;
+        ocrMode = selected;
+        if (previous != null) previous.close();
+        if (speaker != null) speaker.stop();
+        resetTracks();
+        ledger.reset();
+        if (lastRead != null) lastRead.setText("");
+        diagnostics.event("ocr_mode_changed", "mode", selected.storedValue);
+    }
+
     private void applyLiveSettings() {
+        applyOcrModeIfIdle();
         stableConfig.stableMs = preferences.getStableMs();
         hideCc = preferences.isYouTubeCcHidden();
         getWindow().getDecorView().setKeepScreenOn(preferences.isKeepScreenOn());
@@ -544,7 +567,7 @@ public final class SharedPlayerActivity extends Activity {
         long timestamp = SystemClock.elapsedRealtime();
         long frameId = ++frameSequence;
         diagnostics.image("video_frame", frame, "frame_id", frameId,
-                "generation", generation, "video_id", videoId);
+                "generation", generation, "video_id", videoId, "ocr_mode", ocrMode.storedValue);
         // Broad detection is bounded; refinement always uses this original frame.
         final Bitmap input;
         try {
@@ -608,7 +631,7 @@ public final class SharedPlayerActivity extends Activity {
             try { processResult(timestamp, frameId, bands); }
             finally {
                 diagnostics.event("frame_done", "frame_id", frameId,
-                        "processing_ms", SystemClock.elapsedRealtime() - timestamp);
+                        "processing_ms", SystemClock.elapsedRealtime() - timestamp, "ocr_mode", ocrMode.storedValue);
                 finishFrame(frame);
             }
             return;

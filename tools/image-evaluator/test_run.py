@@ -47,6 +47,9 @@ class DiagnosticPreflightTest(unittest.TestCase):
         self.assertTrue(self.marker.exists(), result.stderr)
         self.assertFalse((self.root / "result.json").exists())
 
+    def test_native_detection_cannot_be_labelled_raw(self):
+        self.rejected("Native PP detection requires", "--pp-detection", "rescue")
+
     def test_coarse_override_cannot_be_labelled_raw(self):
         self.rejected("Coarse width override requires", "--coarse-width", "1100")
 

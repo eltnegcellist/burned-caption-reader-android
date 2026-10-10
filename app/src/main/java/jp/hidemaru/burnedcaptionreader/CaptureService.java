@@ -30,7 +30,8 @@ import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 import jp.hidemaru.burnedcaptionreader.capture.SceneChangeDetector;
-import jp.hidemaru.burnedcaptionreader.ocr.HybridCaptionOcrEngine;
+import jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrEngines;
+import jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
 import jp.hidemaru.burnedcaptionreader.subtitle.AutoSubtitleRegionTracker;
@@ -98,6 +99,7 @@ public final class CaptureService extends Service {
     private DiagnosticRecorder diagnostics;
     private AppPreferences preferences;
     private OcrEngine ocrEngine;
+    private CaptionOcrMode ocrMode;
     private SpeechEngine speechEngine;
     private BrowserMediaController browserMediaController;
     private SubtitleStabilizer stabilizer;
@@ -121,7 +123,8 @@ public final class CaptureService extends Service {
         preferences = new AppPreferences(this);
         diagnostics = DiagnosticRecorder.get(this);
         diagnostics.event("capture_service_start");
-        ocrEngine = new HybridCaptionOcrEngine(this);
+        ocrMode = preferences.getOcrMode();
+        ocrEngine = CaptionOcrEngines.create(this, ocrMode);
         speechEngine = new AndroidTtsSpeaker(this);
         browserMediaController = new BrowserMediaController(this);
         speechEngine.setListener(speaking -> {
@@ -222,6 +225,8 @@ public final class CaptureService extends Service {
         try {
             image = reader.acquireLatestImage();
             if (image == null) return;
+            if (ocrBusy.get()) return;
+            applyOcrModeIfIdle();
             long now = SystemClock.elapsedRealtime();
             updateScreenWakeLock();
             boolean automatic = preferences.isAutoRegion();
@@ -269,10 +274,29 @@ public final class CaptureService extends Service {
         }
     }
 
+    private void applyOcrModeIfIdle() {
+        CaptionOcrMode selected = preferences.getOcrMode();
+        if (selected == ocrMode) return;
+        OcrEngine replacement = CaptionOcrEngines.create(this, selected);
+        OcrEngine previous = ocrEngine;
+        ocrEngine = replacement;
+        ocrMode = selected;
+        if (previous != null) previous.close();
+        speechEngine.stop();
+        resetSpeechOrder();
+        stabilizer.reset();
+        regionTracker.reset();
+        sceneChangeDetector.reset();
+        autoStabilizers.clear();
+        autoConsensus.clear();
+        autoTrackLastSeen.clear();
+        diagnostics.event("ocr_mode_changed", "mode", selected.storedValue);
+    }
+
     private void recognize(Bitmap detectionBitmap, Bitmap highResSource,
                            long timestamp, boolean automatic, boolean sceneChanged) {
         diagnostics.image("ocr_input", detectionBitmap, "frame_id", timestamp,
-                "automatic", automatic, "scene_changed", sceneChanged,
+                "automatic", automatic, "scene_changed", sceneChanged, "ocr_mode", ocrMode.storedValue,
                 "rate", preferences.getSpeechRate(), "stable_ms", preferences.getStableMs(),
                 "roi_version", roiVersion, "capture_width", captureWidth, "capture_height", captureHeight);
         ocrEngine.recognizeRegion(detectionBitmap, !automatic,

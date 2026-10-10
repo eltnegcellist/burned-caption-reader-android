@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 
-/** ML Kit locates lines; PP-OCR re-reads bounded subtitle lines on a single worker. */
+/** ML Kit plus bounded native PP detection rescue; PP refinement stays on one worker. */
 public final class HybridCaptionOcrEngine implements OcrEngine {
     private final OcrEngine detector;
     private final Context context;
@@ -16,18 +16,38 @@ public final class HybridCaptionOcrEngine implements OcrEngine {
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private PpOcrRecognizer ppocr;
     private boolean unavailable;
+    private final boolean detectionEnabled;
+    private PpOcrTextDetector ppDetector;
+    private boolean detectionUnavailable;
+    private volatile String detectionStatus = "not_run";
+    private volatile long detectionMillis;
     private volatile boolean closed;
 
-    public HybridCaptionOcrEngine(Context context) { this(context, new MlKitJapaneseOcrEngine()); }
+    public HybridCaptionOcrEngine(Context context) { this(context, new MlKitJapaneseOcrEngine(), false); }
+    public HybridCaptionOcrEngine(Context context, boolean enableDetection) { this(context, new MlKitJapaneseOcrEngine(), enableDetection); }
     public HybridCaptionOcrEngine(Context context, OcrEngine detector) {
-        this.context = context.getApplicationContext(); this.detector = detector;
+        this(context, detector, false);
+    }
+    public HybridCaptionOcrEngine(Context context, OcrEngine detector, boolean enableDetection) {
+        this.context = context.getApplicationContext(); this.detector = detector; this.detectionEnabled = enableDetection;
     }
     @Override public void recognize(Bitmap bitmap, Consumer<OcrResult> success, Consumer<Exception> error) {
         if (closed) { error.accept(new IllegalStateException("OCR closed")); return; }
-        detector.recognize(bitmap, success, error);
+        detector.recognize(bitmap, original -> {
+            if (!detectionEnabled) { success.accept(original); return; }
+            try { worker.execute(() -> {
+                OcrResult completed = original;
+                long start = android.os.SystemClock.elapsedRealtime();
+                try { completed = rescue(bitmap, original); }
+                catch (Exception | LinkageError | OutOfMemoryError failure) { detectionUnavailable = true; detectionStatus = "fallback:" + failure.getClass().getSimpleName(); }
+                detectionMillis = android.os.SystemClock.elapsedRealtime() - start;
+                OcrResult result = completed;
+                callbacks.post(() -> { if (closed) error.accept(new IllegalStateException("OCR closed")); else success.accept(result); });
+            }); } catch (RejectedExecutionException closing) { error.accept(closing); }
+        }, error);
     }
     @Override public void refine(Bitmap bitmap, Consumer<OcrResult> success, Consumer<Exception> error) {
-        recognize(bitmap, detected -> {
+        detector.recognize(bitmap, detected -> {
             if (closed) { error.accept(new IllegalStateException("OCR closed")); return; }
             try {
                 worker.execute(() -> {
@@ -39,6 +59,49 @@ public final class HybridCaptionOcrEngine implements OcrEngine {
                 });
             } catch (RejectedExecutionException closing) { error.accept(closing); }
         }, error);
+    }
+    public String getDetectionStatus() { return detectionStatus; }
+    public long getDetectionMillis() { return detectionMillis; }
+    private OcrResult rescue(Bitmap bitmap, OcrResult original) throws Exception {
+        if (closed || detectionUnavailable || unavailable) { detectionStatus = "unavailable"; return original; }
+        if (ppDetector == null) {
+            try { ppDetector = new PpOcrTextDetector(context); }
+            catch (Exception | LinkageError | OutOfMemoryError failure) { detectionUnavailable = true; throw failure; }
+        }
+        List<PpOcrDbPostProcessor.Box> proposals = new ArrayList<>();
+        for (PpOcrDbPostProcessor.Box box : ppDetector.detect(bitmap))
+            if (PpOcrCaptionRescue.eligibleCaptionShape(box, bitmap.getWidth(), bitmap.getHeight())) proposals.add(box);
+        proposals.sort(Comparator.comparingDouble((PpOcrDbPostProcessor.Box box) -> box.width() * box.score).reversed());
+        int width = bitmap.getWidth(), height = bitmap.getHeight();
+        int[] pixels = new int[Math.multiplyExact(width, height)]; bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+        List<OcrLine> added = new ArrayList<>(); Map<Integer,OcrLine> repairs = new HashMap<>(); int reads = 0, block = 0;
+        for (OcrLine line : original.getLines()) block = Math.max(block, line.getBlockIndex() + 1);
+        for (PpOcrDbPostProcessor.Box box : proposals) {
+            if (closed || reads >= PpOcrCaptionRescue.MAX_READINGS) break;
+            int matched = PpOcrCaptionRescue.matchingRow(box, original.getLines());
+            if (matched == -2 || repairs.containsKey(matched)) continue;
+            float glyph = PpOcrCaptionRescue.outlinedGlyphHeight(pixels, width, height, box);
+            if (glyph == 0) continue;
+            if (ppocr == null) {
+                try { ppocr = new PpOcrRecognizer(context); }
+                catch (Exception | LinkageError | OutOfMemoryError failure) { unavailable = true; throw failure; }
+            }
+            Bitmap crop = PpOcrTextDetector.crop(bitmap, box);
+            try {
+                reads++; PpOcrCtcDecoder.Reading reading = ppocr.recognizeLine(crop);
+                if (matched >= 0) {
+                    OcrLine source = original.getLines().get(matched);
+                    if (PpOcrCaptionRescue.acceptsRepair(source, reading.text, reading.probability))
+                        repairs.put(matched,PpOcrCaptionRescue.repaired(source,box,reading.text,glyph,reading.probability));
+                } else if (PpOcrCaptionRescue.acceptsReading(reading.text, reading.probability)) {
+                    // Neutral legacy confidence; PP probability is recorded separately.
+                    added.add(new OcrLine(block++, reading.text, 55, box.left, box.top, box.right, box.bottom,
+                            Collections.emptyList(), glyph, reading.probability));
+                }
+            } finally { crop.recycle(); }
+        }
+        detectionStatus = "native:proposals=" + proposals.size() + ",reads=" + reads + ",repaired=" + repairs.size() + ",added=" + added.size();
+        return PpOcrCaptionRescue.apply(original, repairs, added);
     }
     private OcrResult refineDetected(Bitmap bitmap, OcrResult detected) throws Exception {
         if (closed || unavailable || detected.getLines().isEmpty() || detected.getLines().size() > 8) return detected;
@@ -88,6 +151,6 @@ public final class HybridCaptionOcrEngine implements OcrEngine {
     }
     @Override public void close() {
         if (closed) return; closed = true; detector.close();
-        worker.execute(() -> { if (ppocr != null) ppocr.close(); }); worker.shutdown();
+        worker.execute(() -> { if (ppocr != null) ppocr.close(); if (ppDetector != null) ppDetector.close(); }); worker.shutdown();
     }
 }

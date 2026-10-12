@@ -13,7 +13,8 @@ public final class PpOcrDbPostProcessor {
   public float width(){return right-left;}public float height(){return bottom-top;}
  }
  private static final class Point {final double x,y;Point(double x,double y){this.x=x;this.y=y;}}
- public static List<Box> decode(float[]map,int w,int h){return decode(map,w,h,.3f,.6f,1.5f);}\n public static List<Box> decode(float[]map,int w,int h,float threshold,float boxThreshold,float unclip){
+ public static List<Box> decode(float[]map,int w,int h){return decode(map,w,h,.3f,.6f,1.5f);}
+ public static List<Box> decode(float[]map,int w,int h,float threshold,float boxThreshold,float unclip){
   if(w<1||h<1||(long)w*h!=map.length||map.length>1024*1024)throw new IllegalArgumentException("Invalid DB map");
   boolean[]seen=new boolean[map.length];int[]queue=new int[map.length];List<Box>out=new ArrayList<>();int components=0;
   for(int k=0;k<map.length;k++)if(!Float.isFinite(map[k])||map[k]<0||map[k]>1.001f)throw new IllegalArgumentException("Invalid DB probability");

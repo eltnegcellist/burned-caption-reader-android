@@ -64,7 +64,7 @@ final class SettingsPanel extends ScrollView {
             CaptionOcrMode next = CaptionOcrMode.of(old.v6Detection, on);
             if (old != next) { preferences.setOcrMode(next); onChanged.run(); }
         });
-        note("2つのスイッチで4パターンを比較。OFF/OFFが現行基準です。"
+        note("2つのスイッチで4パターンを比較。既定はON/ONのD方式です。OFF/OFFは比較用のA方式です。"
                 + "検出をv6にした場合、ML Kitによる粗い文字認識は実行しません。");
         note(inPlayer ? "処理中の画像が終わってから切替。動画の再生は継続します。"
                 : "選択は保存され、次に開いた動画で使用されます。");

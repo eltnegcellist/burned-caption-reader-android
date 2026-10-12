@@ -45,6 +45,14 @@ public final class TemporalOcrConsensus {
     private final Deque<Observation> history = new ArrayDeque<>();
     private final Deque<Observation> punctuationEvidence = new ArrayDeque<>();
 
+    /** Same-image punctuation repair only. No previous-frame votes or state. */
+    public static Result singleFrame(String rawText, double confidence, String coarseText) {
+        String text = SubtitleNormalizer.normalize(rawText);
+        if (text.isEmpty()) return new Result("", confidence);
+        text = TrailingPunctuation.repair(text, SubtitleNormalizer.normalize(coarseText));
+        return new Result(text, confidence);
+    }
+
     public synchronized Result observe(long timestamp, String rawText, double confidence) {
         return observe(timestamp, rawText, confidence, rawText);
     }

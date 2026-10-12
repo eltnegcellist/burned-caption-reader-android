@@ -42,6 +42,8 @@ import jp.hidemaru.burnedcaptionreader.ocr.SubtitleCropPlan;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrBitmapInputs;
 import jp.hidemaru.burnedcaptionreader.ocr.CaptionStripRecovery;
 import jp.hidemaru.burnedcaptionreader.subtitle.OcrRefinementSelector;
+import jp.hidemaru.burnedcaptionreader.subtitle.OcrVisualLineComposer;
+import jp.hidemaru.burnedcaptionreader.subtitle.CaptionFrameShadow;
 import jp.hidemaru.burnedcaptionreader.subtitle.TemporalOcrConsensus;
 import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticRecorder;
 import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticExport;
@@ -76,6 +78,10 @@ public final class SharedPlayerActivity extends Activity {
     private final Map<Integer, SubtitleStabilizer> stabilizers = new HashMap<>();
     private final Map<Integer, TemporalOcrConsensus> consensus = new HashMap<>();
     private final OcrRefinementSelector refinement = new OcrRefinementSelector();
+    private final CaptionFrameShadow frameShadow = new CaptionFrameShadow();
+    private long lastShadowFrameId = -1L;
+    private boolean lastShadowWouldSkip;
+    private String previousShadowSelected = "";
     private DiagnosticRecorder diagnostics;
     private long frameSequence;
     private Rect evaluationRect;
@@ -144,6 +150,7 @@ public final class SharedPlayerActivity extends Activity {
     private boolean hideCc = true;
     private OcrEngine ocr;
     private CaptionOcrMode ocrMode;
+    private boolean subtitleRecheckEnabled;
     private SpeechEngine speaker;
     private AppPreferences preferences;
     private String videoId;
@@ -162,6 +169,10 @@ public final class SharedPlayerActivity extends Activity {
         preferences = new AppPreferences(this);
         diagnostics = DiagnosticRecorder.get(this);
         stableConfig.stableMs = preferences.getStableMs();
+        subtitleRecheckEnabled = preferences.isSubtitleRecheckEnabled();
+        stableConfig.commitMode = subtitleRecheckEnabled
+                ? SubtitleStabilizer.CommitMode.REOBSERVE
+                : SubtitleStabilizer.CommitMode.FIRST_OBSERVATION;
         hideCc = preferences.isYouTubeCcHidden();
         ocrMode = preferences.getOcrMode();
         ocr = CaptionOcrEngines.create(this, ocrMode);
@@ -403,6 +414,23 @@ public final class SharedPlayerActivity extends Activity {
 
     private void applyLiveSettings() {
         applyOcrModeIfIdle();
+        boolean nextRecheck = preferences.isSubtitleRecheckEnabled();
+        if (subtitleRecheckEnabled != nextRecheck) {
+            captureGeneration++;
+            subtitleRecheckEnabled = nextRecheck;
+            stableConfig.commitMode = nextRecheck
+                    ? SubtitleStabilizer.CommitMode.REOBSERVE
+                    : SubtitleStabilizer.CommitMode.FIRST_OBSERVATION;
+            consensus.clear();
+            for (SubtitleStabilizer stabilizer : stabilizers.values()) {
+                stabilizer.clearPendingCandidate();
+            }
+            long now = SystemClock.elapsedRealtime();
+            speakReady(now, -1, order.offer(now, new ArrayList<>(), new ArrayList<>()));
+            scheduleOrderFlush();
+            diagnostics.event("subtitle_recheck_changed", "enabled", nextRecheck,
+                    "generation", captureGeneration);
+        }
         stableConfig.stableMs = preferences.getStableMs();
         hideCc = preferences.isYouTubeCcHidden();
         getWindow().getDecorView().setKeepScreenOn(preferences.isKeepScreenOn());
@@ -505,9 +533,14 @@ public final class SharedPlayerActivity extends Activity {
         evaluationRect = new Rect(rect);
         busy = true;
         final int generation = captureGeneration;
+        final long started = SystemClock.elapsedRealtime();
+        diagnostics.event("capture_requested", "generation", generation,
+                "width", rect.width(), "height", rect.height());
         try {
             Bitmap frame = Bitmap.createBitmap(rect.width(), rect.height(), Bitmap.Config.ARGB_8888);
             PixelCopy.request(getWindow(), rect, frame, result -> {
+                diagnostics.event("capture_result", "generation", generation, "pixelcopy", result,
+                        "elapsed_ms", SystemClock.elapsedRealtime() - started);
                 if (!sampling || readingPaused || generation != captureGeneration || isDestroyed()) {
                     frame.recycle(); busy = false; return;
                 }
@@ -573,6 +606,20 @@ public final class SharedPlayerActivity extends Activity {
     private void recognizeFrame(Bitmap frame, int generation) {
         long timestamp = SystemClock.elapsedRealtime();
         long frameId = ++frameSequence;
+        diagnostics.event("ocr_call", "frame_id", frameId, "stage", "coarse",
+                "width", frame.getWidth(), "height", frame.getHeight());
+        if (diagnostics.isRecording()) {
+            long shadowStarted = SystemClock.elapsedRealtime();
+            CaptionFrameShadow.Prediction probe = frameShadow.probe(
+                    frame::getPixel, frame.getWidth(), frame.getHeight(), generation, timestamp);
+            lastShadowFrameId = frameId;
+            lastShadowWouldSkip = probe.wouldSkip;
+            diagnostics.event("skip_shadow", "frame_id", frameId,
+                    "would_skip", probe.wouldSkip, "reason", probe.reason,
+                    "elapsed_ms", SystemClock.elapsedRealtime() - shadowStarted,
+                    "broad_delta", probe.broadMeanDelta, "band_delta", probe.bandMeanDelta,
+                    "band_color_delta", probe.bandColorDelta);
+        }
         diagnostics.image("video_frame", frame, "frame_id", frameId,
                 "generation", generation, "video_id", videoId, "ocr_mode", ocrMode.storedValue);
         // Broad detection is bounded; refinement always uses this original frame.
@@ -584,12 +631,18 @@ public final class SharedPlayerActivity extends Activity {
             finishFrame(frame); return;
         }
         diagnostics.image("ocr_input", input, "frame_id", frameId, "stage", "coarse");
+        final long coarseStarted = SystemClock.elapsedRealtime();
         ocr.recognize(input, result -> {
+            diagnostics.event("ocr_stage_done", "frame_id", frameId, "stage", "coarse",
+                    "elapsed_ms", SystemClock.elapsedRealtime() - coarseStarted,
+                    "rows", result.getLines().size());
             if (input != frame) input.recycle();
             if (!acceptsFrame(generation)) { finishFrame(frame); return; }
             diagnostics.ocr("ocr_raw", frameId, -1, result);
             recoverStrip(frame, generation, timestamp, frameId, result);
         }, error -> {
+            diagnostics.event("ocr_stage_done", "frame_id", frameId, "stage", "coarse",
+                    "elapsed_ms", SystemClock.elapsedRealtime() - coarseStarted, "error", true);
             if (input != frame) input.recycle();
             diagnostics.event("ocr_error", "frame_id", frameId, "stage", "coarse", "error", error.toString());
             if (acceptsFrame(generation)) status.setText("OCRエラー: " + error.getMessage());
@@ -606,17 +659,39 @@ public final class SharedPlayerActivity extends Activity {
         } catch (RuntimeException error) {
             diagnostics.event("strip_recovery_fallback", "frame_id", frameId, "reason", "prepare_error");
         }
-        if (input == null) { selectBands(frame, generation, timestamp, frameId, raw); return; }
+        if (diagnostics.isRecording()) {
+            long rescueStarted = SystemClock.elapsedRealtime();
+            CaptionFrameShadow.RescuePrediction probe = frameShadow.inspectMissing(
+                    frame::getPixel, frame.getWidth(), frame.getHeight(), timestamp,
+                    raw.getLines().isEmpty(), input != null);
+            diagnostics.event("rescue_shadow", "frame_id", frameId,
+                    "would_rescue", probe.wouldRescue, "reason", probe.reason,
+                    "elapsed_ms", SystemClock.elapsedRealtime() - rescueStarted,
+                    "luma_range", probe.lumaRange, "raw_rows", raw.getLines().size());
+        }
+        if (input == null) {
+            diagnostics.event("strip_recovery_decision", "frame_id", frameId, "active", false);
+            selectBands(frame, generation, timestamp, frameId, raw);
+            return;
+        }
+        diagnostics.event("strip_recovery_decision", "frame_id", frameId, "active", true);
         final Bitmap crop = input;
         final SubtitleCropPlan region = plan;
         diagnostics.image("ocr_input", crop, "frame_id", frameId, "stage", "strip_recovery");
+        diagnostics.event("ocr_call", "frame_id", frameId, "stage", "strip_recovery");
+        final long stripStarted = SystemClock.elapsedRealtime();
         ocr.recognize(crop, result -> {
+            diagnostics.event("ocr_stage_done", "frame_id", frameId, "stage", "strip_recovery",
+                    "elapsed_ms", SystemClock.elapsedRealtime() - stripStarted,
+                    "rows", result.getLines().size());
             if (crop != frame) crop.recycle();
             if (!acceptsFrame(generation)) { finishFrame(frame); return; }
             diagnostics.ocr("ocr_strip_recovery", frameId, -1, result);
             selectBands(frame, generation, timestamp, frameId,
                     CaptionStripRecovery.merge(raw, result, region, frame.getHeight()));
         }, error -> {
+            diagnostics.event("ocr_stage_done", "frame_id", frameId, "stage", "strip_recovery",
+                    "elapsed_ms", SystemClock.elapsedRealtime() - stripStarted, "error", true);
             if (crop != frame) crop.recycle();
             diagnostics.event("strip_recovery_fallback", "frame_id", frameId, "reason", "ocr_error");
             if (!acceptsFrame(generation)) { finishFrame(frame); return; }
@@ -625,7 +700,50 @@ public final class SharedPlayerActivity extends Activity {
     }
 
     private void selectBands(Bitmap frame, int generation, long timestamp, long frameId, OcrResult raw) {
-        List<AutoSubtitleRegionTracker.Selection> selections = tracker.selectForRecognition(timestamp, raw);
+        // Debug-only shadow: compare precisely the same PP-rescued boxes. Do not
+        // change the text sent to the candidate selector or call OCR again.
+        if (diagnostics.isRecording() && ("ppocrv5_detection_rescue".equals(raw.getBackend()) || raw.getBackend().startsWith("v6det_"))) {
+            List<jp.hidemaru.burnedcaptionreader.ocr.OcrLine> reordered =
+                    OcrVisualLineComposer.compose(raw.getLines());
+            StringBuilder composed = new StringBuilder();
+            for (jp.hidemaru.burnedcaptionreader.ocr.OcrLine row : reordered) {
+                if (composed.length() > 0) composed.append('\n');
+                composed.append(row.getText());
+            }
+            diagnostics.event("line_layout_shadow", "frame_id", frameId,
+                    "original_rows", raw.getLines().size(), "composed_rows", reordered.size(),
+                    "original", raw.getText(), "composed", composed.toString());
+        }
+        AutoSubtitleRegionTracker.DecisionTrace trace = diagnostics.isRecording()
+                ? (stage, reason, text, top, bottom, confidence) ->
+                    diagnostics.event("selection_trace", "frame_id", frameId,
+                            "stage", stage, "reason", reason, "text", text,
+                            "top", top, "bottom", bottom, "confidence", confidence)
+                : null;
+        List<AutoSubtitleRegionTracker.Selection> selections =
+                tracker.selectForRecognition(timestamp, raw, trace);
+        if (diagnostics.isRecording()) {
+            if (selections.size() == 1 && selections.get(0).isLocked()) {
+                AutoSubtitleRegionTracker.Selection locked = selections.get(0);
+                frameShadow.trust(locked.getTrackId(), locked.getTop(), locked.getBottom(), timestamp);
+            } else {
+                frameShadow.clearTrust();
+            }
+        }
+        if (diagnostics.isRecording() && frameId == lastShadowFrameId) {
+            StringBuilder textKey = new StringBuilder();
+            for (AutoSubtitleRegionTracker.Selection selected : selections) {
+                if (textKey.length() > 0) textKey.append('\n');
+                textKey.append(SubtitleNormalizer.comparisonKey(selected.getText()));
+            }
+            String current = textKey.toString();
+            diagnostics.event("skip_shadow_outcome", "frame_id", frameId,
+                    "would_skip", lastShadowWouldSkip,
+                    "selected_text_changed", !current.equals(previousShadowSelected),
+                    "previous_selected", !previousShadowSelected.isEmpty(),
+                    "current_selected", !current.isEmpty());
+            previousShadowSelected = current;
+        }
         diagnostics.event("selection_summary", "frame_id", frameId, "raw_rows", raw.getLines().size(),
                 "selected_bands", selections.size(), "policy", "subtitle_tracker");
         refineBands(frame, generation, timestamp, frameId, selections, 0, new ArrayList<>());
@@ -659,7 +777,14 @@ public final class SharedPlayerActivity extends Activity {
             return;
         }
         diagnostics.image("ocr_input", input, "frame_id", frameId, "track_id", selection.getTrackId(), "stage", "refined");
+        diagnostics.event("ocr_call", "frame_id", frameId, "stage", "refined",
+                "track_id", selection.getTrackId());
+        final long refineStarted = SystemClock.elapsedRealtime();
         ocr.refine(input, result -> {
+            diagnostics.event("ocr_stage_done", "frame_id", frameId, "stage", "refined",
+                    "track_id", selection.getTrackId(),
+                    "elapsed_ms", SystemClock.elapsedRealtime() - refineStarted,
+                    "rows", result.getLines().size());
             if (!acceptsFrame(generation)) {
                 if (input != frame) input.recycle();
                 finishFrame(frame); return;
@@ -668,8 +793,7 @@ public final class SharedPlayerActivity extends Activity {
             OcrRefinementSelector.Result regular = refinement.select(selection.getText(), selection.getConfidence(), result);
             Bitmap white = null;
             try {
-                if (!result.getBackend().startsWith("ppocr") && !result.getBackend().startsWith("v6det_")
-                        && refinement.shouldTryWhiteCore(regular)) white = OcrBitmapInputs.whiteCore(input);
+                if (!result.getBackend().startsWith("ppocr") && !result.getBackend().startsWith("v6det_") && refinement.shouldTryWhiteCore(regular)) white = OcrBitmapInputs.whiteCore(input);
             } catch (RuntimeException error) {
                 diagnostics.event("refinement_fallback", "frame_id", frameId, "track_id", selection.getTrackId(),
                         "reason", "white_core_prepare_error", "error", error.toString());
@@ -680,13 +804,23 @@ public final class SharedPlayerActivity extends Activity {
             }
             final Bitmap mask = white;
             diagnostics.image("ocr_input", mask, "frame_id", frameId, "track_id", selection.getTrackId(), "stage", "white_core");
+            diagnostics.event("ocr_call", "frame_id", frameId, "stage", "white_core",
+                    "track_id", selection.getTrackId());
+            final long whiteStarted = SystemClock.elapsedRealtime();
             ocr.refine(mask, alternate -> {
+                diagnostics.event("ocr_stage_done", "frame_id", frameId, "stage", "white_core",
+                        "track_id", selection.getTrackId(),
+                        "elapsed_ms", SystemClock.elapsedRealtime() - whiteStarted,
+                        "rows", alternate.getLines().size());
                 mask.recycle();
                 if (!acceptsFrame(generation)) { finishFrame(frame); return; }
                 diagnostics.ocr("ocr_white_core", frameId, selection.getTrackId(), alternate);
                 OcrRefinementSelector.Result chosen = refinement.select(selection.getText(), selection.getConfidence(), result, alternate);
                 acceptRefinement(frame, generation, timestamp, frameId, selections, index, bands, selection, chosen);
             }, error -> {
+                diagnostics.event("ocr_stage_done", "frame_id", frameId, "stage", "white_core",
+                        "track_id", selection.getTrackId(),
+                        "elapsed_ms", SystemClock.elapsedRealtime() - whiteStarted, "error", true);
                 mask.recycle();
                 diagnostics.event("refinement_fallback", "frame_id", frameId, "track_id", selection.getTrackId(),
                         "reason", "white_core_ocr_error", "error", error.toString());
@@ -694,6 +828,9 @@ public final class SharedPlayerActivity extends Activity {
                 acceptRefinement(frame, generation, timestamp, frameId, selections, index, bands, selection, regular);
             });
         }, error -> {
+            diagnostics.event("ocr_stage_done", "frame_id", frameId, "stage", "refined",
+                    "track_id", selection.getTrackId(),
+                    "elapsed_ms", SystemClock.elapsedRealtime() - refineStarted, "error", true);
             if (input != frame) input.recycle();
             diagnostics.event("refinement_fallback", "frame_id", frameId, "track_id", selection.getTrackId(),
                     "reason", "ocr_error", "error", error.toString());
@@ -728,14 +865,18 @@ public final class SharedPlayerActivity extends Activity {
             lastSeen.put(id, timestamp);
             SubtitleStabilizer stabilizer = stabilizers.computeIfAbsent(id,
                     ignored -> new SubtitleStabilizer(stableConfig));
-            TemporalOcrConsensus.Result fused = consensus.computeIfAbsent(id,
-                    ignored -> new TemporalOcrConsensus()).observe(timestamp, band.text,
-                            band.confidence, selection.getText());
+            TemporalOcrConsensus.Result fused = subtitleRecheckEnabled
+                    ? consensus.computeIfAbsent(id, ignored -> new TemporalOcrConsensus())
+                            .observe(timestamp, band.text, band.confidence, selection.getText())
+                    : TemporalOcrConsensus.singleFrame(band.text, band.confidence,
+                            selection.getText());
             diagnostics.event("ocr_consensus", "frame_id", frameId, "track_id", id,
                     "text", fused.getText(), "confidence", fused.getConfidence());
             SubtitleEvent event = stabilizer.observe(timestamp, fused.getText(), fused.getConfidence());
             diagnostics.event("stabilizer", "frame_id", frameId, "track_id", id,
-                    "state", stabilizer.getState().name(), "committed", event != null);
+                    "state", stabilizer.getState().name(), "committed", event != null,
+                    "recheck_enabled", subtitleRecheckEnabled,
+                    "commit_observations", event != null ? stabilizer.getLastCommitObservations() : 0);
             if (event != null) {
                 committed.add(new SubtitleSpeechOrderBuffer.Entry(event,
                         selection.getTop(), selection.getBottom()));
@@ -835,6 +976,10 @@ public final class SharedPlayerActivity extends Activity {
     }
 
     private void resetTracks() {
+        frameShadow.reset();
+        lastShadowFrameId = -1L;
+        lastShadowWouldSkip = false;
+        previousShadowSelected = "";
         main.removeCallbacks(orderFlush);
         tracker.reset();
         stabilizers.clear();

@@ -142,6 +142,7 @@ public final class SharedPlayerActivity extends Activity {
     private boolean hideCc = true;
     private OcrEngine ocr;
     private CaptionOcrMode ocrMode;
+    private boolean subtitleRecheckEnabled;
     private SpeechEngine speaker;
     private AppPreferences preferences;
     private String videoId;
@@ -160,6 +161,10 @@ public final class SharedPlayerActivity extends Activity {
         preferences = new AppPreferences(this);
         diagnostics = DiagnosticRecorder.get(this);
         stableConfig.stableMs = preferences.getStableMs();
+        subtitleRecheckEnabled = preferences.isSubtitleRecheckEnabled();
+        stableConfig.commitMode = subtitleRecheckEnabled
+                ? SubtitleStabilizer.CommitMode.REOBSERVE
+                : SubtitleStabilizer.CommitMode.FIRST_OBSERVATION;
         hideCc = preferences.isYouTubeCcHidden();
         ocrMode = preferences.getOcrMode();
         ocr = CaptionOcrEngines.create(this, ocrMode);
@@ -401,6 +406,23 @@ public final class SharedPlayerActivity extends Activity {
 
     private void applyLiveSettings() {
         applyOcrModeIfIdle();
+        boolean nextRecheck = preferences.isSubtitleRecheckEnabled();
+        if (subtitleRecheckEnabled != nextRecheck) {
+            captureGeneration++;
+            subtitleRecheckEnabled = nextRecheck;
+            stableConfig.commitMode = nextRecheck
+                    ? SubtitleStabilizer.CommitMode.REOBSERVE
+                    : SubtitleStabilizer.CommitMode.FIRST_OBSERVATION;
+            consensus.clear();
+            for (SubtitleStabilizer stabilizer : stabilizers.values()) {
+                stabilizer.clearPendingCandidate();
+            }
+            long now = SystemClock.elapsedRealtime();
+            speakReady(now, -1, order.offer(now, new ArrayList<>(), new ArrayList<>()));
+            scheduleOrderFlush();
+            diagnostics.event("subtitle_recheck_changed", "enabled", nextRecheck,
+                    "generation", captureGeneration);
+        }
         stableConfig.stableMs = preferences.getStableMs();
         hideCc = preferences.isYouTubeCcHidden();
         getWindow().getDecorView().setKeepScreenOn(preferences.isKeepScreenOn());
@@ -791,14 +813,18 @@ public final class SharedPlayerActivity extends Activity {
             lastSeen.put(id, timestamp);
             SubtitleStabilizer stabilizer = stabilizers.computeIfAbsent(id,
                     ignored -> new SubtitleStabilizer(stableConfig));
-            TemporalOcrConsensus.Result fused = consensus.computeIfAbsent(id,
-                    ignored -> new TemporalOcrConsensus()).observe(timestamp, band.text,
-                            band.confidence, selection.getText());
+            TemporalOcrConsensus.Result fused = subtitleRecheckEnabled
+                    ? consensus.computeIfAbsent(id, ignored -> new TemporalOcrConsensus())
+                            .observe(timestamp, band.text, band.confidence, selection.getText())
+                    : TemporalOcrConsensus.singleFrame(band.text, band.confidence,
+                            selection.getText());
             diagnostics.event("ocr_consensus", "frame_id", frameId, "track_id", id,
                     "text", fused.getText(), "confidence", fused.getConfidence());
             SubtitleEvent event = stabilizer.observe(timestamp, fused.getText(), fused.getConfidence());
             diagnostics.event("stabilizer", "frame_id", frameId, "track_id", id,
-                    "state", stabilizer.getState().name(), "committed", event != null);
+                    "state", stabilizer.getState().name(), "committed", event != null,
+                    "recheck_enabled", subtitleRecheckEnabled,
+                    "commit_observations", event != null ? stabilizer.getLastCommitObservations() : 0);
             if (event != null) {
                 committed.add(new SubtitleSpeechOrderBuffer.Entry(event,
                         selection.getTop(), selection.getBottom()));

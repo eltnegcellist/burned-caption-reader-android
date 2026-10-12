@@ -609,12 +609,14 @@ public final class SharedPlayerActivity extends Activity {
         diagnostics.event("ocr_call", "frame_id", frameId, "stage", "coarse",
                 "width", frame.getWidth(), "height", frame.getHeight());
         if (diagnostics.isRecording()) {
+            long shadowStarted = SystemClock.elapsedRealtime();
             CaptionFrameShadow.Prediction probe = frameShadow.probe(
                     frame::getPixel, frame.getWidth(), frame.getHeight(), generation, timestamp);
             lastShadowFrameId = frameId;
             lastShadowWouldSkip = probe.wouldSkip;
             diagnostics.event("skip_shadow", "frame_id", frameId,
                     "would_skip", probe.wouldSkip, "reason", probe.reason,
+                    "elapsed_ms", SystemClock.elapsedRealtime() - shadowStarted,
                     "broad_delta", probe.broadMeanDelta, "band_delta", probe.bandMeanDelta);
         }
         diagnostics.image("video_frame", frame, "frame_id", frameId,
@@ -657,11 +659,13 @@ public final class SharedPlayerActivity extends Activity {
             diagnostics.event("strip_recovery_fallback", "frame_id", frameId, "reason", "prepare_error");
         }
         if (diagnostics.isRecording()) {
+            long rescueStarted = SystemClock.elapsedRealtime();
             CaptionFrameShadow.RescuePrediction probe = frameShadow.inspectMissing(
                     frame::getPixel, frame.getWidth(), frame.getHeight(), timestamp,
                     raw.getLines().isEmpty(), input != null);
             diagnostics.event("rescue_shadow", "frame_id", frameId,
                     "would_rescue", probe.wouldRescue, "reason", probe.reason,
+                    "elapsed_ms", SystemClock.elapsedRealtime() - rescueStarted,
                     "luma_range", probe.lumaRange, "raw_rows", raw.getLines().size());
         }
         if (input == null) {

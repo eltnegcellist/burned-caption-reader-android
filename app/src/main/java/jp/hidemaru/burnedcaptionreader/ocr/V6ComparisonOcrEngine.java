@@ -92,7 +92,24 @@ public final class V6ComparisonOcrEngine implements OcrEngine {
         m.put("detector_init_ns",detectorInitNanos); m.put("recognizer_init_ns",recognizerInitNanos);
         return m;
     }
+    /**
+     * Experimental bounded ROI detection. Uses this SAME OCR worker and model;
+     * never starts more than one extra detector inference, at most two readings.
+     */
+    public void recognizeLimited(Bitmap bitmap, Consumer<OcrResult> success,
+                                 Consumer<Exception> error) {
+        if (!v6Detection) {
+            error.accept(new IllegalStateException("Limited detector requires mode C/D"));
+            return;
+        }
+        submit(() -> detectAndRead(bitmap, 2), success, error);
+    }
+
     private OcrResult detectAndRead(Bitmap bitmap) throws Exception {
+        return detectAndRead(bitmap, 24);
+    }
+
+    private OcrResult detectAndRead(Bitmap bitmap, int maxReadings) throws Exception {
         if (detection == null) {
             long start = android.os.SystemClock.elapsedRealtimeNanos();
             detection = new PpOcrTextDetector(context, true);
@@ -113,7 +130,7 @@ public final class V6ComparisonOcrEngine implements OcrEngine {
         int n = 0;
         int readings = 0;
         for (PpOcrDbPostProcessor.Box b : candidates) {
-            if (closed || readings >= 24) break;
+            if (closed || readings >= maxReadings) break;
             readings++;
             Bitmap crop = PpOcrTextDetector.crop(bitmap, b);
             try {

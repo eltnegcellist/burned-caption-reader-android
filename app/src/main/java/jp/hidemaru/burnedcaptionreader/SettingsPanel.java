@@ -167,6 +167,18 @@ final class SettingsPanel extends ScrollView {
             preferences.setKeepScreenOn(checked);
             onChanged.run();
         });
+        if ((context.getApplicationInfo().flags
+                & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            Switch rescue = toggle("実験：字幕帯の再検出（D/C方式・診断専用）",
+                    preferences.isDebugRegionRescueEnabled());
+            rescue.setTag("debug_region_rescue");
+            rescue.setOnCheckedChangeListener((button, checked) -> {
+                preferences.setDebugRegionRescueEnabled(checked);
+                onChanged.run();
+            });
+            note("通常はOFF。前に確定した字幕帯で文字が消えた場合に限り、追加検出1回＋文字認識最大2行を試します。"
+                    + "処理が遅くなる可能性があります。診断ZIPで結果を比較してください。");
+        }
 
         section = ReaderUi.card(context);
         page.addView(section, ReaderUi.block(context, 16));

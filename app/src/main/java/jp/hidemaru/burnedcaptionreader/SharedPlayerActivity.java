@@ -43,6 +43,7 @@ import jp.hidemaru.burnedcaptionreader.ocr.OcrBitmapInputs;
 import jp.hidemaru.burnedcaptionreader.ocr.CaptionStripRecovery;
 import jp.hidemaru.burnedcaptionreader.subtitle.OcrRefinementSelector;
 import jp.hidemaru.burnedcaptionreader.subtitle.OcrVisualLineComposer;
+import jp.hidemaru.burnedcaptionreader.subtitle.CaptionFrameShadow;
 import jp.hidemaru.burnedcaptionreader.subtitle.TemporalOcrConsensus;
 import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticRecorder;
 import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticExport;
@@ -77,6 +78,7 @@ public final class SharedPlayerActivity extends Activity {
     private final Map<Integer, SubtitleStabilizer> stabilizers = new HashMap<>();
     private final Map<Integer, TemporalOcrConsensus> consensus = new HashMap<>();
     private final OcrRefinementSelector refinement = new OcrRefinementSelector();
+    private final CaptionFrameShadow frameShadow = new CaptionFrameShadow();
     private DiagnosticRecorder diagnostics;
     private long frameSequence;
     private Rect evaluationRect;
@@ -603,6 +605,13 @@ public final class SharedPlayerActivity extends Activity {
         long frameId = ++frameSequence;
         diagnostics.event("ocr_call", "frame_id", frameId, "stage", "coarse",
                 "width", frame.getWidth(), "height", frame.getHeight());
+        if (diagnostics.isRecording()) {
+            CaptionFrameShadow.Prediction probe = frameShadow.probe(
+                    frame::getPixel, frame.getWidth(), frame.getHeight(), generation, timestamp);
+            diagnostics.event("skip_shadow", "frame_id", frameId,
+                    "would_skip", probe.wouldSkip, "reason", probe.reason,
+                    "broad_delta", probe.broadMeanDelta, "band_delta", probe.bandMeanDelta);
+        }
         diagnostics.image("video_frame", frame, "frame_id", frameId,
                 "generation", generation, "video_id", videoId, "ocr_mode", ocrMode.storedValue);
         // Broad detection is bounded; refinement always uses this original frame.
@@ -641,6 +650,14 @@ public final class SharedPlayerActivity extends Activity {
             if (plan != null) input = OcrBitmapInputs.refined(frame, plan);
         } catch (RuntimeException error) {
             diagnostics.event("strip_recovery_fallback", "frame_id", frameId, "reason", "prepare_error");
+        }
+        if (diagnostics.isRecording()) {
+            CaptionFrameShadow.RescuePrediction probe = frameShadow.inspectMissing(
+                    frame::getPixel, frame.getWidth(), frame.getHeight(), timestamp,
+                    raw.getLines().isEmpty(), input != null);
+            diagnostics.event("rescue_shadow", "frame_id", frameId,
+                    "would_rescue", probe.wouldRescue, "reason", probe.reason,
+                    "luma_range", probe.lumaRange, "raw_rows", raw.getLines().size());
         }
         if (input == null) {
             diagnostics.event("strip_recovery_decision", "frame_id", frameId, "active", false);
@@ -695,6 +712,14 @@ public final class SharedPlayerActivity extends Activity {
                 : null;
         List<AutoSubtitleRegionTracker.Selection> selections =
                 tracker.selectForRecognition(timestamp, raw, trace);
+        if (diagnostics.isRecording()) {
+            if (selections.size() == 1 && selections.get(0).isLocked()) {
+                AutoSubtitleRegionTracker.Selection locked = selections.get(0);
+                frameShadow.trust(locked.getTrackId(), locked.getTop(), locked.getBottom(), timestamp);
+            } else {
+                frameShadow.clearTrust();
+            }
+        }
         diagnostics.event("selection_summary", "frame_id", frameId, "raw_rows", raw.getLines().size(),
                 "selected_bands", selections.size(), "policy", "subtitle_tracker");
         refineBands(frame, generation, timestamp, frameId, selections, 0, new ArrayList<>());
@@ -927,6 +952,7 @@ public final class SharedPlayerActivity extends Activity {
     }
 
     private void resetTracks() {
+        frameShadow.reset();
         main.removeCallbacks(orderFlush);
         tracker.reset();
         stabilizers.clear();

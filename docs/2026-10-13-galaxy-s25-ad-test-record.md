@@ -8,9 +8,9 @@
 |---|---|
 |端末・SoC・RAM|Galaxy S25（詳細未記録）|
 |Android OS / ビルド / 端末温度の取得方法|未測定|
-|APK入手先・GitHub Actions run / artifact ID|未記録|
-|APK SHA-256 / 署名fingerprint / git SHA|未照合|
-|PP-OCRv5 / v6 det / rec 各asset SHA-256|未照合|
+|APK入手先・GitHub Actions run / artifact ID|[Run #111](https://github.com/eltnegcellist/burned-caption-reader-android/actions/runs/38309087153) / artifact `11773353408`（2026-10-14 21:13 UTC失効予定）|
+|APK SHA-256 / 署名fingerprint / git SHA|APK `b2045aa124dd3cbfd6231b77f9a720a6f814dbdfe19e972cd895a18fae66f4bf`、署名certificate SHA-256 `632f119ec31a56f733534017f7d7f6bc6859e86327c5b293a81c627053036a9f`、source head `acd222e4b5a2003311707ec720f60d9035e28203`（ビルド時点）|
+|PP-OCRv5 / v6 det / rec 各asset SHA-256|APK内6個（v5/v6各辞書・det・rec）を[PR #33検証レポート](2026-10-12-pr33-four-way-validation.md)のSHA-256と照合：6/6一致|
 |再生方法・動画画質・画面向き・輝度|未記録|
 |TTSエンジン・声・レート・メディア音量|未記録|
 |ネットワーク・接続・端末の省電力設定|未記録|
@@ -23,6 +23,16 @@
 - 名札／3行字幕：`2MEgE9xZsGs`、60–120秒（既知・回帰用）
 - 小さい下部字幕：`X115n3Sn5pc`、60–120秒（既知・回帰用）
 - 新規未使用動画ID：**試験前に記入すること**。過去の99画像に使った`mfsi8GfAvEA`は新規未使用扱いしない。動画ID：未選定、区間：未選定
+
+## ビルド・同梱物の事前確認（2026-10-13）
+
+- [x] PR #33のGitHub Actions成功（run 38309087153、commit `acd222...`）
+- [x] Artifactをダウンロードし、`app-debug.apk`を取得：235,939,730 bytes、上記SHA-256
+- [x] APK署名certificate digest確認（上記SHA-256）
+- [x] v5/v6のモデル・辞書の6個のasset SHA-256が既存レポートと一致
+- [ ] Galaxy S25にインストール・起動・A/D設定保存・実動画・実音声の確認
+
+**差異注記：** 過去99画像の評価用APK SHA-256は`5944c384...`であり、今回配布APKは別ハッシュ。旧実験時の`b1c8b18...`から配布用`acd222...`までに加えたファイルはdocs／評価ツールのみで、アプリコード変更はないことをcommit差分で確認した。とはいえ、99画像の数値を新APKによる実機測定結果とは扱わない。既存アプリへの上書きは署名が異なると失敗するため、ユーザーデータを削除せず、必要ならまず署名fingerprintとバックアップを確認する。
 
 ## 2. 順序固定とウォームアップ
 

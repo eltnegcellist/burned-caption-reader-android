@@ -1,0 +1,9 @@
+{
+  "source_preserved": true,
+  "operation": "Insert missing blank separator before numeric-index-plus-timing anchors",
+  "text_or_times_changed": false,
+  "events": 77,
+  "explicit_multiline_events": 17,
+  "changed": false,
+  "strict_source_parse_succeeded": true
+}

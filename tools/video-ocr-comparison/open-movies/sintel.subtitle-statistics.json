@@ -1,0 +1,7 @@
+{
+  "events": 26,
+  "explicit_multiline": 0,
+  "events_in_first_5_minutes": 17,
+  "caption_ms_in_first_5_minutes": 51318,
+  "ground_truth_status": "downloaded subtitle text; generated rendering still requires pixel review"
+}

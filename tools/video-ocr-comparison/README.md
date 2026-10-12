@@ -2,6 +2,11 @@
 
 ## 今回の実行結果（2026-10-12）
 
+公開動画候補の追加確認： [Elephants Dream / Sintel の取得・代表場面の確認](open-movies/README.md)。
+2作品の動画と日本語字幕をMacへ取得し、30秒の字幕焼き込みMP4プレビューを作成した。
+Cosmosは配布サーバーの429で動画未取得。CG映画へこちらで字幕を追加した管理条件であり、
+既存の日本語焼き付け字幕・実写YouTubeテロップの結果とは区別する。性能比較はまだ未実施。
+
 [REPORT.md](REPORT.md)に実行環境、同一画像の認識、5分合成動画3本、
 フレーム削減と誤統合の切り分け結果を保存した。[REPRODUCE.md](REPRODUCE.md)から再実行できる。
 実PixelCopy画像・許可済み実動画のA/B比較と、Subtitle Edit GUIの完走は未実施。

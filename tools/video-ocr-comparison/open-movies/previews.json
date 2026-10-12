@@ -1,0 +1,26 @@
+[
+  {
+    "file": "sintel-japanese-preview.mp4",
+    "bytes": 3715974,
+    "sha256": "a94b018d2263bbe3c0ef791df0d38861f84dfdc1eb3dd3193c149ac62e8aed1d",
+    "width": 960,
+    "height": 408,
+    "duration_seconds": 30.0,
+    "frames": 720,
+    "fps": "24/1",
+    "derived": true,
+    "japanese_subtitles_added_locally": true
+  },
+  {
+    "file": "elephants-japanese-preview.mp4",
+    "bytes": 4603258,
+    "sha256": "2d254d6df11eb9f1c6ce527f8a38a08403311232e0e095079ec37eea4aba8e62",
+    "width": 960,
+    "height": 540,
+    "duration_seconds": 30.0,
+    "frames": 720,
+    "fps": "24/1",
+    "derived": true,
+    "japanese_subtitles_added_locally": true
+  }
+]

@@ -830,7 +830,9 @@ public final class SharedPlayerActivity extends Activity {
             try { processResult(timestamp, frameId, bands); }
             finally {
                 diagnostics.event("frame_done", "frame_id", frameId,
-                        "processing_ms", SystemClock.elapsedRealtime() - timestamp, "ocr_mode", ocrMode.storedValue);
+                        "processing_ms", SystemClock.elapsedRealtime() - timestamp, "ocr_mode", ocrMode.storedValue,
+                        "recheck_enabled", subtitleRecheckEnabled,
+                        "debug_region_rescue", debugRegionRescueActive());
                 finishFrame(frame);
             }
             return;

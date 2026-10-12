@@ -250,11 +250,11 @@ public final class AutoSubtitleRegionTracker {
         if (trace != null) {
             for (LaneState lane : lanes) {
                 if (!lane.seenThisFrame || lane.current == null || selected.contains(lane)) continue;
-                boolean confirmed = confirmed.contains(lane);
+                boolean isConfirmed = confirmed.contains(lane);
                 boolean provisional = lane.transitions == 0
                         && (isStrongCaptionShape(lane.current)
                             || isUpperCaptionRescueShape(lane.current));
-                String reason = confirmed || provisional
+                String reason = isConfirmed || provisional
                         ? "lane_overlap_or_limit" : "temporal_or_caption_shape_gate";
                 trace(trace, "track", reason, lane.current.text, lane.current.top,
                         lane.current.bottom, lane.current.confidence);

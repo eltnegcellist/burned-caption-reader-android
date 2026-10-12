@@ -36,7 +36,7 @@ public class CaptionFrameShadowTest {
     }
     @Test public void rescueProbeNeedsTrustedBandContrastAndNoExistingStrip() {
         CaptionFrameShadow s = new CaptionFrameShadow();
-        CaptionFrameShadow.PixelSource contrast = (x, y) -> (x % 2 == 0) ? 0xffeeeeee : 0xff111111;
+        CaptionFrameShadow.PixelSource contrast = (x, y) -> ((x / 10) % 2 == 0) ? 0xffeeeeee : 0xff111111;
         assertFalse(s.inspectMissing(contrast, 480, 270, 0, true, false).wouldRescue);
         s.trust(1, .60f, .8f, 0);
         assertFalse(s.inspectMissing(contrast, 480, 270, 0, true, true).wouldRescue);

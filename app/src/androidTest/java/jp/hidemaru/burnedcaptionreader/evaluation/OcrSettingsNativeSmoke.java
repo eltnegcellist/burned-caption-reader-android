@@ -36,12 +36,12 @@ final class OcrSettingsNativeSmoke {
         Bitmap bitmap = sample();
         try {
             saved.edit().remove(AppPreferences.OCR_MODE).commit();
-            check(preferences.getOcrMode() == CaptionOcrMode.BASELINE,"Default not baseline");
+            check(preferences.getOcrMode() == CaptionOcrMode.BOTH_V6,"Default not D");
             settings = instrumentation.startActivitySync(new Intent(context,SettingsActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             instrumentation.waitForIdleSync();
             Switch detector = settings.findViewById(android.R.id.content).findViewWithTag("ocr_detector_v6");
             Switch recognizer = settings.findViewById(android.R.id.content).findViewWithTag("ocr_recognizer_v6");
-            check(detector!=null && recognizer!=null && !detector.isChecked() && !recognizer.isChecked(),"Missing independent switches");
+            check(detector!=null && recognizer!=null && detector.isChecked() && recognizer.isChecked(),"Default D switches missing");
             JSONArray modes=new JSONArray();
             for(CaptionOcrMode mode: CaptionOcrMode.values()) {
                 instrumentation.runOnMainSync(() -> {

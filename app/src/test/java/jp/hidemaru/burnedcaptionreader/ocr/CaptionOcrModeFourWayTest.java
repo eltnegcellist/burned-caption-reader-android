@@ -13,7 +13,8 @@ public class CaptionOcrModeFourWayTest {
  @Test public void previousSettingsMigrateSafely() {
   assertEquals(CaptionOcrMode.BASELINE,CaptionOcrMode.fromStoredValue("mlkit"));
   assertEquals(CaptionOcrMode.BASELINE,CaptionOcrMode.fromStoredValue("pp_detection"));
-  assertEquals(CaptionOcrMode.BASELINE,CaptionOcrMode.fromStoredValue(null));
+  assertEquals(CaptionOcrMode.BOTH_V6,CaptionOcrMode.fromStoredValue(null));
+  assertEquals(CaptionOcrMode.BASELINE,CaptionOcrMode.fromStoredValue("invalid_legacy_mode"));
   assertEquals(CaptionOcrMode.BASELINE,CaptionOcrMode.fromStoredValue("hybrid"));
  }
 }

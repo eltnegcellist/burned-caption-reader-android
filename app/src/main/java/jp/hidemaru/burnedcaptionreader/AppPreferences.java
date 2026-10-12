@@ -23,6 +23,7 @@ public final class AppPreferences {
     private static final String SPEECH_RATE = "speech_rate";
     private static final String SPEECH_MODE = "speech_mode";
     private static final String STABLE_MS = "stable_ms";
+    private static final String SUBTITLE_RECHECK_ENABLED = "subtitle_recheck_enabled";
     private static final String AUTO_PAUSE_BROWSER = "auto_pause_browser";
     private static final String KEEP_SCREEN_ON = "keep_screen_on";
     private static final String HIDE_YOUTUBE_CC = "hide_youtube_cc";
@@ -155,6 +156,15 @@ public final class AppPreferences {
 
     public void setKeepScreenOn(boolean enabled) {
         preferences.edit().putBoolean(KEEP_SCREEN_ON, enabled).apply();
+    }
+
+    /** False for new and existing installations until explicitly configured. */
+    public boolean isSubtitleRecheckEnabled() {
+        return preferences.getBoolean(SUBTITLE_RECHECK_ENABLED, false);
+    }
+
+    public void setSubtitleRecheckEnabled(boolean enabled) {
+        preferences.edit().putBoolean(SUBTITLE_RECHECK_ENABLED, enabled).apply();
     }
 
     public long getStableMs() {

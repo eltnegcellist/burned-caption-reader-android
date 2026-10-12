@@ -79,6 +79,9 @@ public final class SharedPlayerActivity extends Activity {
     private final Map<Integer, TemporalOcrConsensus> consensus = new HashMap<>();
     private final OcrRefinementSelector refinement = new OcrRefinementSelector();
     private final CaptionFrameShadow frameShadow = new CaptionFrameShadow();
+    private long lastShadowFrameId = -1L;
+    private boolean lastShadowWouldSkip;
+    private String previousShadowSelected = "";
     private DiagnosticRecorder diagnostics;
     private long frameSequence;
     private Rect evaluationRect;
@@ -608,6 +611,8 @@ public final class SharedPlayerActivity extends Activity {
         if (diagnostics.isRecording()) {
             CaptionFrameShadow.Prediction probe = frameShadow.probe(
                     frame::getPixel, frame.getWidth(), frame.getHeight(), generation, timestamp);
+            lastShadowFrameId = frameId;
+            lastShadowWouldSkip = probe.wouldSkip;
             diagnostics.event("skip_shadow", "frame_id", frameId,
                     "would_skip", probe.wouldSkip, "reason", probe.reason,
                     "broad_delta", probe.broadMeanDelta, "band_delta", probe.bandMeanDelta);
@@ -719,6 +724,20 @@ public final class SharedPlayerActivity extends Activity {
             } else {
                 frameShadow.clearTrust();
             }
+        }
+        if (diagnostics.isRecording() && frameId == lastShadowFrameId) {
+            StringBuilder textKey = new StringBuilder();
+            for (AutoSubtitleRegionTracker.Selection selected : selections) {
+                if (textKey.length() > 0) textKey.append('\n');
+                textKey.append(SubtitleNormalizer.comparisonKey(selected.getText()));
+            }
+            String current = textKey.toString();
+            diagnostics.event("skip_shadow_outcome", "frame_id", frameId,
+                    "would_skip", lastShadowWouldSkip,
+                    "selected_text_changed", !current.equals(previousShadowSelected),
+                    "previous_selected", !previousShadowSelected.isEmpty(),
+                    "current_selected", !current.isEmpty());
+            previousShadowSelected = current;
         }
         diagnostics.event("selection_summary", "frame_id", frameId, "raw_rows", raw.getLines().size(),
                 "selected_bands", selections.size(), "policy", "subtitle_tracker");
@@ -953,6 +972,9 @@ public final class SharedPlayerActivity extends Activity {
 
     private void resetTracks() {
         frameShadow.reset();
+        lastShadowFrameId = -1L;
+        lastShadowWouldSkip = false;
+        previousShadowSelected = "";
         main.removeCallbacks(orderFlush);
         tracker.reset();
         stabilizers.clear();

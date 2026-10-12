@@ -28,6 +28,10 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
     @Override public void onStart() {
         Bundle report = new Bundle();
         try {
+            if ("four-way-components".equals(arguments.getString("mode"))) {
+                FourWayComponents.run(this);
+                report.putString("stream", "Four-way components PASS\n"); finish(-1, report); return;
+            }
             if ("ocr-settings-smoke".equals(arguments.getString("mode"))) {
                 JSONObject result = OcrSettingsNativeSmoke.run(this);
                 Files.write(new File(getTargetContext().getFilesDir(), "ocr-settings-smoke.json").toPath(), result.toString(2).getBytes(StandardCharsets.UTF_8));
@@ -43,7 +47,8 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
                 Files.write(new File(getTargetContext().getFilesDir(), "ppocr-smoke.json").toPath(), result.toString(2).getBytes(StandardCharsets.UTF_8));
                 report.putString("stream", "PP-OCR native integration PASS\n"); finish(-1, report); return;
             }
-            if ("capture-full".equals(arguments.getString("mode")) || "capture-window".equals(arguments.getString("mode"))) {
+            if ("capture-full".equals(arguments.getString("mode")) || "capture-window".equals(arguments.getString("mode"))
+                    || "capture-short-window".equals(arguments.getString("mode"))) {
                 captureFull(report); return;
             }
             if ("capture".equals(arguments.getString("mode"))) {
@@ -100,8 +105,11 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
                         stages.put("native_detector_status", engine.getClass().getMethod("getDetectionStatus").invoke(engine));
                         stages.put("native_detector_ms", engine.getClass().getMethod("getDetectionMillis").invoke(engine));
                     } catch (NoSuchMethodException legacy) { stages.put("native_detector_status", "legacy_disabled"); }
+                    long pipelineMillis = SystemClock.elapsedRealtime() - started;
+                    try { stages.put("engine_metrics",new JSONObject((java.util.Map<?,?>)engine.getClass().getMethod("getMetrics").invoke(engine))); }
+                    catch (NoSuchMethodException legacy) { /* A keeps its original adapter. */ }
+                    peakPssKb=Math.max(peakPssKb,android.os.Debug.getPss());
                     if(i%25==0) {
-                        peakPssKb=Math.max(peakPssKb,android.os.Debug.getPss());
                         Bundle progress=new Bundle();progress.putString("stream","Frame "+i+"/"+frames.length()+"\n");sendStatus(0,progress);
                     }
                     bitmap.recycle();
@@ -116,12 +124,15 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
                             .put("mono_ms", timestamp).put("gap_ms", previous < 0 ? JSONObject.NULL : timestamp - previous)
                             .put("expected_text", expected).put("ocr_text", actual).put("stages", stages)
                             .put("edit_distance", distance).put("reference_characters", length)
-                            .put("ocr_processing_ms", SystemClock.elapsedRealtime() - started));
+                            .put("ocr_processing_ms", pipelineMillis).put("pss_kb",android.os.Debug.getPss()));
                     previous = timestamp;
                 }
             } finally { engine.close(); }
             replay.finish(previous);
             JSONObject output = new JSONObject().put("schema_version", 1).put("native_detection", arguments.getString("pp_detection", "off")).put("sampled_peak_pss_kb", peakPssKb)
+                    .put("ocr_mode", arguments.getString("ocr_mode", "legacy"))
+                    .put("engine_class", engine.getClass().getName())
+                    .put("process_status",new String(Files.readAllBytes(new File("/proc/self/status").toPath()),StandardCharsets.UTF_8))
                     .put("scope", playerMode ? (diagnosticCoarseWidth == 0 ? "player_components_immediate_tts" : "player_components_diagnostic_coarse_width") : cropMode ? "manual_caption_regions_only" : "raw_image_ocr_only")
                     .put("metric", playerMode || cropMode ? "caption_comparison_key_cer" : "raw_codepoint_cer")
                     .put("diagnostic_coarse_width", diagnosticCoarseWidth)
@@ -154,8 +165,9 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
                 .putExtra(Intent.EXTRA_TEXT,"https://www.youtube.com/watch?v=" + video)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         long deadline = SystemClock.elapsedRealtime() + limit * 1000L;
-        int windowSeconds = "capture-window".equals(arguments.getString("mode"))
-                ? Math.max(300, Math.min(1800, Integer.parseInt(arguments.getString("window_seconds", "300")))) : 0;
+        boolean shortWindow = "capture-short-window".equals(arguments.getString("mode"));
+        int windowSeconds = shortWindow || "capture-window".equals(arguments.getString("mode"))
+                ? Math.max(shortWindow ? 20 : 300, Math.min(1800, Integer.parseInt(arguments.getString("window_seconds", "300")))) : 0;
         int windowStartSeconds = Math.max(0, Math.min(86400,
                 Integer.parseInt(arguments.getString("start_seconds", "0"))));
         JSONObject last = new JSONObject(); boolean ended = false; boolean windowComplete = false;
@@ -244,6 +256,12 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
         return recognize(engine, bitmap, true);
     }
     private OcrEngine productionEngine() throws Exception {
+        if (arguments.containsKey("ocr_mode")) {
+            String value = arguments.getString("ocr_mode");
+            for (jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode mode : jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode.values())
+                if (mode.storedValue.equals(value)) return jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrEngines.create(getTargetContext(), mode);
+            throw new IllegalArgumentException("Invalid four-way OCR mode: " + value);
+        }
         try {
             Class<?> type=Class.forName("jp.hidemaru.burnedcaptionreader.ocr.HybridCaptionOcrEngine");
             boolean rescue="rescue".equals(arguments.getString("pp_detection", "off"));

@@ -661,7 +661,8 @@ public final class SharedPlayerActivity extends Activity {
             OcrRefinementSelector.Result regular = refinement.select(selection.getText(), selection.getConfidence(), result);
             Bitmap white = null;
             try {
-                if (!"ppocrv5".equals(result.getBackend()) && refinement.shouldTryWhiteCore(regular)) white = OcrBitmapInputs.whiteCore(input);
+                if (!result.getBackend().startsWith("ppocr") && !result.getBackend().startsWith("v6det_")
+                        && refinement.shouldTryWhiteCore(regular)) white = OcrBitmapInputs.whiteCore(input);
             } catch (RuntimeException error) {
                 diagnostics.event("refinement_fallback", "frame_id", frameId, "track_id", selection.getTrackId(),
                         "reason", "white_core_prepare_error", "error", error.toString());

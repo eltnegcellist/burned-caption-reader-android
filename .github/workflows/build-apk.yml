@@ -42,6 +42,11 @@ jobs:
         with:
           gradle-version: "8.13"
       - run: sdkmanager "platforms;android-36" "build-tools;35.0.0"
+      - name: Restore pinned PP-OCRv6 Small models for comparisons
+        run: |
+          python3 -m pip install --user PyYAML==6.0.3
+          python3 tools/models/prepare_v6.py
+
       - run: bash tools/replay-evaluator/run.sh
       - run: python3 tools/image-evaluator/test_run.py
       - name: Restore persistent signing key when configured

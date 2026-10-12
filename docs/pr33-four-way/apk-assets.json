@@ -1,0 +1,36 @@
+{
+  "apk_bytes": 235980168,
+  "apk_sha256": "5944c384459f2aee3c29680c24608c76ea9e43761266b221acf82fe7db061901",
+  "models": {
+    "assets/ppocrv5/characters.json": {
+      "bytes": 110789,
+      "stored_bytes": 53457,
+      "sha256": "14ccb8e120e701464bd3084acf3b398ffee767e515477ad27d3c80fd5996c180"
+    },
+    "assets/ppocrv5/detection.onnx": {
+      "bytes": 4826518,
+      "stored_bytes": 4826518,
+      "sha256": "a431985659dc921974177a95adcfbb90fd9e51989a5e04d70d0b75f597b6e61d"
+    },
+    "assets/ppocrv5/recognition.onnx": {
+      "bytes": 16534782,
+      "stored_bytes": 16534782,
+      "sha256": "da72dc72ca4dc220df0dfde68c1dedc31c58d3e76a25871122e5056227d50092"
+    },
+    "assets/ppocrv6/characters.json": {
+      "bytes": 112374,
+      "stored_bytes": 47731,
+      "sha256": "a49d51120786924a642c9e8a14b2a2ab73c019699abf5b2b6970ec7355c0415f"
+    },
+    "assets/ppocrv6/detection.onnx": {
+      "bytes": 9880512,
+      "stored_bytes": 9880512,
+      "sha256": "d73e0058b7a8086bbd57f3d10b8bcd4ff95363f67e06e2762b5e814fe9c9410e"
+    },
+    "assets/ppocrv6/recognition.onnx": {
+      "bytes": 21159378,
+      "stored_bytes": 21159378,
+      "sha256": "5435fd747c9e0efe15a96d0b378d5bd157e9492ed8fd80edf08f30d02fa24634"
+    }
+  }
+}

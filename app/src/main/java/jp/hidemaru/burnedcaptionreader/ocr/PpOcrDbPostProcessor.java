@@ -13,17 +13,18 @@ public final class PpOcrDbPostProcessor {
   public float width(){return right-left;}public float height(){return bottom-top;}
  }
  private static final class Point {final double x,y;Point(double x,double y){this.x=x;this.y=y;}}
- public static List<Box> decode(float[]map,int w,int h){
+ public static List<Box> decode(float[]map,int w,int h){return decode(map,w,h,.3f,.6f,1.5f);}
+ public static List<Box> decode(float[]map,int w,int h,float threshold,float boxThreshold,float unclip){
   if(w<1||h<1||(long)w*h!=map.length||map.length>1024*1024)throw new IllegalArgumentException("Invalid DB map");
   boolean[]seen=new boolean[map.length];int[]queue=new int[map.length];List<Box>out=new ArrayList<>();int components=0;
   for(int k=0;k<map.length;k++)if(!Float.isFinite(map[k])||map[k]<0||map[k]>1.001f)throw new IllegalArgumentException("Invalid DB probability");
-  for(int seed=map.length-1;seed>=0&&components<MAX_COMPONENTS;seed--){if(seen[seed]||map[seed]<=.3f)continue;components++;int head=0,tail=0;queue[tail++]=seed;seen[seed]=true;List<Point>boundary=new ArrayList<>();
+  for(int seed=map.length-1;seed>=0&&components<MAX_COMPONENTS;seed--){if(seen[seed]||map[seed]<=threshold)continue;components++;int head=0,tail=0;queue[tail++]=seed;seen[seed]=true;List<Point>boundary=new ArrayList<>();
    while(head<tail){int p=queue[head++],x=p%w,y=p/w;boolean edge=false;
-    for(int dy=-1;dy<=1;dy++)for(int dx=-1;dx<=1;dx++){if(dx==0&&dy==0)continue;int xx=x+dx,yy=y+dy;if(xx<0||xx>=w||yy<0||yy>=h){edge=true;continue;}int q=yy*w+xx;if(map[q]<=.3f){edge=true;continue;}if(!seen[q]){seen[q]=true;queue[tail++]=q;}}
+    for(int dy=-1;dy<=1;dy++)for(int dx=-1;dx<=1;dx++){if(dx==0&&dy==0)continue;int xx=x+dx,yy=y+dy;if(xx<0||xx>=w||yy<0||yy>=h){edge=true;continue;}int q=yy*w+xx;if(map[q]<=threshold){edge=true;continue;}if(!seen[q]){seen[q]=true;queue[tail++]=q;}}
     if(edge)boundary.add(new Point(x,y));
    }
    if(boundary.size()<4)continue;List<Point>hull=hull(boundary);if(hull.size()<3)continue;double[]rect=minimumRectangle(hull);double rw=rect[4]-rect[2],rh=rect[5]-rect[3];if(Math.min(rw,rh)<3)continue;
-   double score=score(map,w,h,rect);if(score<.6)continue;double d=rw*rh*1.5/(2*(rw+rh));rect[2]-=d;rect[3]-=d;rect[4]+=d;rect[5]+=d;if(Math.min(rw+2*d,rh+2*d)<5)continue;float[]points=points(rect,w,h);Box box=new Box(points,score);if(box.width()>0&&box.height()>0)out.add(box);
+   double score=score(map,w,h,rect);if(score<boxThreshold)continue;double d=rw*rh*unclip/(2*(rw+rh));rect[2]-=d;rect[3]-=d;rect[4]+=d;rect[5]+=d;if(Math.min(rw+2*d,rh+2*d)<5)continue;float[]points=points(rect,w,h);Box box=new Box(points,score);if(box.width()>0&&box.height()>0)out.add(box);
   }
   out.sort(Comparator.comparingDouble((Box b)->b.top).thenComparingDouble(b->b.left));return Collections.unmodifiableList(out);
  }

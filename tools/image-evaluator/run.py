@@ -15,12 +15,16 @@ parser.add_argument("--adb", required=True)
 parser.add_argument("--device", required=True)
 parser.add_argument("--label", required=True, help="Git SHA or build label")
 parser.add_argument("--mode", choices=["raw", "player-replay", "caption-crops"], default="raw")
+parser.add_argument("--ocr-mode", choices=["hybrid", "v6_rec", "v6_det", "v6_both"],
+                    help="Explicit four-way production engine; requires player-replay")
 parser.add_argument("--pp-detection", choices=["off","rescue"], default="off", help="Native PP detector rescue, requires player-replay")
 parser.add_argument("--crop-preparation", choices=["original", "double", "white-core", "dark-core"], default="original", help="Diagnostic manual-caption-region preparation; never automatic detection")
 parser.add_argument("--coarse-width", type=int, choices=[0,1100], default=0, help="Test-only pipeline override, not automatic application performance")
 parser.add_argument("--app-apk", type=Path)
 parser.add_argument("--test-apk", type=Path)
 args = parser.parse_args()
+if args.ocr_mode and (args.mode != "player-replay" or args.pp_detection != "off"):
+    parser.error("Four-way engine requires player-replay without legacy PP rescue")
 if args.pp_detection != "off" and args.mode != "player-replay":
     parser.error("Native PP detection requires player-replay")
 if args.coarse_width and args.mode != "player-replay":
@@ -81,6 +85,7 @@ payload = json.dumps(dataset, ensure_ascii=False).encode("utf-8")
 adb("shell", f"run-as {package} sh -c 'cat > files/image-evaluation/dataset.json'", input=payload)
 adb("shell", "run-as", package, "rm", "-f", "files/image-evaluation/results.json")
 run = adb("shell", "am", "instrument", "-w", "-r", "-e", "label", args.label,
+          *(["-e", "ocr_mode", args.ocr_mode] if args.ocr_mode else []),
           "-e", "mode", args.mode, "-e", "pp_detection", args.pp_detection, "-e", "crop_preparation", args.crop_preparation, "-e", "coarse_width", str(args.coarse_width),
           package + ".test/jp.hidemaru.burnedcaptionreader.evaluation.ImageEvaluationInstrumentation",
           stdout=subprocess.PIPE, stderr=subprocess.STDOUT)

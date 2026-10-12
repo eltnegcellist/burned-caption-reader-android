@@ -618,7 +618,8 @@ public final class SharedPlayerActivity extends Activity {
                     "would_skip", probe.wouldSkip, "reason", probe.reason,
                     "elapsed_ms", SystemClock.elapsedRealtime() - shadowStarted,
                     "broad_delta", probe.broadMeanDelta, "band_delta", probe.bandMeanDelta,
-                    "band_color_delta", probe.bandColorDelta);
+                    "band_color_delta", probe.bandColorDelta,
+                    "band_peak_delta", probe.bandPeakChannelDelta);
         }
         diagnostics.image("video_frame", frame, "frame_id", frameId,
                 "generation", generation, "video_id", videoId, "ocr_mode", ocrMode.storedValue);

@@ -15,9 +15,11 @@ public final class CaptionFrameShadow {
         public final double broadMeanDelta;
         public final double bandMeanDelta;
         public final double bandColorDelta;
-        Prediction(boolean skip, String why, double broad, double band, double color) {
+        public final int bandPeakChannelDelta;
+        Prediction(boolean skip, String why, double broad, double band, double color, int peak) {
             wouldSkip = skip; reason = why; broadMeanDelta = broad; bandMeanDelta = band;
             bandColorDelta = color;
+            bandPeakChannelDelta = peak;
         }
     }
 
@@ -76,14 +78,14 @@ public final class CaptionFrameShadow {
     }
 
     public Prediction probe(PixelSource pixels, int w, int h, int currentGeneration, long now) {
-        if (w <= 0 || h <= 0) return new Prediction(false, "invalid_dimensions", -1, -1, -1);
+        if (w <= 0 || h <= 0) return new Prediction(false, "invalid_dimensions", -1, -1, -1, -1);
         if (width != w || height != h || generation != currentGeneration) {
             clearFingerprints();
             width = w; height = h; generation = currentGeneration;
         }
         if (!hasTrust(now)) {
             clearFingerprints();
-            return new Prediction(false, "no_recent_locked_lane", -1, -1, -1);
+            return new Prediction(false, "no_recent_locked_lane", -1, -1, -1, -1);
         }
         int[] broad = sample(pixels, w, h, WHOLE_W, WHOLE_H, 0, 1);
         int[] band = sample(pixels, w, h, BAND_W, BAND_H,
@@ -93,11 +95,13 @@ public final class CaptionFrameShadow {
         // Luma alone misses hue changes (e.g. a red digit becoming green)
         // when their weighted brightness is approximately equal.
         double bandColorDelta = previousBand == null ? -1 : meanColorDelta(previousBand, band);
+        int bandPeakChannelDelta = previousBand == null ? -1
+                : peakChannelDelta(previousBand, band);
         boolean force = lastWouldOcrAt >= 0 && now - lastWouldOcrAt >= FORCE_EVERY_MS;
         boolean skip = previousBroad != null && previousBand != null
                 && !force && consecutiveWouldSkips < 1
                 && wholeDelta <= 4.0 && bandDelta <= 3.0
-                && bandColorDelta <= 4.0;
+                && bandColorDelta <= 4.0 && bandPeakChannelDelta <= 30;
         String reason = previousBroad == null ? "first_with_trust"
                 : force ? "forced_periodic_ocr"
                 : consecutiveWouldSkips >= 1 ? "max_one_skip"
@@ -110,7 +114,7 @@ public final class CaptionFrameShadow {
             consecutiveWouldSkips = 0;
             lastWouldOcrAt = now;
         }
-        return new Prediction(skip, reason, wholeDelta, bandDelta, bandColorDelta);
+        return new Prediction(skip, reason, wholeDelta, bandDelta, bandColorDelta, bandPeakChannelDelta);
     }
 
     /** P3 candidate only. Shadow does not invoke another detector. */
@@ -166,6 +170,21 @@ public final class CaptionFrameShadow {
         for (int i = 0; i < a.length; i++)
             total += Math.abs(luminance(a[i]) - luminance(b[i]));
         return total / (double) a.length;
+    }
+
+    /**
+     * A single changed digit can affect only one sampled cell: a mean over 576
+     * cells would dilute the difference. Reject a potential skip on a changed
+     * sampled pixel even when the average delta remains tiny.
+     */
+    private static int peakChannelDelta(int[] a, int[] b) {
+        int peak = 0;
+        for (int i = 0; i < a.length; i++) {
+            peak = Math.max(peak, Math.abs(((a[i] >> 16) & 255) - ((b[i] >> 16) & 255)));
+            peak = Math.max(peak, Math.abs(((a[i] >> 8) & 255) - ((b[i] >> 8) & 255)));
+            peak = Math.max(peak, Math.abs((a[i] & 255) - (b[i] & 255)));
+        }
+        return peak;
     }
 
     private static double meanColorDelta(int[] a, int[] b) {

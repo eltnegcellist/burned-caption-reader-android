@@ -47,6 +47,21 @@ public class CaptionFrameShadowTest {
         assertFalse(observed.wouldSkip);
     }
 
+    @Test public void changedSingleSampledCellCannotBeHiddenByLowMean() {
+        CaptionFrameShadow s = new CaptionFrameShadow();
+        CaptionFrameShadow.PixelSource dark = (x, y) -> 0xff000000;
+        CaptionFrameShadow.PixelSource changed = (x, y) ->
+                x >= 135 && x <= 145 && y >= 232 && y <= 239
+                        ? 0xffee0000 : 0xff000000;
+        s.trust(1, .60f, .80f, 0);
+        s.probe(dark, 640, 360, 1, 0);
+        CaptionFrameShadow.Prediction result = s.probe(changed, 640, 360, 1, 480);
+        assertTrue("Small-area color delta should be diluted in the mean",
+                result.bandColorDelta < 4.0);
+        assertTrue(result.bandPeakChannelDelta >= 200);
+        assertFalse("One changed sampled digit must force OCR", result.wouldSkip);
+    }
+
     @Test public void rescueProbeNeedsTrustedBandContrastAndNoExistingStrip() {
         CaptionFrameShadow s = new CaptionFrameShadow();
         CaptionFrameShadow.PixelSource contrast = (x, y) -> ((x / 10) % 2 == 0) ? 0xffeeeeee : 0xff111111;

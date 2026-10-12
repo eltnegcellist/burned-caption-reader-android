@@ -25,7 +25,7 @@ Elephants Dream最初5分の字幕表示はSRT上74.462秒、Sintelは51.318秒�
 
 ## 字幕描画の確認
 
-使用したffmpegはSubtitle Edit 5.2.0公式Macアプリ同梱版。検証用代表画像は幅960へ縮小し、`subtitles`フィルタ、VSE同梱Noto Sans CJK、FontSize=24 / Outline=2 / MarginV=20で描画。元SRTの時刻を維持して、画像中の文字が一致するか目視した。
+使用したffmpegはSubtitle Edit 5.2.0公式Macアプリ同梱版。検証用代表画像は幅960へ縮小し、`subtitles`フィルタ、FontName=Noto Sans CJK JP / FontSize=24 / Outline=2 / MarginV=20を指定して描画。CoreTextの選択ログでは、日本語は実際にはHiragino Sans W4、LatinはHelveticaへフォールバックしていた。再現時は指定名だけでなく実際のフォント選択も合わせる。フォントの現物SHAを保存し、フォントファイル自体は公開していない。元SRTの時刻を維持して、画像中の文字が一致するか目視した。
 
 - Elephants Dream 345秒：「なぜ？」と「―早く！」の2行が確認できる。
 - Elephants Dream 115秒：字幕なし。背景に細かな多数の線・高輝度部分があり、背景除外の評価に使える。

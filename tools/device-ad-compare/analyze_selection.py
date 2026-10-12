@@ -91,6 +91,14 @@ def analyze(events, max_examples=100):
                                     and e.get("would_rescue") is True for e in events),
         "p4_shadow_skip_candidates": sum(e.get("type") == "skip_shadow"
                                          and e.get("would_skip") is True for e in events),
+        "p4_candidate_hides_selected_change": sum(
+            e.get("type") == "skip_shadow_outcome"
+            and e.get("would_skip") is True
+            and e.get("selected_text_changed") is True for e in events),
+        "p4_comparison_cost_ms": quantiles_ms([
+            e.get("elapsed_ms") for e in events if e.get("type") == "skip_shadow"]),
+        "p3_probe_cost_ms": quantiles_ms([
+            e.get("elapsed_ms") for e in events if e.get("type") == "rescue_shadow"]),
         "limitations": [
             "Raw-positive/selected-empty is an observation, not proof that raw OCR was correct.",
             "Each reason is a traced decision, not an established root cause.",

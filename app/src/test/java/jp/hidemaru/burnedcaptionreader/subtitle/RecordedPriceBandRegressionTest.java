@@ -59,7 +59,7 @@ public final class RecordedPriceBandRegressionTest {
             }
         }
         assertTrue("Existing 100-yen caption must not regress", found100 >= 5);
-        assertTrue("Previously 0/8 selected; protected transition should recover", found200 >= 1);
+        assertEquals("Recorded 200-yen caption must be selected in all 7 post-corroboration frames", 7, found200);
         assertEquals("Fixed header and blank frames must never be selected", 0, extras);
     }
 

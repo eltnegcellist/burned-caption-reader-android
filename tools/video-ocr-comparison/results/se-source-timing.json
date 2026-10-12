@@ -1,0 +1,20 @@
+{
+  "command": [
+    "private/dotnet/dotnet",
+    "benchmark/tools/video-ocr-comparison/se-source/bin/Release/net10.0/SeSource.dll",
+    "upstream/Subtitle Edit.app/Contents/MacOS/ffmpeg",
+    "private/controls/timing-offset.mp4",
+    "outputs/se-source-timing.srt",
+    "private/se-timing-frames",
+    "refine"
+  ],
+  "cwd": "<WORKSPACE>",
+  "exit_code": 0,
+  "elapsed_seconds": 1.099464958999306,
+  "peak_sampled_tree_rss_bytes": 222396416,
+  "rss_sampling_interval_ms": 50,
+  "samples": 18,
+  "rss_caveat": "sum of parent and live children RSS; shared pages may be double-counted; short peaks may be missed",
+  "environment": {},
+  "log": "se-source-timing.log"
+}

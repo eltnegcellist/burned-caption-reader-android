@@ -1,0 +1,54 @@
+{
+  "experiment": "owned_synthetic_SE_source_components",
+  "gui_product_run": false,
+  "omitted": "GUI/viewmodel recovery and spelling fixes are not exercised; refinement only with explicit refine argument",
+  "refinement": true,
+  "coarseLines": [
+    {
+      "StartMs": 1200,
+      "EndMs": 7200,
+      "Text": "\u672C\u65E5\u306E\u4FA1\u683C\u306F100\u5186\u3067\u3059"
+    },
+    {
+      "StartMs": 11200,
+      "EndMs": 17200,
+      "Text": "\u672C\u65E5\u306E\u4FA1\u683C\u306F200\u5186\u3067\u3059"
+    },
+    {
+      "StartMs": 21200,
+      "EndMs": 27200,
+      "Text": "\u3053\u306E\u30B5\u30FC\u30D3\u30B9\u3092\u5229\u7528\u3067\u304D\u307E\u3059"
+    }
+  ],
+  "fps": 5,
+  "brightness_minimum": 190,
+  "image_similarity_percent": 92,
+  "text_similarity_percent": 80,
+  "max_gap_ms": 250,
+  "min_duration_ms": 250,
+  "sampled_frames": 150,
+  "group_count": 7,
+  "ocr_calls": 3,
+  "non_ocr_sampled_frames": 147,
+  "elapsed_seconds": 1.0264881,
+  "readings": [
+    {
+      "StartFrame": 6,
+      "EndFrame": 35,
+      "Text": "\u672C\u65E5\u306E\u4FA1\u683C\u306F100\u5186\u3067\u3059",
+      "ocr_ms": 251.832
+    },
+    {
+      "StartFrame": 56,
+      "EndFrame": 85,
+      "Text": "\u672C\u65E5\u306E\u4FA1\u683C\u306F200\u5186\u3067\u3059",
+      "ocr_ms": 56.7075
+    },
+    {
+      "StartFrame": 106,
+      "EndFrame": 135,
+      "Text": "\u3053\u306E\u30B5\u30FC\u30D3\u30B9\u3092\u5229\u7528\u3067\u304D\u307E\u3059",
+      "ocr_ms": 62.34
+    }
+  ]
+}

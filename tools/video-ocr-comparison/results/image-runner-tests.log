@@ -1,0 +1,17 @@
+test_coarse_override_cannot_be_labelled_raw (test_run.DiagnosticPreflightTest.test_coarse_override_cannot_be_labelled_raw) ... ok
+test_crop_preparation_cannot_be_labelled_player (test_run.DiagnosticPreflightTest.test_crop_preparation_cannot_be_labelled_player) ... ok
+test_explicit_blank_region_list_is_allowed (test_run.DiagnosticPreflightTest.test_explicit_blank_region_list_is_allowed) ... ok
+test_full_frame_boundary_crop_is_allowed (test_run.DiagnosticPreflightTest.test_full_frame_boundary_crop_is_allowed) ... ok
+test_hybrid_diagnostic_cannot_be_labelled_player (test_run.DiagnosticPreflightTest.test_hybrid_diagnostic_cannot_be_labelled_player) ... ok
+test_hybrid_manual_diagnostic_is_allowed (test_run.DiagnosticPreflightTest.test_hybrid_manual_diagnostic_is_allowed) ... ok
+test_invalid_rectangles_never_reach_device (test_run.DiagnosticPreflightTest.test_invalid_rectangles_never_reach_device) ... ok
+test_legacy_raw_does_not_require_manual_regions (test_run.DiagnosticPreflightTest.test_legacy_raw_does_not_require_manual_regions) ... ok
+test_manual_flag_required (test_run.DiagnosticPreflightTest.test_manual_flag_required) ... ok
+test_native_detection_cannot_be_labelled_raw (test_run.DiagnosticPreflightTest.test_native_detection_cannot_be_labelled_raw) ... ok
+test_player_override_is_allowed (test_run.DiagnosticPreflightTest.test_player_override_is_allowed) ... ok
+test_regions_required_even_on_blank_frame (test_run.DiagnosticPreflightTest.test_regions_required_even_on_blank_frame) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 2.905s
+
+OK

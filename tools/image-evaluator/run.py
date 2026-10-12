@@ -20,7 +20,10 @@ parser.add_argument("--crop-preparation", choices=["original", "double", "white-
 parser.add_argument("--coarse-width", type=int, choices=[0,1100], default=0, help="Test-only pipeline override, not automatic application performance")
 parser.add_argument("--app-apk", type=Path)
 parser.add_argument("--test-apk", type=Path)
+parser.add_argument("--diagnostic-engine", choices=["mlkit", "hybrid"], default="mlkit", help="Test-only manual-ROI hybrid refinement; production app unchanged")
 args = parser.parse_args()
+if args.diagnostic_engine != "mlkit" and args.mode != "caption-crops":
+    parser.error("Hybrid diagnostic engine requires caption-crops")
 if args.pp_detection != "off" and args.mode != "player-replay":
     parser.error("Native PP detection requires player-replay")
 if args.coarse_width and args.mode != "player-replay":
@@ -80,7 +83,7 @@ for i, frame in enumerate(dataset["frames"]):
 payload = json.dumps(dataset, ensure_ascii=False).encode("utf-8")
 adb("shell", f"run-as {package} sh -c 'cat > files/image-evaluation/dataset.json'", input=payload)
 adb("shell", "run-as", package, "rm", "-f", "files/image-evaluation/results.json")
-run = adb("shell", "am", "instrument", "-w", "-r", "-e", "label", args.label,
+run = adb("shell", "am", "instrument", "-w", "-r", "-e", "diagnostic_engine", args.diagnostic_engine, "-e", "label", args.label,
           "-e", "mode", args.mode, "-e", "pp_detection", args.pp_detection, "-e", "crop_preparation", args.crop_preparation, "-e", "coarse_width", str(args.coarse_width),
           package + ".test/jp.hidemaru.burnedcaptionreader.evaluation.ImageEvaluationInstrumentation",
           stdout=subprocess.PIPE, stderr=subprocess.STDOUT)

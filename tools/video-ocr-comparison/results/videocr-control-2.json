@@ -1,0 +1,39 @@
+{
+  "command": [
+    "envs/videocr/bin/python",
+    "benchmark/tools/video-ocr-comparison/run_videocr_mac.py",
+    "--video_path",
+    "private/controls/control-2.mp4",
+    "--output",
+    "outputs/videocr-control-2.srt",
+    "--ocr_engine",
+    "paddleocr",
+    "--lang",
+    "japan",
+    "--use_gpu",
+    "false",
+    "--crop_x",
+    "0",
+    "--crop_y",
+    "350",
+    "--crop_width",
+    "960",
+    "--crop_height",
+    "190",
+    "--allow_system_sleep",
+    "true"
+  ],
+  "cwd": "<WORKSPACE>",
+  "exit_code": 0,
+  "elapsed_seconds": 26.002003125147894,
+  "peak_sampled_tree_rss_bytes": 1129414656,
+  "rss_sampling_interval_ms": 50,
+  "samples": 448,
+  "rss_caveat": "sum of parent and live children RSS; shared pages may be double-counted; short peaks may be missed",
+  "environment": {
+    "PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK": "True",
+    "PADDLE_PDX_CACHE_HOME": "<WORKSPACE>/private/videocr-model-cache",
+    "OMP_NUM_THREADS": "1"
+  },
+  "log": "videocr-control-2.log"
+}

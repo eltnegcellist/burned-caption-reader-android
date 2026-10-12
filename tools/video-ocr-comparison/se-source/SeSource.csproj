@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="SkiaSharp" Version="3.119.4" />
+    <Compile Include="$(SeSource)/src/ui/Features/Ocr/OcrLanguage2.cs" Link="upstream/OcrLanguage2.cs" />
+    <Compile Include="$(SeSource)/src/ui/Features/Ocr/Engines/AppleVisionOcr.cs" Link="upstream/AppleVisionOcr.cs" />
+    <Compile Include="$(SeSource)/src/ui/Features/Ocr/Engines/AppleVisionTextLayout.cs" Link="upstream/AppleVisionTextLayout.cs" />
+    <Compile Include="$(SeSource)/src/ui/Features/Video/VideoOcr/VideoOcrFrameGrouper.cs" Link="upstream/VideoOcrFrameGrouper.cs" />
+    <Compile Include="$(SeSource)/src/ui/Features/Video/VideoOcr/VideoOcrFrameGroup.cs" Link="upstream/VideoOcrFrameGroup.cs" />
+    <Compile Include="$(SeSource)/src/ui/Features/Video/VideoOcr/VideoOcrLineBuilder.cs" Link="upstream/VideoOcrLineBuilder.cs" />
+    <Compile Include="$(SeSource)/src/ui/Features/Video/VideoOcr/VideoOcrObservationFilter.cs" Link="upstream/VideoOcrObservationFilter.cs" />
+    <Compile Include="$(SeSource)/src/ui/Features/Video/VideoOcr/VideoOcrTimingRefiner.cs" Link="upstream/VideoOcrTimingRefiner.cs" />
+  </ItemGroup>
+</Project>

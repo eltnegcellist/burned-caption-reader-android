@@ -65,7 +65,10 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
             long previous = -1;
             int edits = 0, characters = 0;
             boolean playerMode = "player-replay".equals(arguments.getString("mode"));
-            OcrEngine engine = playerMode ? productionEngine() : new MlKitJapaneseOcrEngine();
+            boolean hybridDiagnostic = "hybrid".equals(arguments.getString("diagnostic_engine", "mlkit"));
+            if (hybridDiagnostic && !"caption-crops".equals(arguments.getString("mode")))
+                throw new IllegalArgumentException("Hybrid diagnostic requires manual-caption-crops mode");
+            OcrEngine engine = playerMode || hybridDiagnostic ? productionEngine() : new MlKitJapaneseOcrEngine();
             boolean cropMode = "caption-crops".equals(arguments.getString("mode"));
             if (cropMode && !dataset.optBoolean("manual_caption_regions"))
                 throw new IllegalArgumentException("Pixel-reviewed manual caption regions required");
@@ -94,7 +97,8 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
                         public OcrResult refine(Bitmap input) throws Exception { return recognizeRefined(engine, input); }
                     });
                     else if (cropMode) stages = CaptionRegionDiagnostic.process(bitmap, row,
-                            arguments.getString("crop_preparation", "original"), input -> recognize(engine, input));
+                            arguments.getString("crop_preparation", "original"), input -> hybridDiagnostic
+                                    ? recognizeRefined(engine, input) : recognize(engine, input));
                     else stages = new JSONObject().put("ocr_text", recognize(engine, bitmap).getText());
                     try {
                         stages.put("native_detector_status", engine.getClass().getMethod("getDetectionStatus").invoke(engine));
@@ -121,7 +125,7 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
                 }
             } finally { engine.close(); }
             replay.finish(previous);
-            JSONObject output = new JSONObject().put("schema_version", 1).put("native_detection", arguments.getString("pp_detection", "off")).put("sampled_peak_pss_kb", peakPssKb)
+            JSONObject output = new JSONObject().put("schema_version", 1).put("diagnostic_engine", hybridDiagnostic ? "hybrid_refine" : "mlkit_or_player_hybrid").put("native_detection", arguments.getString("pp_detection", "off")).put("sampled_peak_pss_kb", peakPssKb)
                     .put("scope", playerMode ? (diagnosticCoarseWidth == 0 ? "player_components_immediate_tts" : "player_components_diagnostic_coarse_width") : cropMode ? "manual_caption_regions_only" : "raw_image_ocr_only")
                     .put("metric", playerMode || cropMode ? "caption_comparison_key_cer" : "raw_codepoint_cer")
                     .put("diagnostic_coarse_width", diagnosticCoarseWidth)

@@ -1,0 +1,26 @@
+{
+  "command": [
+    "envs/videocr/bin/python",
+    "benchmark/tools/video-ocr-comparison/compare_images.py",
+    "private/controls/control-1.manifest.json",
+    "--out",
+    "outputs/images-videocr-manual.json",
+    "--engine",
+    "videocr",
+    "--scope",
+    "manual-roi"
+  ],
+  "cwd": "<WORKSPACE>",
+  "exit_code": 0,
+  "elapsed_seconds": 4.99343033391051,
+  "peak_sampled_tree_rss_bytes": 963264512,
+  "rss_sampling_interval_ms": 50,
+  "samples": 84,
+  "rss_caveat": "sum of parent and live children RSS; shared pages may be double-counted; short peaks may be missed",
+  "environment": {
+    "PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK": "True",
+    "PADDLE_PDX_CACHE_HOME": "<WORKSPACE>/private/videocr-model-cache",
+    "OMP_NUM_THREADS": "1"
+  },
+  "log": "images-videocr-manual-resource.log"
+}

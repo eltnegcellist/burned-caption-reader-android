@@ -1,0 +1,1035 @@
+{
+  "source": "owned_synthetic_render",
+  "natural_video": false,
+  "pixelcopy": false,
+  "split": "development_control",
+  "video": "control-1.mp4",
+  "sha256": "9b807e425bdb27a1b79c1d124e19f6d116a00520c7bc4d8be6b1c376ec324a82",
+  "font_sha256": "e1ee608f584acdaffc898efac7e2c9fa1c19457474bf215f6b7031ca720993d1",
+  "seconds": 300,
+  "fps": 10,
+  "common_roi_pixels": [
+    0,
+    350,
+    960,
+    190
+  ],
+  "events": [
+    {
+      "start": 1000,
+      "end": 7000,
+      "text": "本日の価格は100円です"
+    },
+    {
+      "start": 11000,
+      "end": 17000,
+      "text": "本日の価格は200円です"
+    },
+    {
+      "start": 21000,
+      "end": 27000,
+      "text": "このサービスを利用できます"
+    },
+    {
+      "start": 31000,
+      "end": 37000,
+      "text": "このサービスを利用できません"
+    },
+    {
+      "start": 41000,
+      "end": 47000,
+      "text": "東京都で山田太郎さんに会いました"
+    },
+    {
+      "start": 51000,
+      "end": 57000,
+      "text": "字幕は上から読みます\n二行目にも大切な情報があります"
+    },
+    {
+      "start": 61000,
+      "end": 67000,
+      "text": "今日は10月12日です\n参加者は25人です\n中止ではありません"
+    },
+    {
+      "start": 71000,
+      "end": 77000,
+      "text": "同じ字幕がしばらく続きます"
+    },
+    {
+      "start": 81000,
+      "end": 87000,
+      "text": "小さい字幕も読み取れますか"
+    },
+    {
+      "start": 91000,
+      "end": 97000,
+      "text": "これは字幕ではありませんとは言いません"
+    },
+    {
+      "start": 101000,
+      "end": 107000,
+      "text": "本日の価格は100円です"
+    },
+    {
+      "start": 111000,
+      "end": 117000,
+      "text": "本日の価格は200円です"
+    },
+    {
+      "start": 121000,
+      "end": 127000,
+      "text": "このサービスを利用できます"
+    },
+    {
+      "start": 131000,
+      "end": 137000,
+      "text": "このサービスを利用できません"
+    },
+    {
+      "start": 141000,
+      "end": 147000,
+      "text": "東京都で山田太郎さんに会いました"
+    },
+    {
+      "start": 151000,
+      "end": 157000,
+      "text": "字幕は上から読みます\n二行目にも大切な情報があります"
+    },
+    {
+      "start": 161000,
+      "end": 167000,
+      "text": "今日は10月12日です\n参加者は25人です\n中止ではありません"
+    },
+    {
+      "start": 171000,
+      "end": 177000,
+      "text": "同じ字幕がしばらく続きます"
+    },
+    {
+      "start": 181000,
+      "end": 187000,
+      "text": "小さい字幕も読み取れますか"
+    },
+    {
+      "start": 191000,
+      "end": 197000,
+      "text": "これは字幕ではありませんとは言いません"
+    },
+    {
+      "start": 201000,
+      "end": 207000,
+      "text": "本日の価格は100円です"
+    },
+    {
+      "start": 211000,
+      "end": 217000,
+      "text": "本日の価格は200円です"
+    },
+    {
+      "start": 221000,
+      "end": 227000,
+      "text": "このサービスを利用できます"
+    },
+    {
+      "start": 231000,
+      "end": 237000,
+      "text": "このサービスを利用できません"
+    },
+    {
+      "start": 241000,
+      "end": 247000,
+      "text": "東京都で山田太郎さんに会いました"
+    },
+    {
+      "start": 251000,
+      "end": 257000,
+      "text": "字幕は上から読みます\n二行目にも大切な情報があります"
+    },
+    {
+      "start": 261000,
+      "end": 267000,
+      "text": "今日は10月12日です\n参加者は25人です\n中止ではありません"
+    },
+    {
+      "start": 271000,
+      "end": 277000,
+      "text": "同じ字幕がしばらく続きます"
+    },
+    {
+      "start": 281000,
+      "end": 287000,
+      "text": "小さい字幕も読み取れますか"
+    },
+    {
+      "start": 291000,
+      "end": 297000,
+      "text": "これは字幕ではありませんとは言いません"
+    }
+  ],
+  "frames": [
+    {
+      "id": "control-1-0030.png",
+      "image": "control-1-0030.png",
+      "sha256": "b161812c486a34ce1dcd17c45bb18a86e9ed92387515ba25d1a1a694a2573579",
+      "expected_text": "本日の価格は100円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 3000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0090.png",
+      "image": "control-1-0090.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 9000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0130.png",
+      "image": "control-1-0130.png",
+      "sha256": "36b2eb1d782a2ad8b5eccc4e87f165d8d89a8ca20795a81ebd3059d6b6c27ec8",
+      "expected_text": "本日の価格は200円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 13000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0190.png",
+      "image": "control-1-0190.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 19000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0230.png",
+      "image": "control-1-0230.png",
+      "sha256": "6718bd973e7e793df30599254c1f2fd4e9304458ec5e81633c983f0b7bc8fb9b",
+      "expected_text": "このサービスを利用できます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 23000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0290.png",
+      "image": "control-1-0290.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 29000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0330.png",
+      "image": "control-1-0330.png",
+      "sha256": "a6ec14874608a67d67ae85a039169a0c728282fd3eb9fbeb3ccba56d28dfecd6",
+      "expected_text": "このサービスを利用できません",
+      "caption_regions": [
+        [
+          0.24791666666666667,
+          0.8592592592592593,
+          0.7520833333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 33000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0390.png",
+      "image": "control-1-0390.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 39000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0430.png",
+      "image": "control-1-0430.png",
+      "sha256": "69a9eb05a7a185bb03660989c8b603e490cfa11a34afd936ba71e441cb5e13f8",
+      "expected_text": "東京都で山田太郎さんに会いました",
+      "caption_regions": [
+        [
+          0.2125,
+          0.8592592592592593,
+          0.7875,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 43000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0490.png",
+      "image": "control-1-0490.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 49000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0530.png",
+      "image": "control-1-0530.png",
+      "sha256": "c1325527c119d64a4b6067ea52d16b8e66fb8e9944342f6805123f55b214aad0",
+      "expected_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "caption_regions": [
+        [
+          0.31875,
+          0.7814814814814814,
+          0.68125,
+          0.8666666666666667
+        ],
+        [
+          0.23020833333333332,
+          0.8592592592592593,
+          0.7697916666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 53000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0590.png",
+      "image": "control-1-0590.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 59000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0630.png",
+      "image": "control-1-0630.png",
+      "sha256": "222dc254c48bebb8e2207c07c240acc1d1e46a01b73e0b99d04f439af3fcb1aa",
+      "expected_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "caption_regions": [
+        [
+          0.32395833333333335,
+          0.7037037037037037,
+          0.6760416666666667,
+          0.7888888888888889
+        ],
+        [
+          0.34791666666666665,
+          0.7814814814814814,
+          0.6520833333333333,
+          0.8666666666666667
+        ],
+        [
+          0.33645833333333336,
+          0.8592592592592593,
+          0.6635416666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 63000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0690.png",
+      "image": "control-1-0690.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 69000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0730.png",
+      "image": "control-1-0730.png",
+      "sha256": "f0fb863a8933c33d70fdb669cd0b507dc63f109f0fdaf06470ae52b280c53258",
+      "expected_text": "同じ字幕がしばらく続きます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 73000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0790.png",
+      "image": "control-1-0790.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 79000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0830.png",
+      "image": "control-1-0830.png",
+      "sha256": "49e06fde2e2efb59c648aa634e3d467ac81d1d2416a70f19a0e72ef958667512",
+      "expected_text": "小さい字幕も読み取れますか",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 83000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0890.png",
+      "image": "control-1-0890.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 89000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0930.png",
+      "image": "control-1-0930.png",
+      "sha256": "3892b098e22cfea49690a78f747d9484308555c6b13178e936beb236a1aeb54b",
+      "expected_text": "これは字幕ではありませんとは言いません",
+      "caption_regions": [
+        [
+          0.159375,
+          0.8592592592592593,
+          0.840625,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 93000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-0990.png",
+      "image": "control-1-0990.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 99000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1030.png",
+      "image": "control-1-1030.png",
+      "sha256": "b161812c486a34ce1dcd17c45bb18a86e9ed92387515ba25d1a1a694a2573579",
+      "expected_text": "本日の価格は100円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 103000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1090.png",
+      "image": "control-1-1090.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 109000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1130.png",
+      "image": "control-1-1130.png",
+      "sha256": "36b2eb1d782a2ad8b5eccc4e87f165d8d89a8ca20795a81ebd3059d6b6c27ec8",
+      "expected_text": "本日の価格は200円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 113000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1190.png",
+      "image": "control-1-1190.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 119000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1230.png",
+      "image": "control-1-1230.png",
+      "sha256": "6718bd973e7e793df30599254c1f2fd4e9304458ec5e81633c983f0b7bc8fb9b",
+      "expected_text": "このサービスを利用できます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 123000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1290.png",
+      "image": "control-1-1290.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 129000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1330.png",
+      "image": "control-1-1330.png",
+      "sha256": "a6ec14874608a67d67ae85a039169a0c728282fd3eb9fbeb3ccba56d28dfecd6",
+      "expected_text": "このサービスを利用できません",
+      "caption_regions": [
+        [
+          0.24791666666666667,
+          0.8592592592592593,
+          0.7520833333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 133000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1390.png",
+      "image": "control-1-1390.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 139000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1430.png",
+      "image": "control-1-1430.png",
+      "sha256": "69a9eb05a7a185bb03660989c8b603e490cfa11a34afd936ba71e441cb5e13f8",
+      "expected_text": "東京都で山田太郎さんに会いました",
+      "caption_regions": [
+        [
+          0.2125,
+          0.8592592592592593,
+          0.7875,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 143000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1490.png",
+      "image": "control-1-1490.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 149000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1530.png",
+      "image": "control-1-1530.png",
+      "sha256": "c1325527c119d64a4b6067ea52d16b8e66fb8e9944342f6805123f55b214aad0",
+      "expected_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "caption_regions": [
+        [
+          0.31875,
+          0.7814814814814814,
+          0.68125,
+          0.8666666666666667
+        ],
+        [
+          0.23020833333333332,
+          0.8592592592592593,
+          0.7697916666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 153000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1590.png",
+      "image": "control-1-1590.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 159000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1630.png",
+      "image": "control-1-1630.png",
+      "sha256": "222dc254c48bebb8e2207c07c240acc1d1e46a01b73e0b99d04f439af3fcb1aa",
+      "expected_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "caption_regions": [
+        [
+          0.32395833333333335,
+          0.7037037037037037,
+          0.6760416666666667,
+          0.7888888888888889
+        ],
+        [
+          0.34791666666666665,
+          0.7814814814814814,
+          0.6520833333333333,
+          0.8666666666666667
+        ],
+        [
+          0.33645833333333336,
+          0.8592592592592593,
+          0.6635416666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 163000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1690.png",
+      "image": "control-1-1690.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 169000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1730.png",
+      "image": "control-1-1730.png",
+      "sha256": "f0fb863a8933c33d70fdb669cd0b507dc63f109f0fdaf06470ae52b280c53258",
+      "expected_text": "同じ字幕がしばらく続きます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 173000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1790.png",
+      "image": "control-1-1790.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 179000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1830.png",
+      "image": "control-1-1830.png",
+      "sha256": "49e06fde2e2efb59c648aa634e3d467ac81d1d2416a70f19a0e72ef958667512",
+      "expected_text": "小さい字幕も読み取れますか",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 183000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1890.png",
+      "image": "control-1-1890.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 189000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1930.png",
+      "image": "control-1-1930.png",
+      "sha256": "3892b098e22cfea49690a78f747d9484308555c6b13178e936beb236a1aeb54b",
+      "expected_text": "これは字幕ではありませんとは言いません",
+      "caption_regions": [
+        [
+          0.159375,
+          0.8592592592592593,
+          0.840625,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 193000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-1990.png",
+      "image": "control-1-1990.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 199000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2030.png",
+      "image": "control-1-2030.png",
+      "sha256": "b161812c486a34ce1dcd17c45bb18a86e9ed92387515ba25d1a1a694a2573579",
+      "expected_text": "本日の価格は100円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 203000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2090.png",
+      "image": "control-1-2090.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 209000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2130.png",
+      "image": "control-1-2130.png",
+      "sha256": "36b2eb1d782a2ad8b5eccc4e87f165d8d89a8ca20795a81ebd3059d6b6c27ec8",
+      "expected_text": "本日の価格は200円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 213000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2190.png",
+      "image": "control-1-2190.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 219000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2230.png",
+      "image": "control-1-2230.png",
+      "sha256": "6718bd973e7e793df30599254c1f2fd4e9304458ec5e81633c983f0b7bc8fb9b",
+      "expected_text": "このサービスを利用できます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 223000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2290.png",
+      "image": "control-1-2290.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 229000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2330.png",
+      "image": "control-1-2330.png",
+      "sha256": "a6ec14874608a67d67ae85a039169a0c728282fd3eb9fbeb3ccba56d28dfecd6",
+      "expected_text": "このサービスを利用できません",
+      "caption_regions": [
+        [
+          0.24791666666666667,
+          0.8592592592592593,
+          0.7520833333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 233000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2390.png",
+      "image": "control-1-2390.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 239000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2430.png",
+      "image": "control-1-2430.png",
+      "sha256": "69a9eb05a7a185bb03660989c8b603e490cfa11a34afd936ba71e441cb5e13f8",
+      "expected_text": "東京都で山田太郎さんに会いました",
+      "caption_regions": [
+        [
+          0.2125,
+          0.8592592592592593,
+          0.7875,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 243000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2490.png",
+      "image": "control-1-2490.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 249000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2530.png",
+      "image": "control-1-2530.png",
+      "sha256": "c1325527c119d64a4b6067ea52d16b8e66fb8e9944342f6805123f55b214aad0",
+      "expected_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "caption_regions": [
+        [
+          0.31875,
+          0.7814814814814814,
+          0.68125,
+          0.8666666666666667
+        ],
+        [
+          0.23020833333333332,
+          0.8592592592592593,
+          0.7697916666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 253000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2590.png",
+      "image": "control-1-2590.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 259000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2630.png",
+      "image": "control-1-2630.png",
+      "sha256": "222dc254c48bebb8e2207c07c240acc1d1e46a01b73e0b99d04f439af3fcb1aa",
+      "expected_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "caption_regions": [
+        [
+          0.32395833333333335,
+          0.7037037037037037,
+          0.6760416666666667,
+          0.7888888888888889
+        ],
+        [
+          0.34791666666666665,
+          0.7814814814814814,
+          0.6520833333333333,
+          0.8666666666666667
+        ],
+        [
+          0.33645833333333336,
+          0.8592592592592593,
+          0.6635416666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 263000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2690.png",
+      "image": "control-1-2690.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 269000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2730.png",
+      "image": "control-1-2730.png",
+      "sha256": "f0fb863a8933c33d70fdb669cd0b507dc63f109f0fdaf06470ae52b280c53258",
+      "expected_text": "同じ字幕がしばらく続きます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 273000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2790.png",
+      "image": "control-1-2790.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 279000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2830.png",
+      "image": "control-1-2830.png",
+      "sha256": "49e06fde2e2efb59c648aa634e3d467ac81d1d2416a70f19a0e72ef958667512",
+      "expected_text": "小さい字幕も読み取れますか",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 283000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2890.png",
+      "image": "control-1-2890.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 289000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2930.png",
+      "image": "control-1-2930.png",
+      "sha256": "3892b098e22cfea49690a78f747d9484308555c6b13178e936beb236a1aeb54b",
+      "expected_text": "これは字幕ではありませんとは言いません",
+      "caption_regions": [
+        [
+          0.159375,
+          0.8592592592592593,
+          0.840625,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 293000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    },
+    {
+      "id": "control-1-2990.png",
+      "image": "control-1-2990.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 299000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification"
+    }
+  ]
+}

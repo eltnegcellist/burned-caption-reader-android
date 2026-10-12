@@ -1,0 +1,452 @@
+{
+  "engine": "vision",
+  "scope": "manual-roi",
+  "source": "owned_synthetic_render",
+  "product_pipeline": false,
+  "pixelcopy": false,
+  "caveat": "Manual ROI still uses detector + recognizer. Full-frame engine does not implement semantic subtitle selection.",
+  "initialization_ms": 380.4452500771731,
+  "manifest_sha256": "e854aa813a66f16b104af766e6a9e66f2a60622a240517a6a2a2f1eaa7ae7021",
+  "frames": [
+    {
+      "id": "control-1-0030.png",
+      "sha256": "b161812c486a34ce1dcd17c45bb18a86e9ed92387515ba25d1a1a694a2573579",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "c30559dcd5e5de4f37c0950b69070c4657e76ea21ababb70376d99e0aa7bcdfb",
+      "expected_text": "本日の価格は100円です",
+      "text": "本日の価格は100円です",
+      "ocr_ms": 602.6425000745803,
+      "rows": [
+        {
+          "text": "本日の価格は100円です",
+          "confidence": 1.0,
+          "normalized_box": [
+            0.30000000179924236,
+            0.610526315215311,
+            0.39583333333333337,
+            0.21052631578947378
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control-1-0090.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "01bba8eb0a401a2d9295e5140670417cdea30d0dabfce756fb99cb787d8e6035",
+      "expected_text": "",
+      "text": "",
+      "ocr_ms": 16.898417146876454,
+      "rows": []
+    },
+    {
+      "id": "control-1-0130.png",
+      "sha256": "36b2eb1d782a2ad8b5eccc4e87f165d8d89a8ca20795a81ebd3059d6b6c27ec8",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "8b0146dc7635b13e05b728be164e0514a5ac9e6c9a56dc45ebdb0a7ead44939d",
+      "expected_text": "本日の価格は200円です",
+      "text": "本日の価格は200円です",
+      "ocr_ms": 56.11179186962545,
+      "rows": [
+        {
+          "text": "本日の価格は200円です",
+          "confidence": 1.0,
+          "normalized_box": [
+            0.30208333550925925,
+            0.621052630994152,
+            0.3916666666666667,
+            0.18947368421052635
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control-1-0190.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "01bba8eb0a401a2d9295e5140670417cdea30d0dabfce756fb99cb787d8e6035",
+      "expected_text": "",
+      "text": "",
+      "ocr_ms": 16.865500016137958,
+      "rows": []
+    },
+    {
+      "id": "control-1-0230.png",
+      "sha256": "6718bd973e7e793df30599254c1f2fd4e9304458ec5e81633c983f0b7bc8fb9b",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "83351adf12d3f6482be3345f1e99269098993dd629f3133f7b32bce72ce659b4",
+      "expected_text": "このサービスを利用できます",
+      "text": "このサービスを利用できます",
+      "ocr_ms": 65.60049997642636,
+      "rows": [
+        {
+          "text": "このサービスを利用できます",
+          "confidence": 1.0,
+          "normalized_box": [
+            0.27083333621093747,
+            0.6210526310526316,
+            0.46041666666666653,
+            0.18947368421052624
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control-1-0290.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "01bba8eb0a401a2d9295e5140670417cdea30d0dabfce756fb99cb787d8e6035",
+      "expected_text": "",
+      "text": "",
+      "ocr_ms": 16.82575000450015,
+      "rows": []
+    },
+    {
+      "id": "control-1-0330.png",
+      "sha256": "a6ec14874608a67d67ae85a039169a0c728282fd3eb9fbeb3ccba56d28dfecd6",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "ba6bc189296d6c5fa6d74f638d275115bc2efdb7fb3b46ddec5d9eec118df0c1",
+      "expected_text": "このサービスを利用できません",
+      "text": "このサービスを利用できません",
+      "ocr_ms": 63.803124940022826,
+      "rows": [
+        {
+          "text": "このサービスを利用できません",
+          "confidence": 1.0,
+          "normalized_box": [
+            0.25416666442234853,
+            0.62105263215311,
+            0.49374999999999997,
+            0.18947368421052635
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control-1-0390.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "01bba8eb0a401a2d9295e5140670417cdea30d0dabfce756fb99cb787d8e6035",
+      "expected_text": "",
+      "text": "",
+      "ocr_ms": 17.258542124181986,
+      "rows": []
+    },
+    {
+      "id": "control-1-0430.png",
+      "sha256": "69a9eb05a7a185bb03660989c8b603e490cfa11a34afd936ba71e441cb5e13f8",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "94b308b08f7f346da1670571f82e13fb23c8e9005f0d8042ca1b6a6c50d80bd9",
+      "expected_text": "東京都で山田太郎さんに会いました",
+      "text": "東京都で山田太郎さんに会いました",
+      "ocr_ms": 73.671167017892,
+      "rows": [
+        {
+          "text": "東京都で山田太郎さんに会いました",
+          "confidence": 1.0,
+          "normalized_box": [
+            0.21458333617708328,
+            0.6210526310526316,
+            0.5687500000000001,
+            0.18947368421052624
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control-1-0490.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "01bba8eb0a401a2d9295e5140670417cdea30d0dabfce756fb99cb787d8e6035",
+      "expected_text": "",
+      "text": "",
+      "ocr_ms": 17.49183307401836,
+      "rows": []
+    },
+    {
+      "id": "control-1-0530.png",
+      "sha256": "c1325527c119d64a4b6067ea52d16b8e66fb8e9944342f6805123f55b214aad0",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "75a768f8e85117d9d7195e7262cffb5f35d81ddbccc4737b6df3eec57b8b1fbd",
+      "expected_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "ocr_ms": 81.76550013013184,
+      "rows": [
+        {
+          "text": "字幕は上から読みます",
+          "confidence": 1.0,
+          "normalized_box": [
+            0.3208333315520833,
+            0.4000000005263158,
+            0.35625,
+            0.18947368421052624
+          ]
+        },
+        {
+          "text": "二行目にも大切な情報があります",
+          "confidence": 1.0,
+          "normalized_box": [
+            0.23333332952380956,
+            0.6210526321052632,
+            0.5333333333333333,
+            0.19999999999999996
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control-1-0590.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "01bba8eb0a401a2d9295e5140670417cdea30d0dabfce756fb99cb787d8e6035",
+      "expected_text": "",
+      "text": "",
+      "ocr_ms": 16.95020915940404,
+      "rows": []
+    },
+    {
+      "id": "control-1-0630.png",
+      "sha256": "222dc254c48bebb8e2207c07c240acc1d1e46a01b73e0b99d04f439af3fcb1aa",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "2b6d28356279f93f379f3b8b7ad680708ae687270f49e421961a11f941a3538f",
+      "expected_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "ocr_ms": 75.0063331797719,
+      "rows": [
+        {
+          "text": "今日は10月12日です",
+          "confidence": 1.0,
+          "normalized_box": [
+            0.32499999827083337,
+            0.1789473689473684,
+            0.3458333333333333,
+            0.18947368421052624
+          ]
+        },
+        {
+          "text": "参加者は25人です",
+          "confidence": 1.0,
+          "normalized_box": [
+            0.3520833348125,
+            0.3999999994210526,
+            0.2958333333333334,
+            0.20000000000000007
+          ]
+        },
+        {
+          "text": "中止ではありません",
+          "confidence": 1.0,
+          "normalized_box": [
+            0.3395833353385417,
+            0.621052631118421,
+            0.3208333333333333,
+            0.19999999999999996
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control-1-0690.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "01bba8eb0a401a2d9295e5140670417cdea30d0dabfce756fb99cb787d8e6035",
+      "expected_text": "",
+      "text": "",
+      "ocr_ms": 17.116874922066927,
+      "rows": []
+    },
+    {
+      "id": "control-1-0730.png",
+      "sha256": "f0fb863a8933c33d70fdb669cd0b507dc63f109f0fdaf06470ae52b280c53258",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "52bad76c7ca8a6702da92cc8bdeed593069f95c8a70e5795703672b8ed1882df",
+      "expected_text": "同じ字幕がしばらく続きます",
+      "text": "同じ字幕がしばらく続きます",
+      "ocr_ms": 66.80262484587729,
+      "rows": [
+        {
+          "text": "同じ字幕がしばらく続きます",
+          "confidence": 1.0,
+          "normalized_box": [
+            0.268750002890625,
+            0.621052630986842,
+            0.4625,
+            0.20000000000000007
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control-1-0790.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "01bba8eb0a401a2d9295e5140670417cdea30d0dabfce756fb99cb787d8e6035",
+      "expected_text": "",
+      "text": "",
+      "ocr_ms": 17.474875086918473,
+      "rows": []
+    },
+    {
+      "id": "control-1-0830.png",
+      "sha256": "49e06fde2e2efb59c648aa634e3d467ac81d1d2416a70f19a0e72ef958667512",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "0e5c89db2ed5148bbf9a9c7bac8145153a66f4c8c3d58f21b0b6d8286d4cb8fd",
+      "expected_text": "小さい字幕も読み取れますか",
+      "text": "小さい字幕も読み取れますか",
+      "ocr_ms": 58.64879209548235,
+      "rows": [
+        {
+          "text": "小さい字幕も読み取れますか",
+          "confidence": 1.0,
+          "normalized_box": [
+            0.26666666279513895,
+            0.6210526320175439,
+            0.46458333333333335,
+            0.19999999999999996
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control-1-0890.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "01bba8eb0a401a2d9295e5140670417cdea30d0dabfce756fb99cb787d8e6035",
+      "expected_text": "",
+      "text": "",
+      "ocr_ms": 17.44391699321568,
+      "rows": []
+    },
+    {
+      "id": "control-1-0930.png",
+      "sha256": "3892b098e22cfea49690a78f747d9484308555c6b13178e936beb236a1aeb54b",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "d20b156c1fa4d76c448927e4575feadf517a600c96436520dbbc016b55482d98",
+      "expected_text": "これは字幕ではありませんとは言いません",
+      "text": "これは字幕ではありませんとは言いません",
+      "ocr_ms": 76.02966600097716,
+      "rows": [
+        {
+          "text": "これは字幕ではありませんとは言いません",
+          "confidence": 1.0,
+          "normalized_box": [
+            0.1645833381398809,
+            0.6210526311278196,
+            0.6729166666666667,
+            0.18947368421052635
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control-1-0990.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "roi": [
+        0,
+        350,
+        960,
+        190
+      ],
+      "roi_rgb_sha256": "01bba8eb0a401a2d9295e5140670417cdea30d0dabfce756fb99cb787d8e6035",
+      "expected_text": "",
+      "text": "",
+      "ocr_ms": 16.665916191414,
+      "rows": []
+    }
+  ]
+}

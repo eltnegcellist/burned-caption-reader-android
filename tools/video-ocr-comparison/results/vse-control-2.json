@@ -1,0 +1,25 @@
+{
+  "command": [
+    "<WORKSPACE>/envs/vse/bin/python",
+    "<WORKSPACE>/benchmark/tools/video-ocr-comparison/run_vse.py",
+    "<WORKSPACE>/private/controls/control-2.mp4",
+    "--roi",
+    "0",
+    "350",
+    "960",
+    "190"
+  ],
+  "cwd": "upstream/vse",
+  "exit_code": 0,
+  "elapsed_seconds": 21.415833374951035,
+  "peak_sampled_tree_rss_bytes": 2269265920,
+  "rss_sampling_interval_ms": 50,
+  "samples": 359,
+  "rss_caveat": "sum of parent and live children RSS; shared pages may be double-counted; short peaks may be missed",
+  "environment": {
+    "PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK": "True",
+    "OMP_NUM_THREADS": "1",
+    "QT_QPA_PLATFORM": "offscreen"
+  },
+  "log": "vse-control-2.log"
+}

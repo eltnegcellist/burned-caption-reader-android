@@ -1,0 +1,22 @@
+{
+  "reference": "private/controls/control-1.reference.srt",
+  "results": {
+    "vse-control-1": {
+      "reference_events": 30,
+      "predicted_events": 24,
+      "matched_events": 24,
+      "missed_events": 6,
+      "extra_events": 0,
+      "possible_duplicate_events": 0,
+      "event_recall": 0.8,
+      "event_precision": 1.0,
+      "reference_chars": 498,
+      "character_edits_including_missed_extra": 75,
+      "event_aligned_cer": 0.1506,
+      "median_start_error_ms": 0.0,
+      "median_end_error_ms": 1.0,
+      "matching_method": "greedy temporal overlap >=80ms; IoU + 0.3*text-similarity",
+      "text_normalization": "NFKC, remove whitespace and Unicode punctuation (NOT Android comparisonKey)"
+    }
+  }
+}

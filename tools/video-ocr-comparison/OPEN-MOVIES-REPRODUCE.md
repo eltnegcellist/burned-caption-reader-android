@@ -46,6 +46,18 @@ CPU OCRを順次実行する。手動ROIは下180px、SRT・raw・resources・sc
 
 VSE自動領域は別の実験。`run_vse.py VIDEO --auto-accept-region`をVSE repo cwdから呼び、watermark削除n、公式の提案字幕帯をyで受諾する。`.auto-region.json`・SRT・rawを別名で保存する。今回Elephantsのみ実行、Sintelのautoは未測定。手動ROI→VideoSubFinderと自動3fps経路は処理全体が異なる。自動帯判定だけの速度とは扱わない。VSEのatexit ProcessManager警告は残ったがexit0とSRTの生成を確認した。
 
+## 公式Subtitle Edit GUI（部品実験と別記録）
+
+1. 公式5.2.0 ARM64 appを起動し、`Video → OCR burned-in subtitle`で同じ `{film}-300s.mp4` を指定する。GUI操作はMacのロック解除が必要。
+2. Apple Vision・Japanese (ja-JP)、5fps、brightness190、text similarity80、gap/min duration250ms、ASS tag off、Fix OCR errors offを設定する。保存設定のOCR項目のみを検証し、image similarity92・max width720を確認する。API鍵を含み得るSettings.json全体は公開しない。
+3. ROIはElephants `960x180 (0,360)`、Sintel `960x180 (0,228)`。SintelのBottom thirdは136pxなので使わず、選択枠をドラッグして表示数値180pxを確認する。成功出力に合わせてSintelの設定を変更しない。
+4. 既に起動している公式アプリPIDを確認し、`sample_gui_process.py --pid PID --out MONITOR.json --stop UNIQUE_STOP_FILE`を別の読み取りプロセスで実行する。stopファイルは初めに存在しない新しい名前を使う。50ms RSSのみを読む補助ツールで、GUIを操作しない。
+5. Start OCRクリック前後の時刻、最後の処理中画面と最初の完了画面の時刻、進捗の分母と最終イベント数を記録する。終了観測後stopファイルを作成する。`elapsed_seconds`は精密タイマーがなければnullにし、区間と不確かさを保存する。UI待機・保存時間を解析時間に加えない。
+6. 完了後OK、Saveで**別名**`se-gui-local.srt`へ保存し、`outputs/open-movie-benchmark/{film}/se-gui.srt`へコピーする。参照SRTを上書きしない。Save Asの名前欄へ絶対パスを入れるとmacOSがslashをcolonに置換する場合があるため、ファイル名とフォルダー選択を分ける。抽出後のSRTを編集しない。
+7. `se-gui-settings.json`は今回の `subtitleedit-gui-status.json`の許可済みOCR設定項目だけを保存する。`se-gui-observations.json`とmonitorも保存し、`finalize_se_gui.py WORKSPACE`でMP4 hash、ROI、設定、実イベント数を検証する。既存SRTから同じ数値を再集計できる。
+
+GUIはJPEG q:v2、fps→crop/scaleと別フレーム確認/救済を含む。部品adapterはJPEG既定品質、crop/scale→fpsで、救済を含まない。GUI/部品の差は単一技術の対照試験ではない。公式ソースとGUIを変更しない。再実行は新しい出力名・観測時刻で記録する。
+
 ## Androidの同一MP4再生
 
 まず独立AVDをheadlessで起動し、`adb -s emulator-5560 shell getprop sys.boot_completed`が1になることを確認する。今回の起動引数は `-avd Benchmark_API_36 -no-window -no-snapshot-save -no-audio -gpu swiftshader_indirect -port 5560`。`ANDROID_AVD_HOME`/SDKも独立環境の実パスを使う。

@@ -3,13 +3,13 @@
 ## 最新の実測（2026-10-12～13）
 
 [公開映画の比較報告](OPEN-MOVIES.md)と[再現手順](OPEN-MOVIES-REPRODUCE.md)を保存した。
-Elephants Dream・Sintelの各5分をVSE/VideOCR/SE公式部品/Android hybridの検証専用MP4経路へ入力し、
+Elephants Dream・Sintelの各5分をVSE/VideOCR/Subtitle Edit GUI＋公式部品/Android hybridの検証専用MP4経路へ入力し、
 同一PixelCopy PNG70枚を4エンジンの手動ROI・全画面に渡した。数値・設定・hash・文字なし対応付けは `open-movies/benchmark-*.json`。
 
 Androidには生認識→字幕選択の欠落、デスクトップには英語タイトル混入・分割重複があった。
 SEの公式行組み立ては同じOCR観測で画像CERを改善した。厳しい重複閾値の丸採用は自然背景で改善せず、VSEは悪化例もあった。
-Subtitle Edit GUIはMacロックで未測定。SE公式部品、CG映画への追加字幕、エミュレーターの成績を
-製品GUI・実写テロップ・Galaxy S25の成績と混同しない。本番ソース・モデル・PR29/31は変更しない。
+Subtitle Edit 5.2.0 GUIもロック解除後に2本完走・SRT保存済み。GUIと公式部品を区別し、
+CG映画への追加字幕・エミュレーターの成績を実写テロップ・Galaxy S25の成績と混同しない。本番ソース・モデル・PR29/31は変更しない。
 
 [合成コントロールの履歴](REPORT.md)と[その再現手順](REPRODUCE.md)も保持した。
 採点器11テスト、画像runner14テスト、nativeモード誤表示ガードを確認済み。

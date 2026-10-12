@@ -526,5 +526,18 @@
     "exit_code": 0,
     "elapsed_seconds": 12.391611375147477,
     "peak_sampled_tree_rss_bytes": 984055808
+  },
+  "subtitleedit_gui": {
+    "invocation": "Official Subtitle Edit.app: Video > OCR burned-in subtitle; Start OCR; OK; Save As separate SRT",
+    "inputs": [
+      "private/open-movie-benchmark/elephants/elephants-300s.mp4",
+      "private/open-movie-benchmark/sintel/sintel-300s.mp4"
+    ],
+    "engine": "AppleVision ja-JP accurate",
+    "settings_evidence": "subtitleedit-gui-status.json",
+    "resource_sampler": "envs/vse/bin/python benchmark/tools/video-ocr-comparison/sample_gui_process.py --pid OFFICIAL_APP_PID --out MONITOR.json --stop UNIQUE_STOP_FILE",
+    "result_verifier": "envs/vse/bin/python benchmark/tools/video-ocr-comparison/finalize_se_gui.py WORKSPACE",
+    "gui_modified": false,
+    "gui_export_text_modified": false
   }
 }

@@ -56,7 +56,7 @@ def main():
         'input_manifest_sha256':hashfile(base/'inputs.json'),'desktop':{},'android':{},'images':{}}
     for name in ['elephants','sintel']:
         ref=read_srt(root/f'private/open-movie-benchmark/{name}/reference.srt');folder=base/name;output['desktop'][name]={}
-        labels=['vse-80','vse-100','videocr-0.85','videocr-1.0','se-source','vse-auto']
+        labels=['vse-80','vse-100','videocr-0.85','videocr-1.0','se-source','se-gui','vse-auto']
         for label in labels:
             if not (folder/f'{label}.srt').exists():continue
             metrics=compare(ref,read_srt(folder/f'{label}.srt'),duration_ms=300000)
@@ -65,6 +65,11 @@ def main():
             metrics['pairs']=[{k:v for k,v in pair.items() if k not in ['reference_text','prediction_text']} for pair in metrics['pairs']]
             resource=json.loads((folder/f'{label}.json').read_text());metrics['resources']={k:resource[k] for k in ['exit_code','elapsed_seconds','peak_sampled_tree_rss_bytes','rss_sampling_interval_ms','rss_caveat']}
             metrics['output_sha256']=hashfile(folder/f'{label}.srt')
+            if label=='se-gui':
+                metrics['gui_product_run']=True
+                metrics['resources'].update({k:resource[k] for k in ['elapsed_seconds_bounds','time_caveat','baseline_tree_rss_bytes']})
+                metrics['work_counts']=resource['work_counts']
+                metrics['settings']=resource['settings']
             if label.startswith('videocr'):
                 log=(folder/f'{label}.log').read_text();det=re.findall(r'pass on (\d+) filtered frame\(s\) stitched into (\d+) image grid',log)
                 rec=re.findall(r'Performing OCR on image \d+ of (\d+)',log);removed=re.findall(r'Filtered out (\d+) redundant frame',log)

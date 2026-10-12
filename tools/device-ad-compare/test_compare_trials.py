@@ -12,13 +12,17 @@ mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
 
 
-def trial(mode, ms, video="abcdefghijk", device="Samsung S25", change=False):
+def trial(mode, ms, video="abcdefghijk", device="Samsung S25",
+          change=False, rescue=False):
     events = [
         {"type": "session_start", "device": device},
         {"type": "video_frame", "video_id": video},
-        {"type": "frame_done", "ocr_mode": mode, "processing_ms": ms * 2},
-        {"type": "frame_done", "ocr_mode": mode, "processing_ms": ms},
-        {"type": "frame_done", "ocr_mode": mode, "processing_ms": ms + 1},
+        {"type": "frame_done", "ocr_mode": mode, "processing_ms": ms * 2,
+         "recheck_enabled": False, "debug_region_rescue": rescue},
+        {"type": "frame_done", "ocr_mode": mode, "processing_ms": ms,
+         "recheck_enabled": False, "debug_region_rescue": rescue},
+        {"type": "frame_done", "ocr_mode": mode, "processing_ms": ms + 1,
+         "recheck_enabled": False, "debug_region_rescue": rescue},
         {"type": "ocr_call", "stage": "coarse"},
         {"type": "ocr_stage_done", "stage": "coarse", "elapsed_ms": ms},
         {"type": "skip_shadow_outcome", "would_skip": True,
@@ -36,6 +40,7 @@ class TrialComparisonTest(unittest.TestCase):
         self.assertTrue(report["same_video_verified"])
         self.assertTrue(report["same_device_verified"])
         self.assertTrue(report["three_or_more_runs_each"])
+        self.assertTrue(report["settings_verified"])
         self.assertEqual(report["baseline"]["aggregate"]["warm_median_ms"]["median_of_run_values"], 110.5)
         self.assertEqual(report["candidate"]["aggregate"]["warm_median_ms"]["median_of_run_values"], 80.5)
         self.assertEqual(report["candidate"]["aggregate"]["shadow_hides_selected_change"]["median_of_run_values"], 0)
@@ -47,6 +52,12 @@ class TrialComparisonTest(unittest.TestCase):
             mod.compare([trial("hybrid", 100)], [trial("v6_both", 80, video="other")])
         with self.assertRaises(ValueError):
             mod.compare([trial("hybrid", 100)], [trial("v6_both", 80, device="other")])
+
+    def test_rejects_same_group_with_different_rescue_switch(self):
+        with self.assertRaises(ValueError):
+            mod.compare([trial("v6_both", 90, rescue=False),
+                         trial("v6_both", 90, rescue=True)],
+                        [trial("v6_both", 80, rescue=True)])
 
     def test_rejects_mixed_modes(self):
         with self.assertRaises(ValueError):

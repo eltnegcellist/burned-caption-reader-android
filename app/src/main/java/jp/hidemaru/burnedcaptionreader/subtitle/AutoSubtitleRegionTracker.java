@@ -3,6 +3,8 @@ package jp.hidemaru.burnedcaptionreader.subtitle;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -12,6 +14,17 @@ import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
 
 /** Selects recurring, changing subtitle-like text lanes from broad OCR results. */
 public final class AutoSubtitleRegionTracker {
+    /** Debug-only decision sink; the normal selection path passes null. */
+    public interface DecisionTrace {
+        void record(String stage, String reason, String text,
+                    float top, float bottom, double confidence);
+    }
+
+    private static void trace(DecisionTrace sink, String stage, String reason,
+                              String text, float top, float bottom, double confidence) {
+        if (sink != null) sink.record(stage, reason, text, top, bottom, confidence);
+    }
+
     public static final class Selection {
         private final int trackId;
         private final String text;
@@ -162,13 +175,26 @@ public final class AutoSubtitleRegionTracker {
         return selectBands(timestamp, result, false, false, true);
     }
 
+    /** Identical selection algorithm with trace annotations; never invokes a second selection. */
+    public synchronized List<Selection> selectForRecognition(
+            long timestamp, OcrResult result, DecisionTrace trace) {
+        return selectBands(timestamp, result, false, false, true, trace);
+    }
+
     private List<Selection> selectBands(long timestamp, OcrResult result,
             boolean portraitVideoViewport, boolean sceneChanged, boolean recognitionCandidates) {
+        return selectBands(timestamp, result, portraitVideoViewport, sceneChanged,
+                recognitionCandidates, null);
+    }
+
+    private List<Selection> selectBands(long timestamp, OcrResult result,
+            boolean portraitVideoViewport, boolean sceneChanged, boolean recognitionCandidates,
+            DecisionTrace trace) {
         if (sceneChanged) {
             lanes.clear();
             lockedLanes.clear();
         }
-        List<Candidate> candidates = buildCandidates(result, portraitVideoViewport, recognitionCandidates);
+        List<Candidate> candidates = buildCandidates(result, portraitVideoViewport, recognitionCandidates, trace);
         expireOldLanes(timestamp);
         for (LaneState lane : lanes) {
             lane.seenThisFrame = false;
@@ -178,7 +204,11 @@ public final class AutoSubtitleRegionTracker {
         candidates.sort(Comparator.comparingDouble((Candidate value) -> value.visualScore).reversed());
         for (Candidate candidate : candidates) {
             LaneState lane = assignLane(timestamp, candidate);
-            if (lane == null) continue;
+            if (lane == null) {
+                trace(trace, "track", "lane_unavailable", candidate.text,
+                        candidate.top, candidate.bottom, candidate.confidence);
+                continue;
+            }
             updateLane(timestamp, lane, candidate);
             candidate.finalScore = laneScore(timestamp, lane, candidate);
         }
@@ -213,6 +243,22 @@ public final class AutoSubtitleRegionTracker {
         List<Selection> output = new ArrayList<>();
         for (LaneState lane : selected) {
             output.add(asSelection(lane, lockedLanes.contains(lane)));
+            trace(trace, "selected", lockedLanes.contains(lane) ? "locked" : "provisional",
+                    lane.current.text, lane.current.top, lane.current.bottom,
+                    lane.current.confidence);
+        }
+        if (trace != null) {
+            for (LaneState lane : lanes) {
+                if (!lane.seenThisFrame || lane.current == null || selected.contains(lane)) continue;
+                boolean isConfirmed = confirmed.contains(lane);
+                boolean provisional = lane.transitions == 0
+                        && (isStrongCaptionShape(lane.current)
+                            || isUpperCaptionRescueShape(lane.current));
+                String reason = isConfirmed || provisional
+                        ? "lane_overlap_or_limit" : "temporal_or_caption_shape_gate";
+                trace(trace, "track", reason, lane.current.text, lane.current.top,
+                        lane.current.bottom, lane.current.confidence);
+            }
         }
         return output;
     }
@@ -222,21 +268,46 @@ public final class AutoSubtitleRegionTracker {
         lockedLanes.clear();
     }
 
-    private List<Candidate> buildCandidates(OcrResult result, boolean portraitVideoViewport, boolean recognitionCandidates) {
+    private List<Candidate> buildCandidates(OcrResult result, boolean portraitVideoViewport,
+            boolean recognitionCandidates, DecisionTrace trace) {
         Map<Integer, Candidate> grouped = new HashMap<>();
         List<OcrLine> eligibleLines = new ArrayList<>();
         List<OcrLine> sourceLines = recognitionCandidates
                 ? SceneTextFilter.captionsOnly(result.getLines()) : result.getLines();
+        if (trace != null && recognitionCandidates) {
+            Set<OcrLine> retained = new HashSet<>(sourceLines);
+            for (OcrLine line : result.getLines()) {
+                if (!retained.contains(line)) {
+                    trace(trace, "scene_filter", "filtered_scene_text", line.getText(),
+                            line.getTop(), line.getBottom(), line.getConfidence());
+                }
+            }
+        }
         for (OcrLine line : sourceLines) {
-            if (recognitionCandidates && isParallelCompactLabel(line, sourceLines)) continue;
+            if (recognitionCandidates && isParallelCompactLabel(line, sourceLines)) {
+                trace(trace, "line", "parallel_compact_label", line.getText(),
+                        line.getTop(), line.getBottom(), line.getConfidence());
+                continue;
+            }
             String text = SubtitleNormalizer.normalize(line.getText());
-            if (text.isEmpty() || line.getHeight() < 0.008f) continue;
+            if (text.isEmpty() || line.getHeight() < 0.008f) {
+                trace(trace, "line", "empty_or_small_height", text,
+                        line.getTop(), line.getBottom(), line.getConfidence());
+                continue;
+            }
             boolean japaneseLine = JAPANESE_TEXT.matcher(text).find();
             double minimumConfidence = japaneseLine ? 20.0 : 30.0;
-            if (line.getConfidence() < minimumConfidence) continue;
-            // Kept for the manual portrait hint. CaptureService currently passes false
-            // because burned-in captions may legitimately occupy the top of the video.
-            if (portraitVideoViewport && line.getCenterY() < 0.18f) continue;
+            if (line.getConfidence() < minimumConfidence) {
+                trace(trace, "line", "below_min_confidence", text,
+                        line.getTop(), line.getBottom(), line.getConfidence());
+                continue;
+            }
+            // Kept for the manual portrait hint. CaptureService currently passes false.
+            if (portraitVideoViewport && line.getCenterY() < 0.18f) {
+                trace(trace, "line", "portrait_top", text,
+                        line.getTop(), line.getBottom(), line.getConfidence());
+                continue;
+            }
             eligibleLines.add(line);
             Candidate candidate = grouped.computeIfAbsent(line.getBlockIndex(), ignored -> new Candidate());
             addLine(candidate, line);
@@ -280,7 +351,11 @@ public final class AutoSubtitleRegionTracker {
             // Only spatially validated triples receive a third row's height budget.
             float heightBudget = candidate.spatialGroup && candidate.lines.size() == 3
                     ? 0.60f : TWO_ROW_MAX_HEIGHT;
-            if (length < 2 || length > 140 || candidate.height() > heightBudget) continue;
+            if (length < 2 || length > 140 || candidate.height() > heightBudget) {
+                trace(trace, "candidate", "length_or_height", candidate.text,
+                        candidate.top, candidate.bottom, candidate.confidence);
+                continue;
+            }
             candidate.textLength = length;
             candidate.japanese = JAPANESE_TEXT.matcher(candidate.text).find();
             candidate.lane = laneFor(candidate.centerY());
@@ -290,8 +365,16 @@ public final class AutoSubtitleRegionTracker {
 
         List<Candidate> output = new ArrayList<>();
         for (Candidate candidate : scored) {
-            if (candidate.visualScore < 0.50) continue;
-            if (isLikelyPlayerMetadata(candidate, scored)) continue;
+            if (candidate.visualScore < 0.50) {
+                trace(trace, "candidate", "visual_score", candidate.text,
+                        candidate.top, candidate.bottom, candidate.confidence);
+                continue;
+            }
+            if (isLikelyPlayerMetadata(candidate, scored)) {
+                trace(trace, "candidate", "player_metadata", candidate.text,
+                        candidate.top, candidate.bottom, candidate.confidence);
+                continue;
+            }
             output.add(candidate);
         }
 
@@ -308,6 +391,8 @@ public final class AutoSubtitleRegionTracker {
                 }
             }
             if (!fragment) wholeCaptions.add(candidate);
+            else trace(trace, "candidate", "covered_by_spatial_parent", candidate.text,
+                    candidate.top, candidate.bottom, candidate.confidence);
         }
         return wholeCaptions;
     }
@@ -501,7 +586,12 @@ public final class AutoSubtitleRegionTracker {
             clearPendingTransition(state);
         } else {
             double similarity = Similarity.textSimilarity(state.lastText, candidate.text);
-            if (isEquivalentOcr(state.lastText, candidate.text, similarity)) {
+            // A changed number or negation can have >0.9 whole-string similarity.
+            // Require an established caption-shaped lane and two corroborating
+            // observations before treating it as a genuine transition.
+            if (isMeaningfulSubtitleTransition(state, candidate, similarity)) {
+                observePendingTransition(timestamp, state, candidate);
+            } else if (isEquivalentOcr(state.lastText, candidate.text, similarity)) {
                 state.stableObservations++;
                 clearPendingTransition(state);
             } else if (Similarity.isPrefixRelation(state.lastText, candidate.text)) {
@@ -756,6 +846,20 @@ public final class AutoSubtitleRegionTracker {
                 ? Math.min(2.0, (timestamp - lane.firstSeenAt - 2_000L) / 2_000.0)
                 : 0.0;
         return candidate.visualScore + transitionEvidence + diversityEvidence - staticPenalty;
+    }
+
+    /**
+     * Keep the existing visual/temporal gates, but do not let the whole-string
+     * similarity hide a protected price/number or affirmation/negation change.
+     * Fixed small labels and one-frame noisy text cannot establish a lane.
+     */
+    private boolean isMeaningfulSubtitleTransition(
+            LaneState lane, Candidate candidate, double similarity) {
+        if (lane.observations < 2 || !candidate.japanese
+                || candidate.textLength < 10 || candidate.width() < .35f
+                || !isStrongCaptionShape(candidate)
+                || similarity < .72 || similarity >= 1.0) return false;
+        return Similarity.hasMeaningfulTokenChange(lane.lastText, candidate.text);
     }
 
     private boolean isEquivalentOcr(String previous, String current, double similarity) {

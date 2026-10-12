@@ -1,0 +1,532 @@
+{
+  "duration_ms": 300000,
+  "fps": 24,
+  "width": 960,
+  "split_frozen_before_OCR": true,
+  "style": "FontName=Hiragino Sans W4,FontSize=24,Outline=2,MarginV=20",
+  "kind": "Commons CG films with locally burned Japanese TimedText; not original Japanese hardsubs",
+  "reference_verified_from_pixels": true,
+  "films": [
+    {
+      "id": "elephants",
+      "role": "development",
+      "source_sha256": "d1ff59c1b046e907c1fb3c5d86cd048017879978b1f0469d025cbe2c3685648e",
+      "subtitle_sha256": "7c882ce70e22143804a147bb18931e89ea2dbba592d1bc8f6c295f6d298b48ce",
+      "video_sha256": "64c18561c5c753e15d40e78a5fd67a05a84aee7021b908b675424bcff9a0e7f0",
+      "reference_sha256": "330ec706c4394cf543a01e7c7e54b195dfa90b03315dd35e9c29fa5cc8250428",
+      "source_time_start_ms": 0,
+      "events": 33,
+      "roi": [
+        0,
+        360,
+        960,
+        180
+      ],
+      "height": 540,
+      "total_video_frames": 7200,
+      "image_hashes": [
+        {
+          "id": "elephants-001000",
+          "mono_ms": 1000,
+          "sha256": "32ba18ff36db2b2a5e0806f906b55f5e344552e1c2bd4afd36511cd3ca40650c",
+          "reference_event_index": -1
+        },
+        {
+          "id": "elephants-016542",
+          "mono_ms": 16542,
+          "sha256": "e49298cd5ca4edc8bf829d4141c12ff42138d68f5e54676101058f537c871df2",
+          "reference_event_index": 0
+        },
+        {
+          "id": "elephants-019541",
+          "mono_ms": 19541,
+          "sha256": "bf5644c7f2fc7b16a95b7343cee3b715b5a2f3c4af146a467bf7331bd3fd6847",
+          "reference_event_index": 1
+        },
+        {
+          "id": "elephants-021167",
+          "mono_ms": 21167,
+          "sha256": "35409026a490dd417d7dc246e911d94efff822087a81ead5d937eeed65a832ad",
+          "reference_event_index": 2
+        },
+        {
+          "id": "elephants-023312",
+          "mono_ms": 23312,
+          "sha256": "af2fd7b46ddcee2bef40574d8d238ac2b95ce18d9b27c53ebacc2e73dd5b11f4",
+          "reference_event_index": 3
+        },
+        {
+          "id": "elephants-026833",
+          "mono_ms": 26833,
+          "sha256": "75f7fe782e38758efa8132e123c982a4f12aa26994c9fbf681c9ec8da51bcacd",
+          "reference_event_index": 4
+        },
+        {
+          "id": "elephants-029562",
+          "mono_ms": 29562,
+          "sha256": "05d6aab74380b09902e002c47f8b217dc9e1cc2131e6ceeda0d95c277de11d63",
+          "reference_event_index": 5
+        },
+        {
+          "id": "elephants-031000",
+          "mono_ms": 31000,
+          "sha256": "d392e500bff3d363b31690d72150d2b0729507000847059ce63049b238717744",
+          "reference_event_index": -1
+        },
+        {
+          "id": "elephants-046000",
+          "mono_ms": 46000,
+          "sha256": "50297a2312dfd97b5d1d707f1ac9a3b72f45b2d3961c2d5475dce3276c66b874",
+          "reference_event_index": -1
+        },
+        {
+          "id": "elephants-047687",
+          "mono_ms": 47687,
+          "sha256": "84ac7862d6a86400029e93b5cf69b6827001cdb31625935a94cb5f21d289b5c5",
+          "reference_event_index": 6
+        },
+        {
+          "id": "elephants-052917",
+          "mono_ms": 52917,
+          "sha256": "dd085d295c0fdbf9c74751f5534ef67a94ae7fe59553c9d85ad86fac42c0f1c1",
+          "reference_event_index": 7
+        },
+        {
+          "id": "elephants-056375",
+          "mono_ms": 56375,
+          "sha256": "85d974f743f4e98fb489b42353ebd12fdd3afdf25c0db1fdd9b08d59d154e0ed",
+          "reference_event_index": 8
+        },
+        {
+          "id": "elephants-059625",
+          "mono_ms": 59625,
+          "sha256": "dca13091964362a2261f594b4b72825d55b440f53c13c914918e4ad86d72c2bc",
+          "reference_event_index": 9
+        },
+        {
+          "id": "elephants-062937",
+          "mono_ms": 62937,
+          "sha256": "ca0cfc342d5cbeccb12635d31da1061ad770d9b1a85d5a35d05d65d5cd8c8662",
+          "reference_event_index": 10
+        },
+        {
+          "id": "elephants-064333",
+          "mono_ms": 64333,
+          "sha256": "09290a96288e2f9a190446f4129671944a9199a5d46c961fefe148998762abf6",
+          "reference_event_index": 11
+        },
+        {
+          "id": "elephants-066875",
+          "mono_ms": 66875,
+          "sha256": "31c055e80970e0fe29bae9b2a6c613d2b3716c93d222edc5717c94952db8cda7",
+          "reference_event_index": 12
+        },
+        {
+          "id": "elephants-077271",
+          "mono_ms": 77271,
+          "sha256": "54e6017877ae86746addb012971446041486c7c4db9b5d611ee7ffbf3101b0a9",
+          "reference_event_index": 13
+        },
+        {
+          "id": "elephants-091000",
+          "mono_ms": 91000,
+          "sha256": "929b2839254fcc8c61abee7054f8c7aeec04aeca1922fcda8dfae7fe929b6ca6",
+          "reference_event_index": -1
+        },
+        {
+          "id": "elephants-095958",
+          "mono_ms": 95958,
+          "sha256": "e6aed3c35552e0d30942786049ad6ef736815b1a07b592fc58300cd91406a135",
+          "reference_event_index": 14
+        },
+        {
+          "id": "elephants-106000",
+          "mono_ms": 106000,
+          "sha256": "b4de9a4dcb4563eeaea857e691cbacd78380fdd59fa558eaaf02acf4065d7da1",
+          "reference_event_index": -1
+        },
+        {
+          "id": "elephants-121000",
+          "mono_ms": 121000,
+          "sha256": "71cc61ff2436fa3b658354582267653239c2e685a62907097945a838e54a93f4",
+          "reference_event_index": -1
+        },
+        {
+          "id": "elephants-132187",
+          "mono_ms": 132187,
+          "sha256": "99b39b08110d17f06b5aee3acf316c1d8bd9b6dfca31f09f29480ed86a3c157c",
+          "reference_event_index": 15
+        },
+        {
+          "id": "elephants-136000",
+          "mono_ms": 136000,
+          "sha256": "a2035908139c66fde3fd2ac6576c1ba721f0f103b823c43b79c2a6644dcdf60e",
+          "reference_event_index": -1
+        },
+        {
+          "id": "elephants-151000",
+          "mono_ms": 151000,
+          "sha256": "d8ec420637545f8c37e22f224450a63d540a3d8ffca3194dbbfb82860bc71f8f",
+          "reference_event_index": -1
+        },
+        {
+          "id": "elephants-166000",
+          "mono_ms": 166000,
+          "sha256": "f9c7db688e5d4f0d16583c86a58e9222ec97d062cf9c61cb613b719c07f9a1b9",
+          "reference_event_index": -1
+        },
+        {
+          "id": "elephants-169229",
+          "mono_ms": 169229,
+          "sha256": "a9d8440a81c9747dc2bca09225670897cff32095697b5141fce8098e5ac941e6",
+          "reference_event_index": 16
+        },
+        {
+          "id": "elephants-172625",
+          "mono_ms": 172625,
+          "sha256": "37dbc494134948c9903b7074bd9a96da4ede1ad72820ced194871bd9b7fd8571",
+          "reference_event_index": 17
+        },
+        {
+          "id": "elephants-176604",
+          "mono_ms": 176604,
+          "sha256": "90b5cd0f5c9b371fe9f866a6a59ad53e9b6862d28c80c23df07171a7ae6d8529",
+          "reference_event_index": 18
+        },
+        {
+          "id": "elephants-181021",
+          "mono_ms": 181021,
+          "sha256": "bf27b7144990180c77d9b1c195428079cd6e92919309694f7adc20e3b3fd93dd",
+          "reference_event_index": 19
+        },
+        {
+          "id": "elephants-184375",
+          "mono_ms": 184375,
+          "sha256": "c9eec094a158c90661f9b4ad337e6883cd27f68133cf617a9720da318b22b4a8",
+          "reference_event_index": 20
+        },
+        {
+          "id": "elephants-188292",
+          "mono_ms": 188292,
+          "sha256": "bd5eda5933f09b529e51612180651f2a968777370c9b7813ff8fc9eaff823e5c",
+          "reference_event_index": 21
+        },
+        {
+          "id": "elephants-192666",
+          "mono_ms": 192666,
+          "sha256": "37f192eaf77aa4c2949f28b356b6d692f9beab860b6f6c74af0a579659fc9cf5",
+          "reference_event_index": 22
+        },
+        {
+          "id": "elephants-196000",
+          "mono_ms": 196000,
+          "sha256": "11e3b2b3926ee1558b325bb5c8f9ab0f5c975ee92b6bc6a37719deef762ebd2d",
+          "reference_event_index": -1
+        },
+        {
+          "id": "elephants-200375",
+          "mono_ms": 200375,
+          "sha256": "d99e2f9c8737ef8a54b8a82747997d3c8b2f8938d6ff9147852badfcfabee8bd",
+          "reference_event_index": 23
+        },
+        {
+          "id": "elephants-268229",
+          "mono_ms": 268229,
+          "sha256": "535cf0097e01e3e5d76d78925e3474438faaa19d6fda3cc6786de4fd000f3d83",
+          "reference_event_index": 24
+        },
+        {
+          "id": "elephants-270333",
+          "mono_ms": 270333,
+          "sha256": "8c39be1ddacb601aebe9bc2e9291c710a7c66160defbaecd5fe5a6b07fb6abe6",
+          "reference_event_index": 25
+        },
+        {
+          "id": "elephants-273208",
+          "mono_ms": 273208,
+          "sha256": "6e29002e0c170fd44590d698ef96890bb547cc7bce95f59872449829a4b5db2c",
+          "reference_event_index": 26
+        },
+        {
+          "id": "elephants-276604",
+          "mono_ms": 276604,
+          "sha256": "1231f0b3b644f0ab3d8053c496122a8ede381c3490330c999b4affd82748e5df",
+          "reference_event_index": 27
+        },
+        {
+          "id": "elephants-279312",
+          "mono_ms": 279312,
+          "sha256": "bdc02393ba8f89f92ffb2d58b701f071e764ed6a010acf664e0fcc57a1469ec3",
+          "reference_event_index": 28
+        },
+        {
+          "id": "elephants-281708",
+          "mono_ms": 281708,
+          "sha256": "e935837b6c309991083bc1db5defa186bca601fc123c40f189f38fac51cef64e",
+          "reference_event_index": 29
+        },
+        {
+          "id": "elephants-284479",
+          "mono_ms": 284479,
+          "sha256": "a58b651ca8dacc7946c028ee7678210dfcc0400e6cd25559330457e407f6a218",
+          "reference_event_index": 30
+        },
+        {
+          "id": "elephants-289041",
+          "mono_ms": 289041,
+          "sha256": "4c8144268aca4bf7f4b91f68da2fb9fd0c838924d5bcb0c2a017c0c9cb21a6b3",
+          "reference_event_index": 31
+        },
+        {
+          "id": "elephants-291416",
+          "mono_ms": 291416,
+          "sha256": "3da635164b0f0292d1040eac29953e7bd738577bdfe0dd1e82435f0910b0f399",
+          "reference_event_index": 32
+        }
+      ],
+      "render_command": [
+        "$WORKSPACE/upstream/Subtitle Edit.app/Contents/MacOS/ffmpeg",
+        "-hide_banner",
+        "-y",
+        "-i",
+        "$WORKSPACE/private/open-movies/elephants.webm",
+        "-t",
+        "300",
+        "-an",
+        "-vf",
+        "scale=960:-2,fps=24,subtitles=$WORKSPACE/private/open-movies/elephants.source-ja.srt:force_style='FontName=Hiragino Sans W4,FontSize=24,Outline=2,MarginV=20'",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "veryfast",
+        "-crf",
+        "20",
+        "$WORKSPACE/private/open-movie-benchmark/elephants/elephants-300s.mp4"
+      ],
+      "reference_verified_from_pixels": true,
+      "manifest_sha256": "1620c0835a684ee35a49c11aedeb74eaf71ee2d02c52bbd976270dc613f92858"
+    },
+    {
+      "id": "sintel",
+      "role": "held-out-fixed-settings",
+      "source_sha256": "59054624b5739ac4dca96719dd04e1249bdb0a93e4a1bad917ff48362be78697",
+      "subtitle_sha256": "635a4710441fcecb6528939cf81e8e19508b45a705e54407d703ce6421452ed9",
+      "video_sha256": "2ac9f667efbcd95405377d13c2ba973663a98cb67c18ec6e27b27d7f95db5c60",
+      "reference_sha256": "7e69835ccf5e9b6af898d53cdbf32263dfd54bab52217820b20e452678c5ba54",
+      "source_time_start_ms": 0,
+      "events": 17,
+      "roi": [
+        0,
+        228,
+        960,
+        180
+      ],
+      "height": 408,
+      "total_video_frames": 7200,
+      "image_hashes": [
+        {
+          "id": "sintel-001000",
+          "mono_ms": 1000,
+          "sha256": "c35b9b0aa3d6818431f728290387f3e233058d9a9f0e69f6aa21e50fbf160826",
+          "reference_event_index": -1
+        },
+        {
+          "id": "sintel-016000",
+          "mono_ms": 16000,
+          "sha256": "83c202b1f4439915fbbec978b4438f84e0faca01a758faa721e3adfd9c17cdc5",
+          "reference_event_index": -1
+        },
+        {
+          "id": "sintel-031000",
+          "mono_ms": 31000,
+          "sha256": "613b00d292a5ee3aa5f0c680edc16922e24218074f3a2d82ee5244e90eb212de",
+          "reference_event_index": -1
+        },
+        {
+          "id": "sintel-046000",
+          "mono_ms": 46000,
+          "sha256": "4941484d16f8df317b9650b6c039ab595d585205d1d28a2a44261dd2692bc4c1",
+          "reference_event_index": -1
+        },
+        {
+          "id": "sintel-061000",
+          "mono_ms": 61000,
+          "sha256": "7d3c4bb70fe7bd33269a94107b63a249205fb70231d8454835502f54a03cde62",
+          "reference_event_index": -1
+        },
+        {
+          "id": "sintel-076000",
+          "mono_ms": 76000,
+          "sha256": "1d80600a4b347aa920c9f33a9e79cdfd08f901c567ac3eb58f6d59123cf8a538",
+          "reference_event_index": -1
+        },
+        {
+          "id": "sintel-091000",
+          "mono_ms": 91000,
+          "sha256": "1474362b64abdbec47a6431949311489f3a85ca6e3bf2b9e754730846a0db17d",
+          "reference_event_index": -1
+        },
+        {
+          "id": "sintel-106000",
+          "mono_ms": 106000,
+          "sha256": "8af8c86a2524c386c2e7ff3acaed170137b40da3be53005ad0e94d7ff4024867",
+          "reference_event_index": -1
+        },
+        {
+          "id": "sintel-108875",
+          "mono_ms": 108875,
+          "sha256": "9b12bd21369d4a8591a1683657f991f4b8e2b1515b263dc298cae604b4483be6",
+          "reference_event_index": 0
+        },
+        {
+          "id": "sintel-113799",
+          "mono_ms": 113799,
+          "sha256": "c986a65c7dba1cc6e4fcae0893af1f3a82722888df1535b6af5698e9b5d452a8",
+          "reference_event_index": 1
+        },
+        {
+          "id": "sintel-119725",
+          "mono_ms": 119725,
+          "sha256": "54c463a4d84219a8c5056e13926e9e4f6a90a08b4486383fedc98fd4be41506f",
+          "reference_event_index": 2
+        },
+        {
+          "id": "sintel-123274",
+          "mono_ms": 123274,
+          "sha256": "686eb626ea2b72ccf9be6d59ace86ece1b90ee9ce04123dc99fad61f65460dd1",
+          "reference_event_index": 3
+        },
+        {
+          "id": "sintel-125774",
+          "mono_ms": 125774,
+          "sha256": "392ccb13205cd06c9362663723c5528a4a3e7d7f9b8d01a0524cc5cf0097eb16",
+          "reference_event_index": 4
+        },
+        {
+          "id": "sintel-128250",
+          "mono_ms": 128250,
+          "sha256": "372112268049240f28d07872f7b534fe5423d4e21b480806da3bdb9270b045ab",
+          "reference_event_index": 5
+        },
+        {
+          "id": "sintel-131600",
+          "mono_ms": 131600,
+          "sha256": "fe589dd7e24981b626295ab658085a869abb0a0d02b282e078769fcd88032d58",
+          "reference_event_index": 6
+        },
+        {
+          "id": "sintel-136250",
+          "mono_ms": 136250,
+          "sha256": "06a240cedebe5d0a5357fc47a913a9c27902afde0b8806d4912c6b1628be18a9",
+          "reference_event_index": 7
+        },
+        {
+          "id": "sintel-140099",
+          "mono_ms": 140099,
+          "sha256": "326a9c0814bceecdc112939d889695de28906f090ecf18acaaa5dead13e2a0b1",
+          "reference_event_index": 8
+        },
+        {
+          "id": "sintel-144200",
+          "mono_ms": 144200,
+          "sha256": "a8baf19bb6549fd2586b754dabb571a4274cf5e61948797afba822528c5a4883",
+          "reference_event_index": 9
+        },
+        {
+          "id": "sintel-150299",
+          "mono_ms": 150299,
+          "sha256": "c262ee1a6936da06e7d773698c97bb6dcf4fa9c5608c97c43f2635a5b04f57d1",
+          "reference_event_index": 10
+        },
+        {
+          "id": "sintel-154409",
+          "mono_ms": 154409,
+          "sha256": "e1e026932874d44dc512169668350a3664ca0801616dcc733f3bb9c476fc1f4d",
+          "reference_event_index": 11
+        },
+        {
+          "id": "sintel-166000",
+          "mono_ms": 166000,
+          "sha256": "baccbae40abfcc5930ab7e7d5258159558ac06b12cd15bb78d87fb31fd695b95",
+          "reference_event_index": -1
+        },
+        {
+          "id": "sintel-181000",
+          "mono_ms": 181000,
+          "sha256": "d5cc0d15a6d7856f6b61244a3546964f666a3c4a6f477a5bb33481d541e806b6",
+          "reference_event_index": -1
+        },
+        {
+          "id": "sintel-208875",
+          "mono_ms": 208875,
+          "sha256": "4306b2bb5e4b3d118057798a2b7d10be51f47ab0fb83f7a9278e30c72c8d24a6",
+          "reference_event_index": 12
+        },
+        {
+          "id": "sintel-212125",
+          "mono_ms": 212125,
+          "sha256": "4a4cfa3526afd8562466c409c8f11c01415e1d5d92c506fc96586bb1c1dc8216",
+          "reference_event_index": 13
+        },
+        {
+          "id": "sintel-230250",
+          "mono_ms": 230250,
+          "sha256": "a1eb9248127f036064de2eb410c1f243e04f9ed7bbec1459cabb45c8f289e187",
+          "reference_event_index": 14
+        },
+        {
+          "id": "sintel-252099",
+          "mono_ms": 252099,
+          "sha256": "2bfd22dcf0f5223846f8e799be86bca5802688d233788e8b1fb11e76a7088b8d",
+          "reference_event_index": 15
+        },
+        {
+          "id": "sintel-266750",
+          "mono_ms": 266750,
+          "sha256": "8801c1b089843cd4f7364aa8cd05db0dded7c02994192bd54b5ae4376196ec71",
+          "reference_event_index": 16
+        }
+      ],
+      "render_command": [
+        "$WORKSPACE/upstream/Subtitle Edit.app/Contents/MacOS/ffmpeg",
+        "-hide_banner",
+        "-y",
+        "-i",
+        "$WORKSPACE/private/open-movies/sintel.ogv",
+        "-t",
+        "300",
+        "-an",
+        "-vf",
+        "scale=960:-2,fps=24,subtitles=$WORKSPACE/private/open-movies/sintel.source-ja.srt:force_style='FontName=Hiragino Sans W4,FontSize=24,Outline=2,MarginV=20'",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "veryfast",
+        "-crf",
+        "20",
+        "$WORKSPACE/private/open-movie-benchmark/sintel/sintel-300s.mp4"
+      ],
+      "reference_verified_from_pixels": true,
+      "manifest_sha256": "d2306bffa2915122f98d91e84b05a795f5d85d88f99af1a0f170da3951d4ab97"
+    }
+  ],
+  "review": "Codex viewed all 50 subtitle event midpoints and 20 subtitle-free ROI images before OCR. Full-frame English titles are non-subtitle text. Boundary truth uses rendering SRT; quantization uncertainty <= one 24fps frame (41.7ms). No human independent review.",
+  "fixed_candidates": {
+    "vse": [
+      80,
+      100
+    ],
+    "videocr_tight_box_ssim": [
+      0.85,
+      1.0
+    ],
+    "se_source": {
+      "brightness": 190,
+      "fps": 5,
+      "image_similarity": 92,
+      "text_similarity": 80,
+      "refine": true
+    }
+  },
+  "candidate_origin": "Prior synthetic controls before inspecting either film OCR. No settings chosen from Sintel outcomes."
+}

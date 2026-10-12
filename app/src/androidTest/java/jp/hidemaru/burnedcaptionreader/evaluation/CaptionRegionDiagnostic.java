@@ -40,7 +40,7 @@ final class CaptionRegionDiagnostic {
                 }
                 OcrResult result = recognize.run(input); texts.add(result.getText());
                 readings.put(new JSONObject().put("region", box).put("text", result.getText())
-                        .put("confidence", result.getConfidence()));
+                        .put("confidence", result.getConfidence()).put("backend",result.getBackend()));
             } finally {
                 if (input != crop && input != frame) input.recycle();
                 if (crop != frame) crop.recycle();

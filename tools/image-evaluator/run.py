@@ -14,7 +14,7 @@ parser.add_argument("output", type=Path)
 parser.add_argument("--adb", required=True)
 parser.add_argument("--device", required=True)
 parser.add_argument("--label", required=True, help="Git SHA or build label")
-parser.add_argument("--mode", choices=["raw", "player-replay", "caption-crops"], default="raw")
+parser.add_argument("--mode", choices=["raw", "player-replay", "caption-crops", "hybrid-full-frame"], default="raw")
 parser.add_argument("--pp-detection", choices=["off","rescue"], default="off", help="Native PP detector rescue, requires player-replay")
 parser.add_argument("--crop-preparation", choices=["original", "double", "white-core", "dark-core"], default="original", help="Diagnostic manual-caption-region preparation; never automatic detection")
 parser.add_argument("--coarse-width", type=int, choices=[0,1100], default=0, help="Test-only pipeline override, not automatic application performance")
@@ -22,8 +22,10 @@ parser.add_argument("--app-apk", type=Path)
 parser.add_argument("--test-apk", type=Path)
 parser.add_argument("--diagnostic-engine", choices=["mlkit", "hybrid"], default="mlkit", help="Test-only manual-ROI hybrid refinement; production app unchanged")
 args = parser.parse_args()
-if args.diagnostic_engine != "mlkit" and args.mode != "caption-crops":
-    parser.error("Hybrid diagnostic engine requires caption-crops")
+if args.diagnostic_engine != "mlkit" and args.mode not in ("caption-crops","hybrid-full-frame"):
+    parser.error("Hybrid diagnostic engine requires caption-crops or hybrid-full-frame")
+if args.mode == "hybrid-full-frame" and args.diagnostic_engine != "hybrid":
+    parser.error("Hybrid-full-frame requires hybrid engine")
 if args.pp_detection != "off" and args.mode != "player-replay":
     parser.error("Native PP detection requires player-replay")
 if args.coarse_width and args.mode != "player-replay":
@@ -80,6 +82,12 @@ for i, frame in enumerate(dataset["frames"]):
     # Remote filenames use a fixed safe generated name, independent of input paths.
     copy(args.dataset / frame["image"], f"files/image-evaluation/images/{i}.png")
     frame["image"] = f"images/{i}.png"
+remote_paths = [f"files/image-evaluation/images/{i}.png" for i in range(len(dataset["frames"]))]
+checked = adb("exec-out", "run-as", package, "sha256sum", *remote_paths, stdout=subprocess.PIPE)
+remote_hashes = dict((line.split()[1], line.split()[0]) for line in checked.stdout.decode().splitlines())
+for i, frame in enumerate(dataset["frames"]):
+    if remote_hashes.get(remote_paths[i]) != frame["sha256"]:
+        raise SystemExit("Device PNG hash mismatch; no OCR result accepted")
 payload = json.dumps(dataset, ensure_ascii=False).encode("utf-8")
 adb("shell", f"run-as {package} sh -c 'cat > files/image-evaluation/dataset.json'", input=payload)
 adb("shell", "run-as", package, "rm", "-f", "files/image-evaluation/results.json")
@@ -93,6 +101,15 @@ if "INSTRUMENTATION_CODE: -1" not in log or "FAILED:" in log:
     raise SystemExit("Instrumentation failed; no result accepted")
 output = adb("exec-out", "run-as", package, "cat", "files/image-evaluation/results.json", stdout=subprocess.PIPE)
 result = json.loads(output.stdout)
+expected_frames = {frame["id"]: frame for frame in dataset["frames"]}
+if len(result["frames"]) != len(expected_frames) or {frame["id"] for frame in result["frames"]} != set(expected_frames):
+    raise SystemExit("Result IDs do not match frozen input")
+for frame in result["frames"]:
+    original = expected_frames[frame["id"]]
+    if frame["expected_text"] != original["expected_text"]:
+        raise SystemExit("Result reference text changed")
+    frame["sha256"] = original["sha256"]
+result["device_png_sha256_verified_before_ocr"] = True
 result["device_serial"] = args.device
 result["input_manifest_sha256"] = hashlib.sha256((args.dataset / "dataset.json").read_bytes()).hexdigest()
 result["apk_sha256"] = hashlib.sha256(app_apk.read_bytes()).hexdigest()

@@ -1,0 +1,7 @@
+{
+  "checked_at": "2026-10-13T02:03:00+09:00",
+  "version": "5.2.0 macOS arm64",
+  "status": "unmeasured",
+  "blocker": "Mac locked; CUA reported manual unlock required",
+  "fallback": "Eight unchanged official source components + local Apple Vision; not a GUI product run"
+}

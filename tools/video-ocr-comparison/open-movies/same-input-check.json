@@ -1,0 +1,185 @@
+{
+  "runs": [
+    {
+      "file": "images-vse-full-frame-engine.json",
+      "film": "elephants",
+      "frames": 43,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": null
+    },
+    {
+      "file": "images-se-layout-manual-roi.json",
+      "film": "elephants",
+      "frames": 43,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": null
+    },
+    {
+      "file": "images-hybrid-full-frame-engine.json",
+      "film": "elephants",
+      "frames": 43,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": true
+    },
+    {
+      "file": "images-vse-manual-roi.json",
+      "film": "elephants",
+      "frames": 43,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": null
+    },
+    {
+      "file": "images-vision-full-frame-engine.json",
+      "film": "elephants",
+      "frames": 43,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": null
+    },
+    {
+      "file": "images-vision-manual-roi.json",
+      "film": "elephants",
+      "frames": 43,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": null
+    },
+    {
+      "file": "images-hybrid-manual-roi.json",
+      "film": "elephants",
+      "frames": 43,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": true
+    },
+    {
+      "file": "images-videocr-full-frame-engine.json",
+      "film": "elephants",
+      "frames": 43,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": null
+    },
+    {
+      "file": "images-videocr-manual-roi.json",
+      "film": "elephants",
+      "frames": 43,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": null
+    },
+    {
+      "file": "images-se-layout-full-frame-engine.json",
+      "film": "elephants",
+      "frames": 43,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": null
+    },
+    {
+      "file": "images-vse-full-frame-engine.json",
+      "film": "sintel",
+      "frames": 27,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": null
+    },
+    {
+      "file": "images-se-layout-manual-roi.json",
+      "film": "sintel",
+      "frames": 27,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": null
+    },
+    {
+      "file": "images-hybrid-full-frame-engine.json",
+      "film": "sintel",
+      "frames": 27,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": true
+    },
+    {
+      "file": "images-vse-manual-roi.json",
+      "film": "sintel",
+      "frames": 27,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": null
+    },
+    {
+      "file": "images-vision-full-frame-engine.json",
+      "film": "sintel",
+      "frames": 27,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": null
+    },
+    {
+      "file": "images-vision-manual-roi.json",
+      "film": "sintel",
+      "frames": 27,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": null
+    },
+    {
+      "file": "images-hybrid-manual-roi.json",
+      "film": "sintel",
+      "frames": 27,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": true
+    },
+    {
+      "file": "images-videocr-full-frame-engine.json",
+      "film": "sintel",
+      "frames": 27,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": null
+    },
+    {
+      "file": "images-videocr-manual-roi.json",
+      "film": "sintel",
+      "frames": 27,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": null
+    },
+    {
+      "file": "images-se-layout-full-frame-engine.json",
+      "film": "sintel",
+      "frames": 27,
+      "per_image_sha_match": true,
+      "reference_match": true,
+      "manifest_match": true,
+      "device_hash_attested": null
+    }
+  ],
+  "decoded_rgb_match_se_vse_videocr": true
+}

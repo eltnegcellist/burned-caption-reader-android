@@ -28,6 +28,9 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
     @Override public void onStart() {
         Bundle report = new Bundle();
         try {
+            if ("local-video".equals(arguments.getString("mode"))) {
+                evaluateLocalVideo(report); return;
+            }
             if ("ocr-settings-smoke".equals(arguments.getString("mode"))) {
                 JSONObject result = OcrSettingsNativeSmoke.run(this);
                 Files.write(new File(getTargetContext().getFilesDir(), "ocr-settings-smoke.json").toPath(), result.toString(2).getBytes(StandardCharsets.UTF_8));
@@ -66,8 +69,11 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
             int edits = 0, characters = 0;
             boolean playerMode = "player-replay".equals(arguments.getString("mode"));
             boolean hybridDiagnostic = "hybrid".equals(arguments.getString("diagnostic_engine", "mlkit"));
-            if (hybridDiagnostic && !"caption-crops".equals(arguments.getString("mode")))
-                throw new IllegalArgumentException("Hybrid diagnostic requires manual-caption-crops mode");
+            boolean hybridFullFrame = "hybrid-full-frame".equals(arguments.getString("mode"));
+            if (hybridFullFrame && !hybridDiagnostic)
+                throw new IllegalArgumentException("Hybrid-full-frame requires hybrid engine");
+            if (hybridDiagnostic && !"caption-crops".equals(arguments.getString("mode")) && !hybridFullFrame)
+                throw new IllegalArgumentException("Hybrid diagnostic requires caption-crops or hybrid-full-frame");
             OcrEngine engine = playerMode || hybridDiagnostic ? productionEngine() : new MlKitJapaneseOcrEngine();
             boolean cropMode = "caption-crops".equals(arguments.getString("mode"));
             if (cropMode && !dataset.optBoolean("manual_caption_regions"))
@@ -99,7 +105,7 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
                     else if (cropMode) stages = CaptionRegionDiagnostic.process(bitmap, row,
                             arguments.getString("crop_preparation", "original"), input -> hybridDiagnostic
                                     ? recognizeRefined(engine, input) : recognize(engine, input));
-                    else stages = new JSONObject().put("ocr_text", recognize(engine, bitmap).getText());
+                    else stages = new JSONObject().put("ocr_text", (hybridFullFrame ? recognizeRefined(engine, bitmap) : recognize(engine, bitmap)).getText());
                     try {
                         stages.put("native_detector_status", engine.getClass().getMethod("getDetectionStatus").invoke(engine));
                         stages.put("native_detector_ms", engine.getClass().getMethod("getDetectionMillis").invoke(engine));
@@ -126,7 +132,7 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
             } finally { engine.close(); }
             replay.finish(previous);
             JSONObject output = new JSONObject().put("schema_version", 1).put("diagnostic_engine", hybridDiagnostic ? "hybrid_refine" : "mlkit_or_player_hybrid").put("native_detection", arguments.getString("pp_detection", "off")).put("sampled_peak_pss_kb", peakPssKb)
-                    .put("scope", playerMode ? (diagnosticCoarseWidth == 0 ? "player_components_immediate_tts" : "player_components_diagnostic_coarse_width") : cropMode ? "manual_caption_regions_only" : "raw_image_ocr_only")
+                    .put("scope", playerMode ? (diagnosticCoarseWidth == 0 ? "player_components_immediate_tts" : "player_components_diagnostic_coarse_width") : cropMode ? "manual_caption_regions_only" : hybridFullFrame ? "full_frame_hybrid_engine_without_subtitle_selection" : "raw_image_ocr_only")
                     .put("metric", playerMode || cropMode ? "caption_comparison_key_cer" : "raw_codepoint_cer")
                     .put("diagnostic_coarse_width", diagnosticCoarseWidth)
                     .put("crop_preparation", cropMode ? arguments.getString("crop_preparation", "original") : JSONObject.NULL)
@@ -145,6 +151,67 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
             finish(1, report);
         }
     }
+    private void evaluateLocalVideo(Bundle report) throws Exception {
+        File root=new File(getTargetContext().getFilesDir(),"video-evaluation");root.mkdirs();
+        File video=new File(root,"input.mp4");
+        if (!video.isFile()) throw new IllegalArgumentException("Local input.mp4 missing");
+        int width=Integer.parseInt(arguments.getString("width","960"));
+        int height=Integer.parseInt(arguments.getString("height","540"));
+        if(width!=960 || (height!=540 && height!=408))throw new IllegalArgumentException("Frozen video geometry required");
+        Intent intent=new Intent().setClassName(getTargetContext(),"jp.hidemaru.burnedcaptionreader.evaluation.LocalBenchmarkVideoActivity")
+                .putExtra("video_path",video.toString()).putExtra("width",width).putExtra("height",height)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        LocalBenchmarkVideoActivity activity=(LocalBenchmarkVideoActivity)startActivitySync(intent);
+        if(!activity.prepared.await(30,TimeUnit.SECONDS))throw new IllegalStateException("Local video prepare timeout");
+        if(activity.failure!=null)throw new IllegalStateException(activity.failure);
+        OcrEngine engine=productionEngine();PlayerFrameReplay replay=new PlayerFrameReplay();
+        JSONArray frames=new JSONArray();long peak=android.os.Debug.getPss();
+        long began=SystemClock.elapsedRealtime(),next=began;int missedSlots=0,captureFailures=0;
+        long lastTimestamp=-1;java.security.MessageDigest hash=java.security.MessageDigest.getInstance("SHA-256");
+        File images=new File(root,"images");images.mkdirs();
+        try {
+            while(!activity.completed && SystemClock.elapsedRealtime()-began<330000) {
+                long wall=SystemClock.elapsedRealtime();if(wall<next){Thread.sleep(Math.min(100,next-wall));continue;}
+                if(wall-next>=480)missedSlots+=(int)((wall-next)/480);
+                next+=(((wall-next)/480)+1)*480;
+                Bitmap frame=Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888);
+                CountDownLatch copied=new CountDownLatch(1);int[] status={-1},timestamp={0};
+                runOnMainSync(() -> {
+                    timestamp[0]=activity.video.getCurrentPosition();
+                    android.view.PixelCopy.request(activity.video,frame,value -> {status[0]=value;copied.countDown();},
+                            new android.os.Handler(android.os.Looper.getMainLooper()));
+                });
+                if(!copied.await(10,TimeUnit.SECONDS))throw new IllegalStateException("PixelCopy timeout");
+                if(status[0]!=android.view.PixelCopy.SUCCESS || timestamp[0]<=lastTimestamp){frame.recycle();captureFailures++;continue;}
+                long started=SystemClock.elapsedRealtime();
+                JSONObject stages=replay.process(frame,timestamp[0],new PlayerFrameReplay.Recognize(){
+                    public OcrResult run(Bitmap input)throws Exception{return recognize(engine,input);}
+                    public OcrResult refine(Bitmap input)throws Exception{return recognizeRefined(engine,input);}
+                });
+                long processing=SystemClock.elapsedRealtime()-started;
+                File image=new File(images,String.format(java.util.Locale.ROOT,"frame-%06d.png",timestamp[0]));
+                try(java.io.FileOutputStream out=new java.io.FileOutputStream(image)){frame.compress(Bitmap.CompressFormat.PNG,100,out);}
+                frame.recycle();String digest=hex(hash.digest(Files.readAllBytes(image.toPath())));
+                frames.put(new JSONObject().put("mono_ms",timestamp[0]).put("image","images/"+image.getName()).put("sha256",digest)
+                        .put("ocr_processing_ms",processing).put("ocr_text",stages.getString("ocr_text")).put("stages",stages));
+                lastTimestamp=timestamp[0];
+                if(frames.length()%25==0){peak=Math.max(peak,android.os.Debug.getPss());Bundle progress=new Bundle();
+                    progress.putString("stream","Local MP4 "+timestamp[0]+"ms / "+frames.length()+" frames\n");sendStatus(0,progress);}
+                if(activity.failure!=null)throw new IllegalStateException(activity.failure);
+            }
+            if(!activity.completed)throw new IllegalStateException("Local video did not complete");
+        } finally {engine.close();runOnMainSync(activity::finish);}
+        replay.finish(lastTimestamp);peak=Math.max(peak,android.os.Debug.getPss());
+        JSONObject result=new JSONObject().put("scope","debug_local_MP4_SurfaceView_PixelCopy_production_hybrid_components")
+                .put("full_production_activity",false).put("tts","immediate completion simulation")
+                .put("video_sha256",hex(hash.digest(Files.readAllBytes(video.toPath()))))
+                .put("elapsed_seconds",(SystemClock.elapsedRealtime()-began)/1000.0).put("sample_interval_ms",480)
+                .put("sampled_peak_pss_kb",peak).put("missed_busy_sample_slots",missedSlots).put("pixelcopy_failures",captureFailures)
+                .put("speech",replay.speech).put("frames",frames);
+        Files.write(new File(root,"results.json").toPath(),result.toString(2).getBytes(StandardCharsets.UTF_8));
+        report.putString("stream","Local video evaluation complete: "+frames.length()+" frames\n");finish(-1,report);
+    }
+    private static String hex(byte[] value){StringBuilder s=new StringBuilder();for(byte b:value)s.append(String.format(java.util.Locale.ROOT,"%02x",b&255));return s.toString();}
     private void captureFull(Bundle report) throws Exception {
         String video = arguments.getString("video_id", "");
         if (!video.matches("[A-Za-z0-9_-]{11}")) throw new IllegalArgumentException("Invalid video ID");

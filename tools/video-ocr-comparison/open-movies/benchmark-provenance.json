@@ -1,0 +1,122 @@
+{
+  "recorded_at": "2026-10-12T17:31:53.106185+00:00",
+  "hardware": {
+    "machine": "arm64",
+    "model": "Mac16,12",
+    "cpu": "Apple M4",
+    "physical_memory_bytes": 17179869184,
+    "macOS": "26.6.2",
+    "hardware_values": "Recorded during initial environment inspection"
+  },
+  "repositories": {
+    "vse": "85746f7df5bf85978fd05f3ca6ce66e321a87a72",
+    "videocr": "0078547b53609f2810b13eb602a4a67721d57952",
+    "subtitleedit": "d8e3b8b41e856a896c541ce7e59b490a99c21196",
+    "paddle-standalone": "6b9dca07636297b93fbb262b41af83caa2a13f4a",
+    "fast-ssim": "8f61acb825d9d9f2a8d2ed1361ec471813ddbb31"
+  },
+  "android_production_source_sha": "eff6b846d02d74e7995652903ecdcc97144d2baa",
+  "benchmark_parent_before_current_uncommitted_changes": "f4c7d409c397ec0301888fa1cffeebe1be2d65e1",
+  "linked_unmodified_se_source_sha256": {
+    "src/ui/Features/Ocr/OcrLanguage2.cs": "a3bf6b2288f16c27d6e274908a28697a4a512a1532d0a254cfaa79029254fb2a",
+    "src/ui/Features/Ocr/Engines/AppleVisionOcr.cs": "b5c87ca2e4b5eb76eefab994c48a12db2d1fe0eeddfc60f5030375d6b5af2b17",
+    "src/ui/Features/Ocr/Engines/AppleVisionTextLayout.cs": "baadbfc95fb28c0540700d7e416d91439aa45f1b3113e759f103c3c3dcc37835",
+    "src/ui/Features/Video/VideoOcr/VideoOcrFrameGrouper.cs": "1fa945fa4d6b8b1e477ccf6f82c5c39f99266cf11900a1eeb628f4fc92aea721",
+    "src/ui/Features/Video/VideoOcr/VideoOcrFrameGroup.cs": "0681a395425e2da3cc8ee7884168562b48aadecf2ef1eb8d5052ee4990c1c3c3",
+    "src/ui/Features/Video/VideoOcr/VideoOcrLineBuilder.cs": "c1e96854fe3d3982e5c856c24f88abd83d1f0312c167c89ad56a620270d935c6",
+    "src/ui/Features/Video/VideoOcr/VideoOcrObservationFilter.cs": "341a88433ee6745882453f58d690ac8165b79e4bd32c920a523c3e1035b37178",
+    "src/ui/Features/Video/VideoOcr/VideoOcrTimingRefiner.cs": "057780ecf48261a1c8a5cfbfaaad4f14d3edc5159d9eedcf08094bc6c55e3b44"
+  },
+  "android_asset_sha256": {
+    "ppocrv5/detection-inference.yml": "98069072e1b6b37d727fd9d9f11725faa46d6ea0de012f2ed26caea011c37699",
+    "ppocrv5/detection-runtime.json": "420d1ffa976daf71d07a156f1325c516ca81bf42df4fe00dde25cf9a3657b0fc",
+    "ppocrv5/detection.onnx": "a431985659dc921974177a95adcfbb90fd9e51989a5e04d70d0b75f597b6e61d",
+    "ppocrv5/characters.json": "14ccb8e120e701464bd3084acf3b398ffee767e515477ad27d3c80fd5996c180",
+    "ppocrv5/detection-provenance.json": "d9bf7e081b53c89e3c9f5a9a3943c6ff8d162ca57212df6c8bd9d56188801b99",
+    "ppocrv5/DETECTION-NOTICE.txt": "e21baf0ce51420e123ba35f4a1412e2ca1922b644f8c736c9ca2890aff2a8c1b",
+    "ppocrv5/source-provenance.json": "c068e595f00f7bf7f13d7c09a1e629697c3549edaa35e3c09962e9e86757411f",
+    "ppocrv5/LICENSE.txt": "3840c5c0c61c294264d2dd77b8777be6ddd90121ef4e0e64abcd22edea581d6e",
+    "ppocrv5/recognition.onnx": "da72dc72ca4dc220df0dfde68c1dedc31c58d3e76a25871122e5056227d50092"
+  },
+  "ffmpeg_sha256": "5aa5d4a2b20ad8bf564b16640aad672ad053662cc241c7e3a373ae42e2657d46",
+  "ffmpeg_version": "ffmpeg version 8.1 Copyright (c) 2000-2026 the FFmpeg developers",
+  "fonts": {
+    "requested_font": "Hiragino Sans W4",
+    "observed_font_provider": "coretext",
+    "observed_japanese_font": "HiraginoSans-W4",
+    "fonts": {
+      "ヒラギノ角ゴシック W4.ttc": "e1ee608f584acdaffc898efac7e2c9fa1c19457474bf215f6b7031ca720993d1"
+    },
+    "observed_font": "HiraginoSans-W4",
+    "note": "Actual first-300s render logs verified CoreText HiraginoSans-W4. Previous Noto fallback experiment is separate."
+  },
+  "runtime_packages": {
+    "vse": {
+      "paddlepaddle": "3.3.1",
+      "paddleocr": "3.4.1",
+      "Pillow": "10.4.0",
+      "numpy": "2.5.4",
+      "psutil": "7.2.2"
+    },
+    "videocr": {
+      "paddlepaddle": "3.3.1",
+      "paddleocr": "3.7.0",
+      "Pillow": "12.3.0",
+      "numpy": "2.3.5",
+      "psutil": "7.2.2"
+    }
+  },
+  "native_test_sources_at_final_validation": {
+    "app/src/androidTest/java/jp/hidemaru/burnedcaptionreader/evaluation/PpOcrNativeSmoke.java": "c20e51ddf0f0dc9ad0d477ffa07e4726e2a998c743596fa9835cd670585b4092",
+    "app/src/androidTest/java/jp/hidemaru/burnedcaptionreader/evaluation/PpDetectionNativeSmoke.java": "70d966e73203f6dcc50e387f887591e6253c39c613d3d664b6263a0224a11c06",
+    "app/src/androidTest/java/jp/hidemaru/burnedcaptionreader/evaluation/CaptionRegionDiagnostic.java": "e26692ff71ebb06a5a114c9469e9019c8aca65233ee25ca4fd21d272c82e842a",
+    "app/src/androidTest/java/jp/hidemaru/burnedcaptionreader/evaluation/PlayerFrameReplay.java": "449ebf43854fb7f83afec00a3e506a64b994d2157019ee5dc96b4ca75549c2a6",
+    "app/src/androidTest/java/jp/hidemaru/burnedcaptionreader/evaluation/ImageEvaluationInstrumentation.java": "a6004bf0c25992c277ab48e5111343eb72df2f4abc97e087f3487cfca492c4fd",
+    "app/src/androidTest/java/jp/hidemaru/burnedcaptionreader/evaluation/OcrSettingsNativeSmoke.java": "a1ba9bb64178f8f8d37371e737a2b0e3e7d2802ed5a0898fbd02a40601155609"
+  },
+  "note": "Video source-component executable hash was not captured at its original run; image adapter subsequently added. Linked official source files were unchanged. Benchmark JSONs store actual APK/test APK hash where recorded.",
+  "paddle_model_files_sha256": {
+    "upstream/vse/backend/models/V5/PP-OCRv5_mobile_det_infer/inference.json": "05feef1acb00aa4cd7362b15f7f501fc4f99d7b1fa73c1c871e0c7b1504b0f5c",
+    "upstream/vse/backend/models/V5/PP-OCRv5_mobile_det_infer/inference.pdiparams": "afa1820cb16c1fd0dad589d0f8b389139061c1ef6d68019685fd07be997dda5b",
+    "upstream/vse/backend/models/V5/PP-OCRv5_mobile_det_infer/inference.yml": "98069072e1b6b37d727fd9d9f11725faa46d6ea0de012f2ed26caea011c37699",
+    "upstream/vse/backend/models/V5/PP-OCRv5_mobile_rec_infer/inference.json": "24587345250c7332d0fc6f9a44e794d078cdaeb64c302fef906f325619de2569",
+    "upstream/vse/backend/models/V5/PP-OCRv5_mobile_rec_infer/inference.pdiparams": "2460da90875937c94db97eba74ae3d9e5d4c4c57c42f1f41531c09a26bcc771a",
+    "upstream/vse/backend/models/V5/PP-OCRv5_mobile_rec_infer/inference.yml": "5dfeb2777f6d0db8177d8128a8acfcf6e6276dc4ac73ea3bf0dc06d6a5e85d8e",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/README.md": "525eef5858b48c009772cd9df422e8a440e1cc3d0cd7e0b5d4fbe8400dc2ecd1",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/inference.json": "89240f689a4a77aad75ef55a8df0a15c8e1d4980a327d17e58f24bbadde5aeab",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/.gitattributes": "a3a43406012ee8c7b9b38dfab1b11610f33e8245cd864a9a9302d042616a859e",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/inference.pdiparams": "5043d4ccc8d63402ccea8feefcee4db57077431a873e78d2191836a178a492da",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/inference.yml": "193f435274bf9f0b5f71a929bbfbcf148282df7e633b34e7c373e8f44741b516",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/.cache/huggingface/CACHEDIR.TAG": "f6572428f6d5e1575e73a1502895a8731f10757dfbb634909c6e154b849af91d",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/.cache/huggingface/.gitignore": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/.cache/huggingface/trees/106c97591b235f607453300d9fc8c1cad1b25488.json": "9626eea76ca1ccebcfe7c4e01e7b8d426dc01ee5ac8d5c1f71fb4e6a7e4cd91e",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/.cache/huggingface/download/.gitattributes.metadata": "9f5d59e901861fa9ed693c8a290337c4bf9dd41161bf8742402ad8087e4e264c",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/.cache/huggingface/download/inference.pdiparams.metadata": "56363edcbbfa824d1fdb000cd090637a7c66f93c5dff36be8c3805640595827c",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/.cache/huggingface/download/inference.yml.metadata": "17486a1f7caa7d8fb1727370e4a9de9599a77e1ccbc1e4433216bffc56b8db80",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/.cache/huggingface/download/inference.json.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/.cache/huggingface/download/.gitattributes.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/.cache/huggingface/download/README.md.metadata": "185e67b6425082d713d537acd09724a7b49c99c09961065fcd82852b3b4818ea",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/.cache/huggingface/download/inference.json.metadata": "5172609e5007104739b2cbd4d3e5fe302b376f309bdfe43f713ed6a452012106",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/.cache/huggingface/download/README.md.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/.cache/huggingface/download/inference.pdiparams.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_det/.cache/huggingface/download/inference.yml.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/README.md": "832f68feddefeffd63ba133b961b7c44a9603d5cde20c14c87383c9440694f7a",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/inference.json": "f0bf53c853937a917affdd74467472167727f8ab0f0f7bded01c4a16c27e46e6",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/.gitattributes": "a3a43406012ee8c7b9b38dfab1b11610f33e8245cd864a9a9302d042616a859e",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/inference.pdiparams": "406e1e689c9a7fbb04178007a3fe10cf852afe7bf8bb3bc6dbb9d532b13bd907",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/inference.yml": "ab078671bb49f06228eadccd34f1bb501e157f7a047095ffb943ba81512c77d1",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/.cache/huggingface/CACHEDIR.TAG": "f6572428f6d5e1575e73a1502895a8731f10757dfbb634909c6e154b849af91d",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/.cache/huggingface/.gitignore": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/.cache/huggingface/trees/bd619643acac4b9650c040234da8d944476ee3f1.json": "9cddc47f54d242184e75191588a1b241c48fc9e97acf56147a6210944a07db66",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/.cache/huggingface/download/.gitattributes.metadata": "56233e00df17a866911a7482a87a5f518848a0480b907c346a8776d94587f0de",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/.cache/huggingface/download/inference.pdiparams.metadata": "27558f4910e54331631ecd19826c11729a70f62504b594c6dbcba1c25e222fcd",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/.cache/huggingface/download/inference.yml.metadata": "016d0af5fb84ab3a4a098e8517f9e2d4cbc2e37c861d9ce9d9a55c2723eb1b50",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/.cache/huggingface/download/inference.json.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/.cache/huggingface/download/.gitattributes.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/.cache/huggingface/download/README.md.metadata": "e31f5556489c8241e8a8779ae7f7e5bd19b5848f9242ca304120c39d4df08af0",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/.cache/huggingface/download/inference.json.metadata": "d347a2babad61b86c4d4f2da8efb12106d9bd56d47b3c053f9ad2583667df3b5",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/.cache/huggingface/download/README.md.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/.cache/huggingface/download/inference.pdiparams.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "private/videocr-model-cache/official_models/PP-OCRv6_small_rec/.cache/huggingface/download/inference.yml.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

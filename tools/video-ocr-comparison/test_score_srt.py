@@ -33,6 +33,14 @@ class ScoreTests(unittest.TestCase):
         self.assertEqual(result["missed_events"], 1)
         self.assertEqual(result["extra_events"], 1)
         self.assertEqual(result["possible_duplicate_events"], 1)
+        self.assertEqual(result["temporally_matched_text_cer"], 0)
+        self.assertGreater(result["event_aligned_cer"], 0)
+
+    def test_no_match_has_no_matched_text_cer(self):
+        r=[{'start':0,'end':1000,'text':'字幕'}]
+        out=compare(r,[])
+        self.assertIsNone(out['temporally_matched_text_cer'])
+        self.assertEqual(out['event_aligned_cer'],1)
 
     def test_global_alignment_avoids_greedy_loss(self):
         r=[{'start':0,'end':1000,'text':'前'}, {'start':1000,'end':2000,'text':'後'}]

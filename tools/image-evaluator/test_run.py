@@ -56,6 +56,12 @@ class DiagnosticPreflightTest(unittest.TestCase):
     def test_hybrid_manual_diagnostic_is_allowed(self):
         self.reaches_stub("--mode", "caption-crops", "--diagnostic-engine", "hybrid")
 
+    def test_full_frame_hybrid_requires_explicit_engine(self):
+        self.rejected("requires hybrid engine", "--mode", "hybrid-full-frame")
+
+    def test_full_frame_hybrid_engine_is_allowed(self):
+        self.reaches_stub("--mode", "hybrid-full-frame", "--diagnostic-engine", "hybrid")
+
     def test_coarse_override_cannot_be_labelled_raw(self):
         self.rejected("Coarse width override requires", "--coarse-width", "1100")
 

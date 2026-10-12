@@ -1,0 +1,38 @@
+[
+  {
+    "film": "elephants",
+    "scope": "full-frame-engine",
+    "same_ocr_observations": true,
+    "additional_ocr_calls": 0,
+    "naive_y_sort_character_edits": 29,
+    "official_layout_character_edits": 23,
+    "reference_characters": 265
+  },
+  {
+    "film": "elephants",
+    "scope": "manual-roi",
+    "same_ocr_observations": true,
+    "additional_ocr_calls": 0,
+    "naive_y_sort_character_edits": 19,
+    "official_layout_character_edits": 9,
+    "reference_characters": 265
+  },
+  {
+    "film": "sintel",
+    "scope": "full-frame-engine",
+    "same_ocr_observations": true,
+    "additional_ocr_calls": 0,
+    "naive_y_sort_character_edits": 27,
+    "official_layout_character_edits": 27,
+    "reference_characters": 168
+  },
+  {
+    "film": "sintel",
+    "scope": "manual-roi",
+    "same_ocr_observations": true,
+    "additional_ocr_calls": 0,
+    "naive_y_sort_character_edits": 27,
+    "official_layout_character_edits": 27,
+    "reference_characters": 168
+  }
+]

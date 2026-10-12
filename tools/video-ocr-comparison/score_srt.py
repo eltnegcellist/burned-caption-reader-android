@@ -113,6 +113,8 @@ def compare(reference, prediction, min_overlap_ms=80, duration_ms=None):
         n = len(values)
         return (values[(n - 1) // 2] + values[n // 2]) / 2 if n else None
     exact = [(i, j) for i, j in pairs if norm(reference[i]['text']) == norm(prediction[j]['text'])]
+    matched_chars = sum(len(norm(reference[i]['text'])) for i, _ in pairs)
+    matched_edits = sum(edits(norm(reference[i]['text']), norm(prediction[j]['text'])) for i, j in pairs)
     raw_norm = lambda s: unicodedata.normalize('NFC', s).replace('\r\n', '\n')
     raw_chars = sum(len(raw_norm(r['text'])) for r in reference)
     raw_edits = sum(edits(raw_norm(reference[i]['text']), raw_norm(prediction[j]['text'])) for i, j in pairs)
@@ -173,6 +175,8 @@ def compare(reference, prediction, min_overlap_ms=80, duration_ms=None):
         "reference_chars": ref_chars,
         "character_edits_including_missed_extra": wrong_chars,
         "event_aligned_cer": round(wrong_chars / ref_chars, 4) if ref_chars else None,
+        "temporally_matched_text_cer": round(matched_edits / matched_chars, 4) if matched_chars else None,
+        "matched_text_cer_caveat": "Excludes omissions, extra events and duplicates; only a diagnostic, not total extraction accuracy",
         "median_start_error_ms": median(start_errors),
         "median_end_error_ms": median(end_errors),
         "matching_method": f"monotonic DP; temporal overlap >={min_overlap_ms}ms; maximize cardinality then IoU; text-independent",

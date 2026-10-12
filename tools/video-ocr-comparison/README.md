@@ -1,20 +1,21 @@
-# 動画内字幕リーダー：4方式Video OCR比較（準備版、2026-10-12）
+# 動画内字幕リーダー：OCR比較結果と再現手順
 
-## 今回の実行結果（2026-10-12）
+## 最新の実測（2026-10-12～13）
 
-公開動画候補の追加確認： [Elephants Dream / Sintel の取得・代表場面の確認](open-movies/README.md)。
-2作品の動画と日本語字幕をMacへ取得し、30秒の字幕焼き込みMP4プレビューを作成した。
-Cosmosは配布サーバーの429で動画未取得。CG映画へこちらで字幕を追加した管理条件であり、
-既存の日本語焼き付け字幕・実写YouTubeテロップの結果とは区別する。性能比較はまだ未実施。
+[公開映画の比較報告](OPEN-MOVIES.md)と[再現手順](OPEN-MOVIES-REPRODUCE.md)を保存した。
+Elephants Dream・Sintelの各5分をVSE/VideOCR/SE公式部品/Android hybridの検証専用MP4経路へ入力し、
+同一PixelCopy PNG70枚を4エンジンの手動ROI・全画面に渡した。数値・設定・hash・文字なし対応付けは `open-movies/benchmark-*.json`。
 
-[REPORT.md](REPORT.md)に実行環境、同一画像の認識、5分合成動画3本、
-フレーム削減と誤統合の切り分け結果を保存した。[REPRODUCE.md](REPRODUCE.md)から再実行できる。
-実PixelCopy画像・許可済み実動画のA/B比較と、Subtitle Edit GUIの完走は未実施。
-合成コントロールとSE公式ソース部品の結果を実映像・製品GUI・Galaxy S25の成績とは扱わない。
-以下はPR #31時点の準備計画を履歴として残す。現在の採点器は文字非依存の時刻順DP、
-正しい文字列の取得率、raw CER、全対応詳細、字幕なし時間への出力を追加し、10テストで検証した。
+Androidには生認識→字幕選択の欠落、デスクトップには英語タイトル混入・分割重複があった。
+SEの公式行組み立ては同じOCR観測で画像CERを改善した。厳しい重複閾値の丸採用は自然背景で改善せず、VSEは悪化例もあった。
+Subtitle Edit GUIはMacロックで未測定。SE公式部品、CG映画への追加字幕、エミュレーターの成績を
+製品GUI・実写テロップ・Galaxy S25の成績と混同しない。本番ソース・モデル・PR29/31は変更しない。
 
-## 目的・現在の到達点
+[合成コントロールの履歴](REPORT.md)と[その再現手順](REPRODUCE.md)も保持した。
+採点器11テスト、画像runner14テスト、nativeモード誤表示ガードを確認済み。
+以下はPR31の準備計画を履歴として残す。
+
+## PR #31時点の準備計画（当時の状態）
 
 既存Androidアプリ（ML Kit + PP-OCRv5の`hybrid`、PR #29 の最新HEAD）を、
 VSE / VideOCR / Subtitle Editの3つと**同じ入力**で比較する。合格した技術のみ後で

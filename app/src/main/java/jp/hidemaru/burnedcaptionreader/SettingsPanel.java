@@ -190,8 +190,25 @@ final class SettingsPanel extends ScrollView {
             if (checked) recorder.start(); else recorder.stop();
             diagnosticStatus.setText(recorder.status());
         });
-        note("オンにした後の動画部分の画像とOCR・発話ログを端末内に保存します。"
-                + "直近約2分・最大64MB。外部へ自動送信しません。新しくオンにすると前の記録を消去します。");
+        note("通常記録は直近約2分・最大64MB。外部へ自動送信しません。"
+                + "新しくオンにすると前の記録を消去します。");
+        if ((context.getApplicationInfo().flags
+                & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            android.widget.Button full = ReaderUi.button(context,
+                    "5分比較向け・全期間の診断記録を開始", false);
+            full.setOnClickListener(v -> {
+                try {
+                    recorder.startFullEvaluation();
+                    diagnosticSwitch.setChecked(true);
+                    diagnosticStatus.setText(recorder.status() + " · 全期間記録");
+                } catch (IllegalStateException error) {
+                    diagnosticStatus.setText(error.getMessage());
+                }
+            });
+            section.addView(full, ReaderUi.block(context, 12));
+            note("デバッグAPK限定。画像を含み、最大3GBまで端末内に保存します。"
+                    + "保存容量を確認してください。終了後は記録をOFFにして診断ZIPを出力します。");
+        }
         android.widget.Button export = ReaderUi.button(context, "診断ZIPを書き出す", false);
         export.setOnClickListener(v -> {
             if (context instanceof Activity) DiagnosticExport.request((Activity) context);

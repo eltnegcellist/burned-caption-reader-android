@@ -856,7 +856,7 @@ public final class AutoSubtitleRegionTracker {
     private boolean isMeaningfulSubtitleTransition(
             LaneState lane, Candidate candidate, double similarity) {
         if (lane.observations < 2 || !candidate.japanese
-                || candidate.textLength < 10 || candidate.width() < .45f
+                || candidate.textLength < 10 || candidate.width() < .35f
                 || !isStrongCaptionShape(candidate)
                 || similarity < .72 || similarity >= 1.0) return false;
         return Similarity.hasMeaningfulTokenChange(lane.lastText, candidate.text);

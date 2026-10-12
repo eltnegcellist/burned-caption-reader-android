@@ -49,11 +49,16 @@ final class OcrSettingsNativeSmoke {
                     recognizer.setChecked(mode.v6Recognition);
                 });
                 check(preferences.getOcrMode()==mode,"UI selection failed: "+mode);
+                check(new AppPreferences(context).getOcrMode()==mode,"Mode not saved: "+mode);
                 try(OcrEngine engine = CaptionOcrEngines.create(context,mode)) {
                     OcrResult raw=read(engine,bitmap,false);
                     OcrResult refined=read(engine,bitmap,true);
                     check(raw!=null&&refined!=null,"OCR result absent: "+mode);
-                    if(mode.v6Detection) check(raw.getBackend().startsWith("v6det_"),"C/D used ML Kit coarse OCR");
+                    if(mode.v6Detection) {
+                        check(raw.getBackend().startsWith("v6det_"),"C/D used ML Kit coarse OCR");
+                        check(field(engine,"mlkit").get(engine)==null,"C/D instantiated ML Kit");
+                        check(((V6ComparisonOcrEngine)engine).getMetrics().get("mlkit_calls")==0,"C/D called ML Kit");
+                    }
                     else check("mlkit".equals(raw.getBackend()),"A/B lost ML Kit coarse detection");
                     modes.put(new JSONObject().put("mode",mode.storedValue)
                         .put("detector_v6",mode.v6Detection).put("recognizer_v6",mode.v6Recognition)

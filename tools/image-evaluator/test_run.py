@@ -50,6 +50,17 @@ class DiagnosticPreflightTest(unittest.TestCase):
     def test_native_detection_cannot_be_labelled_raw(self):
         self.rejected("Native PP detection requires", "--pp-detection", "rescue")
 
+    def test_four_way_mode_cannot_be_labelled_raw(self):
+        self.rejected("Four-way engine requires", "--ocr-mode", "v6_both")
+
+    def test_four_way_mode_cannot_include_legacy_rescue(self):
+        self.rejected("Four-way engine requires", "--mode", "player-replay", "--ocr-mode", "v6_det", "--pp-detection", "rescue")
+
+    def test_all_four_explicit_modes_are_allowed(self):
+        for mode in ["hybrid", "v6_rec", "v6_det", "v6_both"]:
+            with self.subTest(mode=mode):
+                self.reaches_stub("--mode", "player-replay", "--ocr-mode", mode)
+
     def test_coarse_override_cannot_be_labelled_raw(self):
         self.rejected("Coarse width override requires", "--coarse-width", "1100")
 

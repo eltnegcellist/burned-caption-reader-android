@@ -26,6 +26,8 @@ public final class V6ComparisonOcrEngine implements OcrEngine {
     private PpOcrTextDetector detection;
     private PpOcrRecognizer recognition;
     private volatile boolean closed;
+    private volatile long mlkitCalls, mlkitNanos, detectorCalls, detectorNanos, recognizerCalls, recognizerNanos;
+    private volatile long detectorInitNanos, recognizerInitNanos;
 
     public V6ComparisonOcrEngine(Context context, boolean v6Detection, boolean v6Recognition) {
         this.context = context.getApplicationContext();
@@ -51,23 +53,55 @@ public final class V6ComparisonOcrEngine implements OcrEngine {
     }
     @Override public void recognize(Bitmap bitmap, Consumer<OcrResult> success, Consumer<Exception> error) {
         if (v6Detection) submit(() -> detectAndRead(bitmap), success, error);
-        else mlkit.recognize(bitmap, success, error);
+        else detectMlKit(bitmap, success, error);
     }
     @Override public void refine(Bitmap bitmap, Consumer<OcrResult> success, Consumer<Exception> error) {
         if (v6Detection) {
             submit(() -> detectAndRead(bitmap), success, error);
         } else {
-            mlkit.recognize(bitmap, detected ->
+            detectMlKit(bitmap, detected ->
                 submit(() -> refineRecognized(bitmap, detected), success, error), error);
         }
     }
     private PpOcrRecognizer recognizer() throws Exception {
-        if (recognition == null) recognition = new PpOcrRecognizer(context, v6Recognition);
+        if (recognition == null) {
+            long start = android.os.SystemClock.elapsedRealtimeNanos();
+            recognition = new PpOcrRecognizer(context, v6Recognition);
+            recognizerInitNanos += android.os.SystemClock.elapsedRealtimeNanos() - start;
+        }
         return recognition;
     }
+    private void detectMlKit(Bitmap bitmap, Consumer<OcrResult> success, Consumer<Exception> error) {
+        long start = android.os.SystemClock.elapsedRealtimeNanos(); mlkitCalls++;
+        mlkit.recognize(bitmap, result -> {
+            mlkitNanos += android.os.SystemClock.elapsedRealtimeNanos() - start; success.accept(result);
+        }, error);
+    }
+    private PpOcrCtcDecoder.Reading readLine(Bitmap crop) throws Exception {
+        PpOcrRecognizer reader = recognizer();
+        long start = android.os.SystemClock.elapsedRealtimeNanos(); recognizerCalls++;
+        try { return reader.recognizeLine(crop); }
+        finally { recognizerNanos += android.os.SystemClock.elapsedRealtimeNanos() - start; }
+    }
+    /** Cumulative completed work; snapshot after an OCR callback for diagnostics. */
+    public java.util.Map<String, Long> getMetrics() {
+        java.util.Map<String, Long> m = new java.util.LinkedHashMap<>();
+        m.put("mlkit_calls",mlkitCalls); m.put("mlkit_ns",mlkitNanos);
+        m.put("detector_calls",detectorCalls); m.put("detector_ns",detectorNanos);
+        m.put("recognizer_calls",recognizerCalls); m.put("recognizer_ns",recognizerNanos);
+        m.put("detector_init_ns",detectorInitNanos); m.put("recognizer_init_ns",recognizerInitNanos);
+        return m;
+    }
     private OcrResult detectAndRead(Bitmap bitmap) throws Exception {
-        if (detection == null) detection = new PpOcrTextDetector(context, true);
-        List<PpOcrDbPostProcessor.Box> detected = detection.detect(bitmap);
+        if (detection == null) {
+            long start = android.os.SystemClock.elapsedRealtimeNanos();
+            detection = new PpOcrTextDetector(context, true);
+            detectorInitNanos += android.os.SystemClock.elapsedRealtimeNanos() - start;
+        }
+        long start = android.os.SystemClock.elapsedRealtimeNanos(); detectorCalls++;
+        List<PpOcrDbPostProcessor.Box> detected;
+        try { detected = detection.detect(bitmap); }
+        finally { detectorNanos += android.os.SystemClock.elapsedRealtimeNanos() - start; }
         List<PpOcrDbPostProcessor.Box> candidates = new ArrayList<>();
         for (PpOcrDbPostProcessor.Box b : detected)
             if (b.width() >= .055f && b.height() >= .008f && b.height() <= .25f)
@@ -77,11 +111,13 @@ public final class V6ComparisonOcrEngine implements OcrEngine {
         List<OcrLine> lines = new ArrayList<>();
         double sum = 0;
         int n = 0;
+        int readings = 0;
         for (PpOcrDbPostProcessor.Box b : candidates) {
-            if (closed || n >= 24) break;
+            if (closed || readings >= 24) break;
+            readings++;
             Bitmap crop = PpOcrTextDetector.crop(bitmap, b);
             try {
-                PpOcrCtcDecoder.Reading read = recognizer().recognizeLine(crop);
+                PpOcrCtcDecoder.Reading read = readLine(crop);
                 if (read.text == null || read.text.trim().isEmpty()) continue;
                 double confidence = Math.max(0, Math.min(100, read.probability * 100));
                 lines.add(new OcrLine(n++, read.text.trim(), confidence,
@@ -119,7 +155,7 @@ public final class V6ComparisonOcrEngine implements OcrEngine {
             if (left < right && top < bottom) {
                 Bitmap crop = Bitmap.createBitmap(bitmap,left,top,right-left,bottom-top);
                 try {
-                    PpOcrCtcDecoder.Reading read = recognizer().recognizeLine(crop);
+                    PpOcrCtcDecoder.Reading read = readLine(crop);
                     if (PpOcrRefinementPolicy.accepts(text, read.text, read.probability)) {
                         text = read.text; probability = read.probability;
                         replaced = true; total += probability; accepted++;

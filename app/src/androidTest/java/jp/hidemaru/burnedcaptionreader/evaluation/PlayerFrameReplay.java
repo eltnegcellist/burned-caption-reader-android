@@ -131,7 +131,9 @@ final class PlayerFrameReplay {
         try { return (String) result.getClass().getMethod("getBackend").invoke(result); }
         catch (ReflectiveOperationException legacy) { return "mlkit"; }
     }
-    private static boolean ppOcrUsed(OcrResult result) { return "ppocrv5".equals(backend(result)); }
+    private static boolean ppOcrUsed(OcrResult result) {
+        return backend(result).startsWith("ppocr") || backend(result).startsWith("v6det_");
+    }
     private JSONArray rawRows(OcrResult raw) throws Exception {
         JSONArray rows = new JSONArray();
         for (OcrLine row : raw.getLines()) {

@@ -13,7 +13,8 @@ android {
         versionCode = 35
         versionName = "1.0.4-ocr-compare"
 
-        testInstrumentationRunner = "jp.hidemaru.burnedcaptionreader.evaluation.ImageEvaluationInstrumentation"
+        testInstrumentationRunner = providers.gradleProperty("captionTestRunner").getOrElse(
+            "jp.hidemaru.burnedcaptionreader.evaluation.ImageEvaluationInstrumentation")
     }
 
     if (System.getenv("CAPTION_REQUIRE_PERSISTENT_SIGNING") == "true"

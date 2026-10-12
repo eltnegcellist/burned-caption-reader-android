@@ -27,7 +27,9 @@ class SelectionAnalyzerTest(unittest.TestCase):
             {"type": "selection_summary", "frame_id": 3, "raw_rows": 2,
              "selected_bands": 1},
             {"type": "rescue_shadow", "frame_id": 2, "would_rescue": True},
-            {"type": "skip_shadow", "frame_id": 3, "would_skip": True},
+            {"type": "skip_shadow", "frame_id": 3, "would_skip": True, "elapsed_ms": 1},
+            {"type": "skip_shadow_outcome", "frame_id": 3, "would_skip": True,
+             "selected_text_changed": True},
         ]
         result = tool.analyze(events)
         stats = result["frame_summary"]
@@ -36,6 +38,8 @@ class SelectionAnalyzerTest(unittest.TestCase):
         self.assertEqual(stats["has_selection"], 1)
         self.assertEqual(result["p3_shadow_candidates"], 1)
         self.assertEqual(result["p4_shadow_skip_candidates"], 1)
+        self.assertEqual(result["p4_candidate_hides_selected_change"], 1)
+        self.assertEqual(result["p4_comparison_cost_ms"]["median"], 1)
         self.assertEqual(result["ocr_elapsed_ms"]["coarse"]["median"], 90)
         self.assertEqual(result["reason_counts_on_raw_positive_selected_empty"]["scene_filter/filtered_scene_text"], 1)
         self.assertNotIn("PRIVATE", json.dumps(result))

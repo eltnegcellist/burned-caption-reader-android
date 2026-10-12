@@ -115,8 +115,20 @@ final class SettingsPanel extends ScrollView {
         section.addView(volume);
         note("100%を超えると声だけを増幅。動画の音量は変わりません。声が割れる場合は下げてください。");
 
-        heading("字幕の安定待ち時間");
-        TextView stableValue = value(preferences.getStableMs() + " ms");
+        Switch recheck = toggle("字幕を再確認してから読み上げる",
+                preferences.isSubtitleRecheckEnabled());
+        recheck.setTag("subtitle_recheck_enabled");
+        recheck.setContentDescription("字幕を再確認してから読み上げる");
+        note("OFFでは最初に読み取った字幕をすぐ読み上げます。ONではもう一度確認するため、開始が遅くなりますが、認識の揺れを抑えられる場合があります。");
+        LinearLayout stableGroup = new LinearLayout(context);
+        stableGroup.setOrientation(LinearLayout.VERTICAL);
+        TextView stableHeading = ReaderUi.text(context, "再確認時の安定待ち時間", 17,
+                ReaderUi.INK, true);
+        stableHeading.setPadding(0, dp(22), 0, dp(8));
+        stableGroup.addView(stableHeading);
+        TextView stableValue = ReaderUi.text(context, preferences.getStableMs() + " ms",
+                15, ReaderUi.TEAL, false);
+        stableGroup.addView(stableValue);
         SeekBar stable = new SeekBar(context);
         stable.setMax(15);
         stable.setProgress((int) ((preferences.getStableMs() - 250L) / 50L));
@@ -129,7 +141,16 @@ final class SettingsPanel extends ScrollView {
                 onChanged.run();
             }
         });
-        section.addView(stable);
+        stableGroup.addView(stable);
+        stableGroup.setVisibility(preferences.isSubtitleRecheckEnabled()
+                ? View.VISIBLE : View.GONE);
+        section.addView(stableGroup);
+        recheck.setOnCheckedChangeListener((button, checked) -> {
+            if (checked == preferences.isSubtitleRecheckEnabled()) return;
+            preferences.setSubtitleRecheckEnabled(checked);
+            stableGroup.setVisibility(checked ? View.VISIBLE : View.GONE);
+            onChanged.run();
+        });
 
         section = ReaderUi.card(context);
         page.addView(section, ReaderUi.block(context, 16));

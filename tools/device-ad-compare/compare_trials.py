@@ -33,6 +33,12 @@ def measure(events, manifest, name):
               if e.get("type") == "video_frame" and e.get("video_id")}
     if len(videos) > 1:
         raise ValueError(name + ": multiple video IDs")
+    configurations = {}
+    for key in ("recheck_enabled", "debug_region_rescue"):
+        found = {e[key] for e in frames if type(e.get(key)) is bool}
+        if len(found) > 1:
+            raise ValueError(name + ": setting " + key + " changed within one ZIP")
+        configurations[key] = next(iter(found), None)
     durations = [e["processing_ms"] for e in frames]
     warm = durations[1:]
     costs = [e["elapsed_ms"] for e in events if e.get("type") == "ocr_stage_done"
@@ -46,6 +52,8 @@ def measure(events, manifest, name):
               and e.get("would_skip") is True]
     return {
         "source": name, "ocr_mode": next(iter(modes)),
+        "recheck_enabled": configurations["recheck_enabled"],
+        "debug_region_rescue": configurations["debug_region_rescue"],
         "device": next(iter(devices), None),
         "video_id": next(iter(videos), None),
         "frames_completed": len(frames),
@@ -87,6 +95,13 @@ def compare(baseline, candidate):
     video_ids = {r["video_id"] for r in baseline + candidate if r["video_id"]}
     if len(video_ids) > 1:
         raise ValueError("A/B ZIPs must use one video ID")
+    def setting_signature(row):
+        return (row["ocr_mode"], row["recheck_enabled"], row["debug_region_rescue"])
+
+    if len({setting_signature(row) for row in baseline}) != 1:
+        raise ValueError("Baseline ZIPs have inconsistent OCR/recheck/rescue settings")
+    if len({setting_signature(row) for row in candidate}) != 1:
+        raise ValueError("Candidate ZIPs have inconsistent OCR/recheck/rescue settings")
     baseline_summary = summarize(baseline)
     candidate_summary = summarize(candidate)
     differences = {}
@@ -96,8 +111,9 @@ def compare(baseline, candidate):
         b = candidate_summary[field]["median_of_run_values"]
         differences[field + "_relative_change"] = b / a - 1 if a and b is not None else None
     repeated = len(baseline) >= 3 and len(candidate) >= 3
-    dropped = any(r["dropped_records_or_images"] not in (None, 0)
-                  for r in baseline + candidate)
+    complete = all(type(r["dropped_records_or_images"]) is int
+                   and r["dropped_records_or_images"] == 0
+                   for r in baseline + candidate)
     return {
         "schema": 1,
         "baseline_modes": sorted({x["ocr_mode"] for x in baseline}),
@@ -105,7 +121,10 @@ def compare(baseline, candidate):
         "same_device_verified": all(x["device"] for x in baseline + candidate) and len(devices) == 1,
         "same_video_verified": all(x["video_id"] for x in baseline + candidate) and len(video_ids) == 1,
         "three_or_more_runs_each": repeated,
-        "no_reported_drops": not dropped,
+        "no_reported_drops": complete,
+        "settings_verified": all(type(r["recheck_enabled"]) is bool
+                                 and type(r["debug_region_rescue"]) is bool
+                                 for r in baseline + candidate),
         "baseline": {"runs": baseline, "aggregate": baseline_summary},
         "candidate": {"runs": candidate, "aggregate": candidate_summary},
         "relative_changes": differences,
@@ -116,7 +135,7 @@ def compare(baseline, candidate):
             "Missing/failed OCR callbacks are not counted in completed-time totals.",
             "Hypothetical skip and rescue events are NOT performance savings.",
             "Raw-positive is not proof that a caption is correct.",
-            "Missing video/device labels are not independently verified.",
+            "Missing video/device/setting labels are not independently verified.",
             "Image/ZIP content may contain private text; this JSON intentionally omits it.",
             "External PSS, CER, short-caption audit and audible onset are still needed.",
         ],

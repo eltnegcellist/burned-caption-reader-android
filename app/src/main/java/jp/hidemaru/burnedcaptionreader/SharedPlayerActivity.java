@@ -41,6 +41,8 @@ import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
 import jp.hidemaru.burnedcaptionreader.ocr.SubtitleCropPlan;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrBitmapInputs;
 import jp.hidemaru.burnedcaptionreader.ocr.CaptionStripRecovery;
+import jp.hidemaru.burnedcaptionreader.ocr.V6ComparisonOcrEngine;
+import jp.hidemaru.burnedcaptionreader.ocr.LockedRegionRescue;
 import jp.hidemaru.burnedcaptionreader.subtitle.OcrRefinementSelector;
 import jp.hidemaru.burnedcaptionreader.subtitle.OcrVisualLineComposer;
 import jp.hidemaru.burnedcaptionreader.subtitle.CaptionFrameShadow;
@@ -598,6 +600,15 @@ public final class SharedPlayerActivity extends Activity {
         return sampling && !readingPaused && generation == captureGeneration && !isDestroyed();
     }
 
+    /** Never invoke experimental extra OCR in release builds or modes A/B. */
+    private boolean debugRegionRescueActive() {
+        return (getApplicationInfo().flags
+                & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
+                && preferences != null && preferences.isDebugRegionRescueEnabled()
+                && ocrMode != null && ocrMode.v6Detection
+                && ocr instanceof V6ComparisonOcrEngine;
+    }
+
     private void finishFrame(Bitmap frame) {
         if (!frame.isRecycled()) frame.recycle();
         busy = false;
@@ -660,18 +671,27 @@ public final class SharedPlayerActivity extends Activity {
         } catch (RuntimeException error) {
             diagnostics.event("strip_recovery_fallback", "frame_id", frameId, "reason", "prepare_error");
         }
-        if (diagnostics.isRecording()) {
+        boolean experimentalRescue = debugRegionRescueActive();
+        CaptionFrameShadow.RescuePrediction rescuePrediction = null;
+        if (diagnostics.isRecording() || experimentalRescue) {
             long rescueStarted = SystemClock.elapsedRealtime();
-            CaptionFrameShadow.RescuePrediction probe = frameShadow.inspectMissing(
+            rescuePrediction = frameShadow.inspectMissing(
                     frame::getPixel, frame.getWidth(), frame.getHeight(), timestamp,
                     raw.getLines().isEmpty(), input != null);
             diagnostics.event("rescue_shadow", "frame_id", frameId,
-                    "would_rescue", probe.wouldRescue, "reason", probe.reason,
+                    "would_rescue", rescuePrediction.wouldRescue, "reason", rescuePrediction.reason,
                     "elapsed_ms", SystemClock.elapsedRealtime() - rescueStarted,
-                    "luma_range", probe.lumaRange, "raw_rows", raw.getLines().size());
+                    "luma_range", rescuePrediction.lumaRange, "raw_rows", raw.getLines().size());
         }
         if (input == null) {
             diagnostics.event("strip_recovery_decision", "frame_id", frameId, "active", false);
+            if (experimentalRescue && rescuePrediction != null && rescuePrediction.wouldRescue) {
+                float[] bounds = frameShadow.trustedBounds(timestamp);
+                if (bounds != null) {
+                    recoverLockedRegion(frame, generation, timestamp, frameId, raw, bounds);
+                    return;
+                }
+            }
             selectBands(frame, generation, timestamp, frameId, raw);
             return;
         }
@@ -700,6 +720,59 @@ public final class SharedPlayerActivity extends Activity {
         });
     }
 
+    /**
+     * Explicit debug opt-in only. One detector pass + no more than two PP
+     * recognizer calls. The original captured frame remains the mapping basis.
+     * Only pixels from a previously confirmed lane can qualify.
+     */
+    private void recoverLockedRegion(Bitmap frame, int generation, long timestamp,
+                                     long frameId, OcrResult raw, float[] bounds) {
+        final SubtitleCropPlan region;
+        final Bitmap crop;
+        try {
+            region = SubtitleCropPlan.create(frame.getWidth(), frame.getHeight(),
+                    bounds[0], bounds[1]);
+            crop = OcrBitmapInputs.refined(frame, region);
+        } catch (RuntimeException failed) {
+            diagnostics.event("region_rescue_fallback", "frame_id", frameId,
+                    "reason", "prepare_error", "error", failed.toString());
+            selectBands(frame, generation, timestamp, frameId, raw);
+            return;
+        }
+        diagnostics.event("ocr_call", "frame_id", frameId, "stage", "region_rescue",
+                "max_detector_calls", 1, "max_recognizer_calls", 2);
+        diagnostics.image("ocr_input", crop, "frame_id", frameId, "stage", "region_rescue");
+        final long started = SystemClock.elapsedRealtime();
+        ((V6ComparisonOcrEngine) ocr).recognizeLimited(crop, result -> {
+            if (crop != frame) crop.recycle();
+            diagnostics.event("ocr_stage_done", "frame_id", frameId, "stage", "region_rescue",
+                    "elapsed_ms", SystemClock.elapsedRealtime() - started,
+                    "rows", result.getLines().size());
+            if (!acceptsFrame(generation)) { finishFrame(frame); return; }
+            diagnostics.ocr("ocr_region_rescue", frameId, -1, result);
+            OcrResult merged;
+            try {
+                merged = LockedRegionRescue.merge(raw, result, region,
+                        frame.getHeight(), bounds[0], bounds[1]);
+            } catch (RuntimeException failed) {
+                merged = raw;
+                diagnostics.event("region_rescue_fallback", "frame_id", frameId,
+                        "reason", "map_error", "error", failed.toString());
+            }
+            diagnostics.event("region_rescue_result", "frame_id", frameId,
+                    "accepted_rows", merged.getLines().size() - raw.getLines().size());
+            selectBands(frame, generation, timestamp, frameId, merged);
+        }, error -> {
+            if (crop != frame) crop.recycle();
+            diagnostics.event("ocr_stage_done", "frame_id", frameId, "stage", "region_rescue",
+                    "elapsed_ms", SystemClock.elapsedRealtime() - started, "error", true);
+            diagnostics.event("region_rescue_fallback", "frame_id", frameId,
+                    "reason", "ocr_error", "error", error.toString());
+            if (!acceptsFrame(generation)) { finishFrame(frame); return; }
+            selectBands(frame, generation, timestamp, frameId, raw);
+        });
+    }
+
     private void selectBands(Bitmap frame, int generation, long timestamp, long frameId, OcrResult raw) {
         // Debug-only shadow: compare precisely the same PP-rescued boxes. Do not
         // change the text sent to the candidate selector or call OCR again.
@@ -723,7 +796,7 @@ public final class SharedPlayerActivity extends Activity {
                 : null;
         List<AutoSubtitleRegionTracker.Selection> selections =
                 tracker.selectForRecognition(timestamp, raw, trace);
-        if (diagnostics.isRecording()) {
+        if (diagnostics.isRecording() || debugRegionRescueActive()) {
             if (selections.size() == 1 && selections.get(0).isLocked()) {
                 AutoSubtitleRegionTracker.Selection locked = selections.get(0);
                 frameShadow.trust(locked.getTrackId(), locked.getTop(), locked.getBottom(), timestamp);
@@ -757,7 +830,9 @@ public final class SharedPlayerActivity extends Activity {
             try { processResult(timestamp, frameId, bands); }
             finally {
                 diagnostics.event("frame_done", "frame_id", frameId,
-                        "processing_ms", SystemClock.elapsedRealtime() - timestamp, "ocr_mode", ocrMode.storedValue);
+                        "processing_ms", SystemClock.elapsedRealtime() - timestamp, "ocr_mode", ocrMode.storedValue,
+                        "recheck_enabled", subtitleRecheckEnabled,
+                        "debug_region_rescue", debugRegionRescueActive());
                 finishFrame(frame);
             }
             return;

@@ -24,6 +24,7 @@ public final class AppPreferences {
     private static final String SPEECH_MODE = "speech_mode";
     private static final String STABLE_MS = "stable_ms";
     private static final String SUBTITLE_RECHECK_ENABLED = "subtitle_recheck_enabled";
+    private static final String DEBUG_REGION_RESCUE = "debug_region_rescue";
     private static final String AUTO_PAUSE_BROWSER = "auto_pause_browser";
     private static final String KEEP_SCREEN_ON = "keep_screen_on";
     private static final String HIDE_YOUTUBE_CC = "hide_youtube_cc";
@@ -165,6 +166,15 @@ public final class AppPreferences {
 
     public void setSubtitleRecheckEnabled(boolean enabled) {
         preferences.edit().putBoolean(SUBTITLE_RECHECK_ENABLED, enabled).apply();
+    }
+
+    /** Debug-only experiment; cannot be enabled by default or remote configuration. */
+    public boolean isDebugRegionRescueEnabled() {
+        return preferences.getBoolean(DEBUG_REGION_RESCUE, false);
+    }
+
+    public void setDebugRegionRescueEnabled(boolean enabled) {
+        preferences.edit().putBoolean(DEBUG_REGION_RESCUE, enabled).apply();
     }
 
     public long getStableMs() {

@@ -60,6 +60,11 @@ public final class CaptionFrameShadow {
         lastTrustedAt = now;
     }
 
+    /** Cached recognized lane only; null on seek, timeout or geometry change. */
+    public float[] trustedBounds(long now) {
+        return hasTrust(now) ? new float[]{bandTop, bandBottom} : null;
+    }
+
     public void clearTrust() {
         trustedTrack = -1;
         lastTrustedAt = -1;

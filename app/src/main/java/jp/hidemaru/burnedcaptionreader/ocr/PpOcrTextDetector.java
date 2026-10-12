@@ -5,7 +5,8 @@ import ai.onnxruntime.*;import java.io.*;import java.nio.*;import java.nio.chann
 public final class PpOcrTextDetector implements AutoCloseable {
  public static final String MODEL_SHA256="a431985659dc921974177a95adcfbb90fd9e51989a5e04d70d0b75f597b6e61d";
  private final OrtEnvironment environment;private final OrtSession session;private ByteBuffer model;private boolean closed;private final boolean v6;
- public PpOcrTextDetector(Context context)throws Exception{this(context,false);}\n public PpOcrTextDetector(Context context,boolean v6)throws Exception{this.v6=v6;
+ public PpOcrTextDetector(Context context)throws Exception{this(context,false);}
+ public PpOcrTextDetector(Context context,boolean v6)throws Exception{this.v6=v6;
   try(AssetFileDescriptor asset=context.getAssets().openFd(v6?"ppocrv6/detection.onnx":"ppocrv5/detection.onnx");FileInputStream in=asset.createInputStream()){
    if(asset.getLength()!=(v6?9880512L:4826518L))throw new IOException("Invalid PP detector size");model=in.getChannel().map(FileChannel.MapMode.READ_ONLY,asset.getStartOffset(),asset.getLength());
   }

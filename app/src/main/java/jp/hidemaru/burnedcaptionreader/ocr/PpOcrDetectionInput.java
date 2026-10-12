@@ -5,7 +5,9 @@ public final class PpOcrDetectionInput {
  public final int width,height; public final float[] values;
  private PpOcrDetectionInput(int w,int h,float[]v){width=w;height=h;values=v;}
  public static PpOcrDetectionInput fromArgb(int[]p,int w,int h){
-  return fromArgb(p,w,h,LONG_SIDE,128);}\n public static PpOcrDetectionInput fromArgb(int[]p,int w,int h,int longSide,int divisor){\n  if(w<1||h<1||(long)w*h!=p.length)throw new IllegalArgumentException("Invalid detector pixels");
+  return fromArgb(p,w,h,LONG_SIDE,128);}
+ public static PpOcrDetectionInput fromArgb(int[]p,int w,int h,int longSide,int divisor){
+  if(w<1||h<1||(long)w*h!=p.length)throw new IllegalArgumentException("Invalid detector pixels");
   double ratio=longSide/(double)Math.max(w,h);int dw=((int)(w*ratio)+divisor-1)/divisor*divisor,dh=((int)(h*ratio)+divisor-1)/divisor*divisor;dw=Math.max(128,dw);dh=Math.max(128,dh);int plane=dw*dh;float[]v=new float[3*plane];float[]mean={.485f,.456f,.406f},std={.229f,.224f,.225f};
   for(int y=0;y<dh;y++){double sy=Math.max(0,Math.min(h-1,(y+.5)*h/dh-.5));int y0=(int)sy,y1=Math.min(h-1,y0+1);double fy=sy-y0;
    for(int x=0;x<dw;x++){double sx=Math.max(0,Math.min(w-1,(x+.5)*w/dw-.5));int x0=(int)sx,x1=Math.min(w-1,x0+1);double fx=sx-x0;

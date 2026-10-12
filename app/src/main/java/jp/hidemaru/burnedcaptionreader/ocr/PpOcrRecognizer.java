@@ -21,7 +21,8 @@ public final class PpOcrRecognizer implements AutoCloseable {
     private ByteBuffer model;
     private boolean closed;private final boolean v6;
 
-    public PpOcrRecognizer(Context context) throws Exception {this(context,false);}\n    public PpOcrRecognizer(Context context,boolean v6) throws Exception {this.v6=v6;
+    public PpOcrRecognizer(Context context) throws Exception {this(context,false);}
+    public PpOcrRecognizer(Context context,boolean v6) throws Exception {this.v6=v6;
         try (InputStream input = context.getAssets().open(v6?"ppocrv6/characters.json":"ppocrv5/characters.json")) {
             ByteArrayOutputStream bytes = new ByteArrayOutputStream(); byte[] buffer = new byte[8192];
             for (int n; (n = input.read(buffer)) != -1;) bytes.write(buffer, 0, n);

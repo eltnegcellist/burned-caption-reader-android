@@ -112,11 +112,18 @@ public final class SharedPlayerActivity extends Activity {
                 }
                 captureEvaluationReference();
             }
-            if (!readingPaused && !busy && player != null) {
-                applyCcPreference();
-                // Also inspect the watch URL in fullscreen: YouTube can switch
-                // videos without a full page navigation (autoplay / SPA).
-                locateVideoAndCopy();
+            if (!readingPaused && player != null) {
+                // Opt-in comparison telemetry. Busy polls are NOT decoded video frames.
+                if (diagnostics != null && diagnostics.isRecording()) {
+                    diagnostics.event("capture_poll", "ocr_mode", ocrMode.storedValue,
+                            "state", busy ? "busy_skip" : "requested");
+                }
+                if (!busy) {
+                    applyCcPreference();
+                    // Also inspect the watch URL in fullscreen: YouTube can switch
+                    // videos without a full page navigation (autoplay / SPA).
+                    locateVideoAndCopy();
+                }
             }
             main.postDelayed(this, SAMPLE_MS);
         }

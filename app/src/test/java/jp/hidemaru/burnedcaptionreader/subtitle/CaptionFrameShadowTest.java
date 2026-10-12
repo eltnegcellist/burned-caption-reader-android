@@ -34,6 +34,19 @@ public class CaptionFrameShadowTest {
         s.probe(frame(12), 640, 360, 1, 0);
         assertFalse(s.probe(frame(245), 640, 360, 1, 480).wouldSkip);
     }
+    @Test public void equalBrightnessDifferentColorMustNotBeSkipped() {
+        CaptionFrameShadow s = new CaptionFrameShadow();
+        // Red(100) and green(51) have near-identical quantized luma.
+        CaptionFrameShadow.PixelSource red = (x, y) -> 0xff640000;
+        CaptionFrameShadow.PixelSource green = (x, y) -> 0xff003300;
+        s.trust(1, .60f, .80f, 0);
+        s.probe(red, 640, 360, 1, 0);
+        CaptionFrameShadow.Prediction observed = s.probe(green, 640, 360, 1, 480);
+        assertTrue(observed.bandMeanDelta <= 3.0);
+        assertTrue(observed.bandColorDelta > 4.0);
+        assertFalse(observed.wouldSkip);
+    }
+
     @Test public void rescueProbeNeedsTrustedBandContrastAndNoExistingStrip() {
         CaptionFrameShadow s = new CaptionFrameShadow();
         CaptionFrameShadow.PixelSource contrast = (x, y) -> ((x / 10) % 2 == 0) ? 0xffeeeeee : 0xff111111;

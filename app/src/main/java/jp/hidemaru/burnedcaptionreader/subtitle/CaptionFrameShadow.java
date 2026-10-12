@@ -14,8 +14,10 @@ public final class CaptionFrameShadow {
         public final String reason;
         public final double broadMeanDelta;
         public final double bandMeanDelta;
-        Prediction(boolean skip, String why, double broad, double band) {
+        public final double bandColorDelta;
+        Prediction(boolean skip, String why, double broad, double band, double color) {
             wouldSkip = skip; reason = why; broadMeanDelta = broad; bandMeanDelta = band;
+            bandColorDelta = color;
         }
     }
 
@@ -74,24 +76,28 @@ public final class CaptionFrameShadow {
     }
 
     public Prediction probe(PixelSource pixels, int w, int h, int currentGeneration, long now) {
-        if (w <= 0 || h <= 0) return new Prediction(false, "invalid_dimensions", -1, -1);
+        if (w <= 0 || h <= 0) return new Prediction(false, "invalid_dimensions", -1, -1, -1);
         if (width != w || height != h || generation != currentGeneration) {
             clearFingerprints();
             width = w; height = h; generation = currentGeneration;
         }
         if (!hasTrust(now)) {
             clearFingerprints();
-            return new Prediction(false, "no_recent_locked_lane", -1, -1);
+            return new Prediction(false, "no_recent_locked_lane", -1, -1, -1);
         }
         int[] broad = sample(pixels, w, h, WHOLE_W, WHOLE_H, 0, 1);
         int[] band = sample(pixels, w, h, BAND_W, BAND_H,
                 Math.max(0f, bandTop - .01f), Math.min(1f, bandBottom + .01f));
         double wholeDelta = previousBroad == null ? -1 : meanDelta(previousBroad, broad);
         double bandDelta = previousBand == null ? -1 : meanDelta(previousBand, band);
+        // Luma alone misses hue changes (e.g. a red digit becoming green)
+        // when their weighted brightness is approximately equal.
+        double bandColorDelta = previousBand == null ? -1 : meanColorDelta(previousBand, band);
         boolean force = lastWouldOcrAt >= 0 && now - lastWouldOcrAt >= FORCE_EVERY_MS;
         boolean skip = previousBroad != null && previousBand != null
                 && !force && consecutiveWouldSkips < 1
-                && wholeDelta <= 4.0 && bandDelta <= 3.0;
+                && wholeDelta <= 4.0 && bandDelta <= 3.0
+                && bandColorDelta <= 4.0;
         String reason = previousBroad == null ? "first_with_trust"
                 : force ? "forced_periodic_ocr"
                 : consecutiveWouldSkips >= 1 ? "max_one_skip"
@@ -104,7 +110,7 @@ public final class CaptionFrameShadow {
             consecutiveWouldSkips = 0;
             lastWouldOcrAt = now;
         }
-        return new Prediction(skip, reason, wholeDelta, bandDelta);
+        return new Prediction(skip, reason, wholeDelta, bandDelta, bandColorDelta);
     }
 
     /** P3 candidate only. Shadow does not invoke another detector. */
@@ -118,7 +124,8 @@ public final class CaptionFrameShadow {
         int[] band = sample(pixels, w, h, BAND_W, BAND_H,
                 Math.max(0, bandTop - .01f), Math.min(1, bandBottom + .01f));
         int low = 255, high = 0, bright = 0, dark = 0;
-        for (int y : band) {
+        for (int rgb : band) {
+            int y = luminance(rgb);
             low = Math.min(low, y); high = Math.max(high, y);
             if (y >= 190) bright++;
             if (y <= 80) dark++;
@@ -143,17 +150,31 @@ public final class CaptionFrameShadow {
                     (int) (height * (top + (y + .5) / h * (bottom - top)))));
             for (int x = 0; x < w; x++) {
                 int ix = Math.max(0, Math.min(width - 1, (int) (width * (x + .5) / w)));
-                int rgb = src.rgb(ix, iy);
-                data[y * w + x] = (77 * ((rgb >> 16) & 255)
-                        + 150 * ((rgb >> 8) & 255) + 29 * (rgb & 255)) >> 8;
+                data[y * w + x] = src.rgb(ix, iy) & 0x00ffffff;
             }
         }
         return data;
     }
 
+    private static int luminance(int rgb) {
+        return (77 * ((rgb >> 16) & 255) + 150 * ((rgb >> 8) & 255)
+                + 29 * (rgb & 255)) >> 8;
+    }
+
     private static double meanDelta(int[] a, int[] b) {
         int total = 0;
-        for (int i = 0; i < a.length; i++) total += Math.abs(a[i] - b[i]);
+        for (int i = 0; i < a.length; i++)
+            total += Math.abs(luminance(a[i]) - luminance(b[i]));
         return total / (double) a.length;
+    }
+
+    private static double meanColorDelta(int[] a, int[] b) {
+        long total = 0;
+        for (int i = 0; i < a.length; i++) {
+            total += Math.abs(((a[i] >> 16) & 255) - ((b[i] >> 16) & 255));
+            total += Math.abs(((a[i] >> 8) & 255) - ((b[i] >> 8) & 255));
+            total += Math.abs((a[i] & 255) - (b[i] & 255));
+        }
+        return total / (3.0 * a.length);
     }
 }

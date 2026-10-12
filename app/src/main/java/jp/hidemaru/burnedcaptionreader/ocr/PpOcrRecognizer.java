@@ -19,24 +19,24 @@ public final class PpOcrRecognizer implements AutoCloseable {
     private final OrtSession session;
     private final List<String> characters = new ArrayList<>();
     private ByteBuffer model;
-    private boolean closed;
+    private boolean closed;private final boolean v6;
 
-    public PpOcrRecognizer(Context context) throws Exception {
-        try (InputStream input = context.getAssets().open("ppocrv5/characters.json")) {
+    public PpOcrRecognizer(Context context) throws Exception {this(context,false);}\n    public PpOcrRecognizer(Context context,boolean v6) throws Exception {this.v6=v6;
+        try (InputStream input = context.getAssets().open(v6?"ppocrv6/characters.json":"ppocrv5/characters.json")) {
             ByteArrayOutputStream bytes = new ByteArrayOutputStream(); byte[] buffer = new byte[8192];
             for (int n; (n = input.read(buffer)) != -1;) bytes.write(buffer, 0, n);
             JSONArray json = new JSONArray(new String(bytes.toByteArray(), StandardCharsets.UTF_8));
             for (int i = 0; i < json.length(); i++) characters.add(json.getString(i));
         }
-        if (characters.size() != 18385 || !characters.get(0).isEmpty()) throw new IOException("Invalid PP-OCR dictionary");
-        try (AssetFileDescriptor asset = context.getAssets().openFd("ppocrv5/recognition.onnx");
+        if ((v6?characters.size()<1000:characters.size()!=18385) || !characters.get(0).isEmpty()) throw new IOException("Invalid PP-OCR dictionary");
+        try (AssetFileDescriptor asset = context.getAssets().openFd(v6?"ppocrv6/recognition.onnx":"ppocrv5/recognition.onnx");
              FileInputStream input = asset.createInputStream()) {
-            if (asset.getLength() != 16534782L) throw new IOException("Invalid PP-OCR model size");
+            if (asset.getLength() != (v6?21159378L:16534782L)) throw new IOException("Invalid PP-OCR model size");
             model = input.getChannel().map(FileChannel.MapMode.READ_ONLY, asset.getStartOffset(), asset.getLength());
         }
         MessageDigest digest = MessageDigest.getInstance("SHA-256"); digest.update(model.duplicate());
         StringBuilder hex = new StringBuilder(); for (byte b : digest.digest()) hex.append(String.format(Locale.ROOT, "%02x", b & 255));
-        if (!MODEL_SHA256.contentEquals(hex)) throw new IOException("PP-OCR model integrity failure");
+        if (!(v6?"5435fd747c9e0efe15a96d0b378d5bd157e9492ed8fd80edf08f30d02fa24634":MODEL_SHA256).contentEquals(hex)) throw new IOException("PP-OCR model integrity failure");
         environment = OrtEnvironment.getEnvironment();
         try (OrtSession.SessionOptions options = new OrtSession.SessionOptions()) {
             options.setIntraOpNumThreads(2); options.setInterOpNumThreads(1);

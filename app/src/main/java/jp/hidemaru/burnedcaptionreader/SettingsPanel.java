@@ -48,28 +48,24 @@ final class SettingsPanel extends ScrollView {
         note(inPlayer ? "動画は再生を続けます。声の変更は次の読み上げから反映されます。"
                 : "次に開く動画から反映されます。");
 
-        heading("字幕の読み取り方式");
-        CaptionOcrMode[] ocrModes = CaptionOcrMode.values();
-        String[] ocrLabels = new String[ocrModes.length];
-        for (int i = 0; i < ocrModes.length; i++) ocrLabels[i] = ocrModes[i].label;
-        Spinner ocrChoice = spinner(ocrLabels);
-        ocrChoice.setTag("ocr_mode_selector");
-        ocrChoice.setContentDescription("字幕の読み取り方式");
-        ocrChoice.setSelection(preferences.getOcrMode().ordinal());
-        TextView ocrDescription = value(preferences.getOcrMode().description);
-        ocrChoice.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int index, long id) {
-                CaptionOcrMode selected = ocrModes[index];
-                ocrDescription.setText(selected.description);
-                if (selected != preferences.getOcrMode()) {
-                    preferences.setOcrMode(selected);
-                    onChanged.run();
-                }
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        heading("文字位置の検出");
+        Switch detectionV6 = toggle("PP-OCRv6 Small（OFF: ML Kit）", preferences.getOcrMode().v6Detection);
+        detectionV6.setOnCheckedChangeListener((b, on) -> {
+            CaptionOcrMode old = preferences.getOcrMode();
+            CaptionOcrMode next = CaptionOcrMode.of(on, old.v6Recognition);
+            if (old != next) { preferences.setOcrMode(next); onChanged.run(); }
         });
-        note(inPlayer ? "処理中の画像が完了した後に切り替わります。動画の再生は続きます。"
-                : "選択は保存され、次に開く動画で使われます。");
+        heading("文字の読み取り");
+        Switch recognitionV6 = toggle("PP-OCRv6 Small（OFF: PP-OCRv5 Mobile）", preferences.getOcrMode().v6Recognition);
+        recognitionV6.setOnCheckedChangeListener((b, on) -> {
+            CaptionOcrMode old = preferences.getOcrMode();
+            CaptionOcrMode next = CaptionOcrMode.of(old.v6Detection, on);
+            if (old != next) { preferences.setOcrMode(next); onChanged.run(); }
+        });
+        note("2つのスイッチで4パターンを比較。OFF/OFFが現行基準です。"
+                + "検出をv6にした場合、ML Kitによる粗い文字認識は実行しません。");
+        note(inPlayer ? "処理中の画像が終わってから切替。動画の再生は継続します。"
+                : "選択は保存され、次に開いた動画で使用されます。");
 
         heading("字幕が続いたとき");
         Spinner mode = spinner(new String[]{

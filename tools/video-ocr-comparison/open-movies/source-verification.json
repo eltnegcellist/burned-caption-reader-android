@@ -1,0 +1,16 @@
+[
+  {
+    "film": "elephants",
+    "movie_sha256": "d1ff59c1b046e907c1fb3c5d86cd048017879978b1f0469d025cbe2c3685648e",
+    "subtitle_sha256": "7c882ce70e22143804a147bb18931e89ea2dbba592d1bc8f6c295f6d298b48ce",
+    "subtitle_revision": 1052627867,
+    "verified": true
+  },
+  {
+    "film": "sintel",
+    "movie_sha256": "59054624b5739ac4dca96719dd04e1249bdb0a93e4a1bad917ff48362be78697",
+    "subtitle_sha256": "635a4710441fcecb6528939cf81e8e19508b45a705e54407d703ce6421452ed9",
+    "subtitle_revision": 937798514,
+    "verified": true
+  }
+]

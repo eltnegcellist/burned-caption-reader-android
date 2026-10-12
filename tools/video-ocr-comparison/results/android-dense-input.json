@@ -1,0 +1,2145 @@
+{
+  "id": "owned-synthetic-dense-100sec",
+  "source": "synthetic",
+  "ground_truth_source": "synthetic_render_spec",
+  "human_verified": false,
+  "split": "harness_control",
+  "manual_caption_regions": true,
+  "note": "Repeated constant-pixel synthetic images for tracker-state control. Not PixelCopy, MP4 path, or live speed.",
+  "frames": [
+    {
+      "id": "control-1-0030.png-repeat0",
+      "image": "control-1-0030.png",
+      "sha256": "b161812c486a34ce1dcd17c45bb18a86e9ed92387515ba25d1a1a694a2573579",
+      "expected_text": "本日の価格は100円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 3000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 1000
+    },
+    {
+      "id": "control-1-0030.png-repeat1",
+      "image": "control-1-0030.png",
+      "sha256": "b161812c486a34ce1dcd17c45bb18a86e9ed92387515ba25d1a1a694a2573579",
+      "expected_text": "本日の価格は100円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 3000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 1480
+    },
+    {
+      "id": "control-1-0030.png-repeat2",
+      "image": "control-1-0030.png",
+      "sha256": "b161812c486a34ce1dcd17c45bb18a86e9ed92387515ba25d1a1a694a2573579",
+      "expected_text": "本日の価格は100円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 3000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 1960
+    },
+    {
+      "id": "control-1-0030.png-repeat3",
+      "image": "control-1-0030.png",
+      "sha256": "b161812c486a34ce1dcd17c45bb18a86e9ed92387515ba25d1a1a694a2573579",
+      "expected_text": "本日の価格は100円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 3000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 2440
+    },
+    {
+      "id": "control-1-0030.png-repeat4",
+      "image": "control-1-0030.png",
+      "sha256": "b161812c486a34ce1dcd17c45bb18a86e9ed92387515ba25d1a1a694a2573579",
+      "expected_text": "本日の価格は100円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 3000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 2920
+    },
+    {
+      "id": "control-1-0030.png-repeat5",
+      "image": "control-1-0030.png",
+      "sha256": "b161812c486a34ce1dcd17c45bb18a86e9ed92387515ba25d1a1a694a2573579",
+      "expected_text": "本日の価格は100円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 3000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 3400
+    },
+    {
+      "id": "control-1-0030.png-repeat6",
+      "image": "control-1-0030.png",
+      "sha256": "b161812c486a34ce1dcd17c45bb18a86e9ed92387515ba25d1a1a694a2573579",
+      "expected_text": "本日の価格は100円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 3000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 3880
+    },
+    {
+      "id": "control-1-0030.png-repeat7",
+      "image": "control-1-0030.png",
+      "sha256": "b161812c486a34ce1dcd17c45bb18a86e9ed92387515ba25d1a1a694a2573579",
+      "expected_text": "本日の価格は100円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 3000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 4360
+    },
+    {
+      "id": "control-1-0090.png-repeat0",
+      "image": "control-1-0090.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 9000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 7000
+    },
+    {
+      "id": "control-1-0090.png-repeat1",
+      "image": "control-1-0090.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 9000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 7480
+    },
+    {
+      "id": "control-1-0090.png-repeat2",
+      "image": "control-1-0090.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 9000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 7960
+    },
+    {
+      "id": "control-1-0090.png-repeat3",
+      "image": "control-1-0090.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 9000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 8440
+    },
+    {
+      "id": "control-1-0090.png-repeat4",
+      "image": "control-1-0090.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 9000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 8920
+    },
+    {
+      "id": "control-1-0130.png-repeat0",
+      "image": "control-1-0130.png",
+      "sha256": "36b2eb1d782a2ad8b5eccc4e87f165d8d89a8ca20795a81ebd3059d6b6c27ec8",
+      "expected_text": "本日の価格は200円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 13000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 11000
+    },
+    {
+      "id": "control-1-0130.png-repeat1",
+      "image": "control-1-0130.png",
+      "sha256": "36b2eb1d782a2ad8b5eccc4e87f165d8d89a8ca20795a81ebd3059d6b6c27ec8",
+      "expected_text": "本日の価格は200円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 13000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 11480
+    },
+    {
+      "id": "control-1-0130.png-repeat2",
+      "image": "control-1-0130.png",
+      "sha256": "36b2eb1d782a2ad8b5eccc4e87f165d8d89a8ca20795a81ebd3059d6b6c27ec8",
+      "expected_text": "本日の価格は200円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 13000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 11960
+    },
+    {
+      "id": "control-1-0130.png-repeat3",
+      "image": "control-1-0130.png",
+      "sha256": "36b2eb1d782a2ad8b5eccc4e87f165d8d89a8ca20795a81ebd3059d6b6c27ec8",
+      "expected_text": "本日の価格は200円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 13000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 12440
+    },
+    {
+      "id": "control-1-0130.png-repeat4",
+      "image": "control-1-0130.png",
+      "sha256": "36b2eb1d782a2ad8b5eccc4e87f165d8d89a8ca20795a81ebd3059d6b6c27ec8",
+      "expected_text": "本日の価格は200円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 13000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 12920
+    },
+    {
+      "id": "control-1-0130.png-repeat5",
+      "image": "control-1-0130.png",
+      "sha256": "36b2eb1d782a2ad8b5eccc4e87f165d8d89a8ca20795a81ebd3059d6b6c27ec8",
+      "expected_text": "本日の価格は200円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 13000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 13400
+    },
+    {
+      "id": "control-1-0130.png-repeat6",
+      "image": "control-1-0130.png",
+      "sha256": "36b2eb1d782a2ad8b5eccc4e87f165d8d89a8ca20795a81ebd3059d6b6c27ec8",
+      "expected_text": "本日の価格は200円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 13000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 13880
+    },
+    {
+      "id": "control-1-0130.png-repeat7",
+      "image": "control-1-0130.png",
+      "sha256": "36b2eb1d782a2ad8b5eccc4e87f165d8d89a8ca20795a81ebd3059d6b6c27ec8",
+      "expected_text": "本日の価格は200円です",
+      "caption_regions": [
+        [
+          0.3,
+          0.8592592592592593,
+          0.6989583333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 13000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 14360
+    },
+    {
+      "id": "control-1-0190.png-repeat0",
+      "image": "control-1-0190.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 19000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 17000
+    },
+    {
+      "id": "control-1-0190.png-repeat1",
+      "image": "control-1-0190.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 19000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 17480
+    },
+    {
+      "id": "control-1-0190.png-repeat2",
+      "image": "control-1-0190.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 19000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 17960
+    },
+    {
+      "id": "control-1-0190.png-repeat3",
+      "image": "control-1-0190.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 19000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 18440
+    },
+    {
+      "id": "control-1-0190.png-repeat4",
+      "image": "control-1-0190.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 19000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 18920
+    },
+    {
+      "id": "control-1-0230.png-repeat0",
+      "image": "control-1-0230.png",
+      "sha256": "6718bd973e7e793df30599254c1f2fd4e9304458ec5e81633c983f0b7bc8fb9b",
+      "expected_text": "このサービスを利用できます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 23000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 21000
+    },
+    {
+      "id": "control-1-0230.png-repeat1",
+      "image": "control-1-0230.png",
+      "sha256": "6718bd973e7e793df30599254c1f2fd4e9304458ec5e81633c983f0b7bc8fb9b",
+      "expected_text": "このサービスを利用できます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 23000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 21480
+    },
+    {
+      "id": "control-1-0230.png-repeat2",
+      "image": "control-1-0230.png",
+      "sha256": "6718bd973e7e793df30599254c1f2fd4e9304458ec5e81633c983f0b7bc8fb9b",
+      "expected_text": "このサービスを利用できます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 23000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 21960
+    },
+    {
+      "id": "control-1-0230.png-repeat3",
+      "image": "control-1-0230.png",
+      "sha256": "6718bd973e7e793df30599254c1f2fd4e9304458ec5e81633c983f0b7bc8fb9b",
+      "expected_text": "このサービスを利用できます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 23000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 22440
+    },
+    {
+      "id": "control-1-0230.png-repeat4",
+      "image": "control-1-0230.png",
+      "sha256": "6718bd973e7e793df30599254c1f2fd4e9304458ec5e81633c983f0b7bc8fb9b",
+      "expected_text": "このサービスを利用できます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 23000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 22920
+    },
+    {
+      "id": "control-1-0230.png-repeat5",
+      "image": "control-1-0230.png",
+      "sha256": "6718bd973e7e793df30599254c1f2fd4e9304458ec5e81633c983f0b7bc8fb9b",
+      "expected_text": "このサービスを利用できます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 23000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 23400
+    },
+    {
+      "id": "control-1-0230.png-repeat6",
+      "image": "control-1-0230.png",
+      "sha256": "6718bd973e7e793df30599254c1f2fd4e9304458ec5e81633c983f0b7bc8fb9b",
+      "expected_text": "このサービスを利用できます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 23000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 23880
+    },
+    {
+      "id": "control-1-0230.png-repeat7",
+      "image": "control-1-0230.png",
+      "sha256": "6718bd973e7e793df30599254c1f2fd4e9304458ec5e81633c983f0b7bc8fb9b",
+      "expected_text": "このサービスを利用できます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 23000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 24360
+    },
+    {
+      "id": "control-1-0290.png-repeat0",
+      "image": "control-1-0290.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 29000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 27000
+    },
+    {
+      "id": "control-1-0290.png-repeat1",
+      "image": "control-1-0290.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 29000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 27480
+    },
+    {
+      "id": "control-1-0290.png-repeat2",
+      "image": "control-1-0290.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 29000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 27960
+    },
+    {
+      "id": "control-1-0290.png-repeat3",
+      "image": "control-1-0290.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 29000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 28440
+    },
+    {
+      "id": "control-1-0290.png-repeat4",
+      "image": "control-1-0290.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 29000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 28920
+    },
+    {
+      "id": "control-1-0330.png-repeat0",
+      "image": "control-1-0330.png",
+      "sha256": "a6ec14874608a67d67ae85a039169a0c728282fd3eb9fbeb3ccba56d28dfecd6",
+      "expected_text": "このサービスを利用できません",
+      "caption_regions": [
+        [
+          0.24791666666666667,
+          0.8592592592592593,
+          0.7520833333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 33000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 31000
+    },
+    {
+      "id": "control-1-0330.png-repeat1",
+      "image": "control-1-0330.png",
+      "sha256": "a6ec14874608a67d67ae85a039169a0c728282fd3eb9fbeb3ccba56d28dfecd6",
+      "expected_text": "このサービスを利用できません",
+      "caption_regions": [
+        [
+          0.24791666666666667,
+          0.8592592592592593,
+          0.7520833333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 33000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 31480
+    },
+    {
+      "id": "control-1-0330.png-repeat2",
+      "image": "control-1-0330.png",
+      "sha256": "a6ec14874608a67d67ae85a039169a0c728282fd3eb9fbeb3ccba56d28dfecd6",
+      "expected_text": "このサービスを利用できません",
+      "caption_regions": [
+        [
+          0.24791666666666667,
+          0.8592592592592593,
+          0.7520833333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 33000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 31960
+    },
+    {
+      "id": "control-1-0330.png-repeat3",
+      "image": "control-1-0330.png",
+      "sha256": "a6ec14874608a67d67ae85a039169a0c728282fd3eb9fbeb3ccba56d28dfecd6",
+      "expected_text": "このサービスを利用できません",
+      "caption_regions": [
+        [
+          0.24791666666666667,
+          0.8592592592592593,
+          0.7520833333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 33000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 32440
+    },
+    {
+      "id": "control-1-0330.png-repeat4",
+      "image": "control-1-0330.png",
+      "sha256": "a6ec14874608a67d67ae85a039169a0c728282fd3eb9fbeb3ccba56d28dfecd6",
+      "expected_text": "このサービスを利用できません",
+      "caption_regions": [
+        [
+          0.24791666666666667,
+          0.8592592592592593,
+          0.7520833333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 33000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 32920
+    },
+    {
+      "id": "control-1-0330.png-repeat5",
+      "image": "control-1-0330.png",
+      "sha256": "a6ec14874608a67d67ae85a039169a0c728282fd3eb9fbeb3ccba56d28dfecd6",
+      "expected_text": "このサービスを利用できません",
+      "caption_regions": [
+        [
+          0.24791666666666667,
+          0.8592592592592593,
+          0.7520833333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 33000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 33400
+    },
+    {
+      "id": "control-1-0330.png-repeat6",
+      "image": "control-1-0330.png",
+      "sha256": "a6ec14874608a67d67ae85a039169a0c728282fd3eb9fbeb3ccba56d28dfecd6",
+      "expected_text": "このサービスを利用できません",
+      "caption_regions": [
+        [
+          0.24791666666666667,
+          0.8592592592592593,
+          0.7520833333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 33000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 33880
+    },
+    {
+      "id": "control-1-0330.png-repeat7",
+      "image": "control-1-0330.png",
+      "sha256": "a6ec14874608a67d67ae85a039169a0c728282fd3eb9fbeb3ccba56d28dfecd6",
+      "expected_text": "このサービスを利用できません",
+      "caption_regions": [
+        [
+          0.24791666666666667,
+          0.8592592592592593,
+          0.7520833333333333,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 33000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 34360
+    },
+    {
+      "id": "control-1-0390.png-repeat0",
+      "image": "control-1-0390.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 39000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 37000
+    },
+    {
+      "id": "control-1-0390.png-repeat1",
+      "image": "control-1-0390.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 39000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 37480
+    },
+    {
+      "id": "control-1-0390.png-repeat2",
+      "image": "control-1-0390.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 39000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 37960
+    },
+    {
+      "id": "control-1-0390.png-repeat3",
+      "image": "control-1-0390.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 39000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 38440
+    },
+    {
+      "id": "control-1-0390.png-repeat4",
+      "image": "control-1-0390.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 39000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 38920
+    },
+    {
+      "id": "control-1-0430.png-repeat0",
+      "image": "control-1-0430.png",
+      "sha256": "69a9eb05a7a185bb03660989c8b603e490cfa11a34afd936ba71e441cb5e13f8",
+      "expected_text": "東京都で山田太郎さんに会いました",
+      "caption_regions": [
+        [
+          0.2125,
+          0.8592592592592593,
+          0.7875,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 43000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 41000
+    },
+    {
+      "id": "control-1-0430.png-repeat1",
+      "image": "control-1-0430.png",
+      "sha256": "69a9eb05a7a185bb03660989c8b603e490cfa11a34afd936ba71e441cb5e13f8",
+      "expected_text": "東京都で山田太郎さんに会いました",
+      "caption_regions": [
+        [
+          0.2125,
+          0.8592592592592593,
+          0.7875,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 43000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 41480
+    },
+    {
+      "id": "control-1-0430.png-repeat2",
+      "image": "control-1-0430.png",
+      "sha256": "69a9eb05a7a185bb03660989c8b603e490cfa11a34afd936ba71e441cb5e13f8",
+      "expected_text": "東京都で山田太郎さんに会いました",
+      "caption_regions": [
+        [
+          0.2125,
+          0.8592592592592593,
+          0.7875,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 43000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 41960
+    },
+    {
+      "id": "control-1-0430.png-repeat3",
+      "image": "control-1-0430.png",
+      "sha256": "69a9eb05a7a185bb03660989c8b603e490cfa11a34afd936ba71e441cb5e13f8",
+      "expected_text": "東京都で山田太郎さんに会いました",
+      "caption_regions": [
+        [
+          0.2125,
+          0.8592592592592593,
+          0.7875,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 43000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 42440
+    },
+    {
+      "id": "control-1-0430.png-repeat4",
+      "image": "control-1-0430.png",
+      "sha256": "69a9eb05a7a185bb03660989c8b603e490cfa11a34afd936ba71e441cb5e13f8",
+      "expected_text": "東京都で山田太郎さんに会いました",
+      "caption_regions": [
+        [
+          0.2125,
+          0.8592592592592593,
+          0.7875,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 43000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 42920
+    },
+    {
+      "id": "control-1-0430.png-repeat5",
+      "image": "control-1-0430.png",
+      "sha256": "69a9eb05a7a185bb03660989c8b603e490cfa11a34afd936ba71e441cb5e13f8",
+      "expected_text": "東京都で山田太郎さんに会いました",
+      "caption_regions": [
+        [
+          0.2125,
+          0.8592592592592593,
+          0.7875,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 43000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 43400
+    },
+    {
+      "id": "control-1-0430.png-repeat6",
+      "image": "control-1-0430.png",
+      "sha256": "69a9eb05a7a185bb03660989c8b603e490cfa11a34afd936ba71e441cb5e13f8",
+      "expected_text": "東京都で山田太郎さんに会いました",
+      "caption_regions": [
+        [
+          0.2125,
+          0.8592592592592593,
+          0.7875,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 43000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 43880
+    },
+    {
+      "id": "control-1-0430.png-repeat7",
+      "image": "control-1-0430.png",
+      "sha256": "69a9eb05a7a185bb03660989c8b603e490cfa11a34afd936ba71e441cb5e13f8",
+      "expected_text": "東京都で山田太郎さんに会いました",
+      "caption_regions": [
+        [
+          0.2125,
+          0.8592592592592593,
+          0.7875,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 43000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 44360
+    },
+    {
+      "id": "control-1-0490.png-repeat0",
+      "image": "control-1-0490.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 49000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 47000
+    },
+    {
+      "id": "control-1-0490.png-repeat1",
+      "image": "control-1-0490.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 49000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 47480
+    },
+    {
+      "id": "control-1-0490.png-repeat2",
+      "image": "control-1-0490.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 49000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 47960
+    },
+    {
+      "id": "control-1-0490.png-repeat3",
+      "image": "control-1-0490.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 49000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 48440
+    },
+    {
+      "id": "control-1-0490.png-repeat4",
+      "image": "control-1-0490.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 49000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 48920
+    },
+    {
+      "id": "control-1-0530.png-repeat0",
+      "image": "control-1-0530.png",
+      "sha256": "c1325527c119d64a4b6067ea52d16b8e66fb8e9944342f6805123f55b214aad0",
+      "expected_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "caption_regions": [
+        [
+          0.31875,
+          0.7814814814814814,
+          0.68125,
+          0.8666666666666667
+        ],
+        [
+          0.23020833333333332,
+          0.8592592592592593,
+          0.7697916666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 53000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 51000
+    },
+    {
+      "id": "control-1-0530.png-repeat1",
+      "image": "control-1-0530.png",
+      "sha256": "c1325527c119d64a4b6067ea52d16b8e66fb8e9944342f6805123f55b214aad0",
+      "expected_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "caption_regions": [
+        [
+          0.31875,
+          0.7814814814814814,
+          0.68125,
+          0.8666666666666667
+        ],
+        [
+          0.23020833333333332,
+          0.8592592592592593,
+          0.7697916666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 53000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 51480
+    },
+    {
+      "id": "control-1-0530.png-repeat2",
+      "image": "control-1-0530.png",
+      "sha256": "c1325527c119d64a4b6067ea52d16b8e66fb8e9944342f6805123f55b214aad0",
+      "expected_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "caption_regions": [
+        [
+          0.31875,
+          0.7814814814814814,
+          0.68125,
+          0.8666666666666667
+        ],
+        [
+          0.23020833333333332,
+          0.8592592592592593,
+          0.7697916666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 53000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 51960
+    },
+    {
+      "id": "control-1-0530.png-repeat3",
+      "image": "control-1-0530.png",
+      "sha256": "c1325527c119d64a4b6067ea52d16b8e66fb8e9944342f6805123f55b214aad0",
+      "expected_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "caption_regions": [
+        [
+          0.31875,
+          0.7814814814814814,
+          0.68125,
+          0.8666666666666667
+        ],
+        [
+          0.23020833333333332,
+          0.8592592592592593,
+          0.7697916666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 53000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 52440
+    },
+    {
+      "id": "control-1-0530.png-repeat4",
+      "image": "control-1-0530.png",
+      "sha256": "c1325527c119d64a4b6067ea52d16b8e66fb8e9944342f6805123f55b214aad0",
+      "expected_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "caption_regions": [
+        [
+          0.31875,
+          0.7814814814814814,
+          0.68125,
+          0.8666666666666667
+        ],
+        [
+          0.23020833333333332,
+          0.8592592592592593,
+          0.7697916666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 53000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 52920
+    },
+    {
+      "id": "control-1-0530.png-repeat5",
+      "image": "control-1-0530.png",
+      "sha256": "c1325527c119d64a4b6067ea52d16b8e66fb8e9944342f6805123f55b214aad0",
+      "expected_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "caption_regions": [
+        [
+          0.31875,
+          0.7814814814814814,
+          0.68125,
+          0.8666666666666667
+        ],
+        [
+          0.23020833333333332,
+          0.8592592592592593,
+          0.7697916666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 53000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 53400
+    },
+    {
+      "id": "control-1-0530.png-repeat6",
+      "image": "control-1-0530.png",
+      "sha256": "c1325527c119d64a4b6067ea52d16b8e66fb8e9944342f6805123f55b214aad0",
+      "expected_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "caption_regions": [
+        [
+          0.31875,
+          0.7814814814814814,
+          0.68125,
+          0.8666666666666667
+        ],
+        [
+          0.23020833333333332,
+          0.8592592592592593,
+          0.7697916666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 53000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 53880
+    },
+    {
+      "id": "control-1-0530.png-repeat7",
+      "image": "control-1-0530.png",
+      "sha256": "c1325527c119d64a4b6067ea52d16b8e66fb8e9944342f6805123f55b214aad0",
+      "expected_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "caption_regions": [
+        [
+          0.31875,
+          0.7814814814814814,
+          0.68125,
+          0.8666666666666667
+        ],
+        [
+          0.23020833333333332,
+          0.8592592592592593,
+          0.7697916666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 53000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 54360
+    },
+    {
+      "id": "control-1-0590.png-repeat0",
+      "image": "control-1-0590.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 59000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 57000
+    },
+    {
+      "id": "control-1-0590.png-repeat1",
+      "image": "control-1-0590.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 59000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 57480
+    },
+    {
+      "id": "control-1-0590.png-repeat2",
+      "image": "control-1-0590.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 59000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 57960
+    },
+    {
+      "id": "control-1-0590.png-repeat3",
+      "image": "control-1-0590.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 59000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 58440
+    },
+    {
+      "id": "control-1-0590.png-repeat4",
+      "image": "control-1-0590.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 59000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 58920
+    },
+    {
+      "id": "control-1-0630.png-repeat0",
+      "image": "control-1-0630.png",
+      "sha256": "222dc254c48bebb8e2207c07c240acc1d1e46a01b73e0b99d04f439af3fcb1aa",
+      "expected_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "caption_regions": [
+        [
+          0.32395833333333335,
+          0.7037037037037037,
+          0.6760416666666667,
+          0.7888888888888889
+        ],
+        [
+          0.34791666666666665,
+          0.7814814814814814,
+          0.6520833333333333,
+          0.8666666666666667
+        ],
+        [
+          0.33645833333333336,
+          0.8592592592592593,
+          0.6635416666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 63000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 61000
+    },
+    {
+      "id": "control-1-0630.png-repeat1",
+      "image": "control-1-0630.png",
+      "sha256": "222dc254c48bebb8e2207c07c240acc1d1e46a01b73e0b99d04f439af3fcb1aa",
+      "expected_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "caption_regions": [
+        [
+          0.32395833333333335,
+          0.7037037037037037,
+          0.6760416666666667,
+          0.7888888888888889
+        ],
+        [
+          0.34791666666666665,
+          0.7814814814814814,
+          0.6520833333333333,
+          0.8666666666666667
+        ],
+        [
+          0.33645833333333336,
+          0.8592592592592593,
+          0.6635416666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 63000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 61480
+    },
+    {
+      "id": "control-1-0630.png-repeat2",
+      "image": "control-1-0630.png",
+      "sha256": "222dc254c48bebb8e2207c07c240acc1d1e46a01b73e0b99d04f439af3fcb1aa",
+      "expected_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "caption_regions": [
+        [
+          0.32395833333333335,
+          0.7037037037037037,
+          0.6760416666666667,
+          0.7888888888888889
+        ],
+        [
+          0.34791666666666665,
+          0.7814814814814814,
+          0.6520833333333333,
+          0.8666666666666667
+        ],
+        [
+          0.33645833333333336,
+          0.8592592592592593,
+          0.6635416666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 63000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 61960
+    },
+    {
+      "id": "control-1-0630.png-repeat3",
+      "image": "control-1-0630.png",
+      "sha256": "222dc254c48bebb8e2207c07c240acc1d1e46a01b73e0b99d04f439af3fcb1aa",
+      "expected_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "caption_regions": [
+        [
+          0.32395833333333335,
+          0.7037037037037037,
+          0.6760416666666667,
+          0.7888888888888889
+        ],
+        [
+          0.34791666666666665,
+          0.7814814814814814,
+          0.6520833333333333,
+          0.8666666666666667
+        ],
+        [
+          0.33645833333333336,
+          0.8592592592592593,
+          0.6635416666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 63000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 62440
+    },
+    {
+      "id": "control-1-0630.png-repeat4",
+      "image": "control-1-0630.png",
+      "sha256": "222dc254c48bebb8e2207c07c240acc1d1e46a01b73e0b99d04f439af3fcb1aa",
+      "expected_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "caption_regions": [
+        [
+          0.32395833333333335,
+          0.7037037037037037,
+          0.6760416666666667,
+          0.7888888888888889
+        ],
+        [
+          0.34791666666666665,
+          0.7814814814814814,
+          0.6520833333333333,
+          0.8666666666666667
+        ],
+        [
+          0.33645833333333336,
+          0.8592592592592593,
+          0.6635416666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 63000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 62920
+    },
+    {
+      "id": "control-1-0630.png-repeat5",
+      "image": "control-1-0630.png",
+      "sha256": "222dc254c48bebb8e2207c07c240acc1d1e46a01b73e0b99d04f439af3fcb1aa",
+      "expected_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "caption_regions": [
+        [
+          0.32395833333333335,
+          0.7037037037037037,
+          0.6760416666666667,
+          0.7888888888888889
+        ],
+        [
+          0.34791666666666665,
+          0.7814814814814814,
+          0.6520833333333333,
+          0.8666666666666667
+        ],
+        [
+          0.33645833333333336,
+          0.8592592592592593,
+          0.6635416666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 63000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 63400
+    },
+    {
+      "id": "control-1-0630.png-repeat6",
+      "image": "control-1-0630.png",
+      "sha256": "222dc254c48bebb8e2207c07c240acc1d1e46a01b73e0b99d04f439af3fcb1aa",
+      "expected_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "caption_regions": [
+        [
+          0.32395833333333335,
+          0.7037037037037037,
+          0.6760416666666667,
+          0.7888888888888889
+        ],
+        [
+          0.34791666666666665,
+          0.7814814814814814,
+          0.6520833333333333,
+          0.8666666666666667
+        ],
+        [
+          0.33645833333333336,
+          0.8592592592592593,
+          0.6635416666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 63000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 63880
+    },
+    {
+      "id": "control-1-0630.png-repeat7",
+      "image": "control-1-0630.png",
+      "sha256": "222dc254c48bebb8e2207c07c240acc1d1e46a01b73e0b99d04f439af3fcb1aa",
+      "expected_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "caption_regions": [
+        [
+          0.32395833333333335,
+          0.7037037037037037,
+          0.6760416666666667,
+          0.7888888888888889
+        ],
+        [
+          0.34791666666666665,
+          0.7814814814814814,
+          0.6520833333333333,
+          0.8666666666666667
+        ],
+        [
+          0.33645833333333336,
+          0.8592592592592593,
+          0.6635416666666667,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 63000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 64360
+    },
+    {
+      "id": "control-1-0690.png-repeat0",
+      "image": "control-1-0690.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 69000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 67000
+    },
+    {
+      "id": "control-1-0690.png-repeat1",
+      "image": "control-1-0690.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 69000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 67480
+    },
+    {
+      "id": "control-1-0690.png-repeat2",
+      "image": "control-1-0690.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 69000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 67960
+    },
+    {
+      "id": "control-1-0690.png-repeat3",
+      "image": "control-1-0690.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 69000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 68440
+    },
+    {
+      "id": "control-1-0690.png-repeat4",
+      "image": "control-1-0690.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 69000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 68920
+    },
+    {
+      "id": "control-1-0730.png-repeat0",
+      "image": "control-1-0730.png",
+      "sha256": "f0fb863a8933c33d70fdb669cd0b507dc63f109f0fdaf06470ae52b280c53258",
+      "expected_text": "同じ字幕がしばらく続きます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 73000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 71000
+    },
+    {
+      "id": "control-1-0730.png-repeat1",
+      "image": "control-1-0730.png",
+      "sha256": "f0fb863a8933c33d70fdb669cd0b507dc63f109f0fdaf06470ae52b280c53258",
+      "expected_text": "同じ字幕がしばらく続きます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 73000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 71480
+    },
+    {
+      "id": "control-1-0730.png-repeat2",
+      "image": "control-1-0730.png",
+      "sha256": "f0fb863a8933c33d70fdb669cd0b507dc63f109f0fdaf06470ae52b280c53258",
+      "expected_text": "同じ字幕がしばらく続きます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 73000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 71960
+    },
+    {
+      "id": "control-1-0730.png-repeat3",
+      "image": "control-1-0730.png",
+      "sha256": "f0fb863a8933c33d70fdb669cd0b507dc63f109f0fdaf06470ae52b280c53258",
+      "expected_text": "同じ字幕がしばらく続きます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 73000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 72440
+    },
+    {
+      "id": "control-1-0730.png-repeat4",
+      "image": "control-1-0730.png",
+      "sha256": "f0fb863a8933c33d70fdb669cd0b507dc63f109f0fdaf06470ae52b280c53258",
+      "expected_text": "同じ字幕がしばらく続きます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 73000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 72920
+    },
+    {
+      "id": "control-1-0730.png-repeat5",
+      "image": "control-1-0730.png",
+      "sha256": "f0fb863a8933c33d70fdb669cd0b507dc63f109f0fdaf06470ae52b280c53258",
+      "expected_text": "同じ字幕がしばらく続きます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 73000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 73400
+    },
+    {
+      "id": "control-1-0730.png-repeat6",
+      "image": "control-1-0730.png",
+      "sha256": "f0fb863a8933c33d70fdb669cd0b507dc63f109f0fdaf06470ae52b280c53258",
+      "expected_text": "同じ字幕がしばらく続きます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 73000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 73880
+    },
+    {
+      "id": "control-1-0730.png-repeat7",
+      "image": "control-1-0730.png",
+      "sha256": "f0fb863a8933c33d70fdb669cd0b507dc63f109f0fdaf06470ae52b280c53258",
+      "expected_text": "同じ字幕がしばらく続きます",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 73000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 74360
+    },
+    {
+      "id": "control-1-0790.png-repeat0",
+      "image": "control-1-0790.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 79000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 77000
+    },
+    {
+      "id": "control-1-0790.png-repeat1",
+      "image": "control-1-0790.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 79000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 77480
+    },
+    {
+      "id": "control-1-0790.png-repeat2",
+      "image": "control-1-0790.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 79000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 77960
+    },
+    {
+      "id": "control-1-0790.png-repeat3",
+      "image": "control-1-0790.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 79000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 78440
+    },
+    {
+      "id": "control-1-0790.png-repeat4",
+      "image": "control-1-0790.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 79000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 78920
+    },
+    {
+      "id": "control-1-0830.png-repeat0",
+      "image": "control-1-0830.png",
+      "sha256": "49e06fde2e2efb59c648aa634e3d467ac81d1d2416a70f19a0e72ef958667512",
+      "expected_text": "小さい字幕も読み取れますか",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 83000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 81000
+    },
+    {
+      "id": "control-1-0830.png-repeat1",
+      "image": "control-1-0830.png",
+      "sha256": "49e06fde2e2efb59c648aa634e3d467ac81d1d2416a70f19a0e72ef958667512",
+      "expected_text": "小さい字幕も読み取れますか",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 83000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 81480
+    },
+    {
+      "id": "control-1-0830.png-repeat2",
+      "image": "control-1-0830.png",
+      "sha256": "49e06fde2e2efb59c648aa634e3d467ac81d1d2416a70f19a0e72ef958667512",
+      "expected_text": "小さい字幕も読み取れますか",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 83000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 81960
+    },
+    {
+      "id": "control-1-0830.png-repeat3",
+      "image": "control-1-0830.png",
+      "sha256": "49e06fde2e2efb59c648aa634e3d467ac81d1d2416a70f19a0e72ef958667512",
+      "expected_text": "小さい字幕も読み取れますか",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 83000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 82440
+    },
+    {
+      "id": "control-1-0830.png-repeat4",
+      "image": "control-1-0830.png",
+      "sha256": "49e06fde2e2efb59c648aa634e3d467ac81d1d2416a70f19a0e72ef958667512",
+      "expected_text": "小さい字幕も読み取れますか",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 83000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 82920
+    },
+    {
+      "id": "control-1-0830.png-repeat5",
+      "image": "control-1-0830.png",
+      "sha256": "49e06fde2e2efb59c648aa634e3d467ac81d1d2416a70f19a0e72ef958667512",
+      "expected_text": "小さい字幕も読み取れますか",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 83000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 83400
+    },
+    {
+      "id": "control-1-0830.png-repeat6",
+      "image": "control-1-0830.png",
+      "sha256": "49e06fde2e2efb59c648aa634e3d467ac81d1d2416a70f19a0e72ef958667512",
+      "expected_text": "小さい字幕も読み取れますか",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 83000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 83880
+    },
+    {
+      "id": "control-1-0830.png-repeat7",
+      "image": "control-1-0830.png",
+      "sha256": "49e06fde2e2efb59c648aa634e3d467ac81d1d2416a70f19a0e72ef958667512",
+      "expected_text": "小さい字幕も読み取れますか",
+      "caption_regions": [
+        [
+          0.265625,
+          0.8592592592592593,
+          0.734375,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 83000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 84360
+    },
+    {
+      "id": "control-1-0890.png-repeat0",
+      "image": "control-1-0890.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 89000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 87000
+    },
+    {
+      "id": "control-1-0890.png-repeat1",
+      "image": "control-1-0890.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 89000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 87480
+    },
+    {
+      "id": "control-1-0890.png-repeat2",
+      "image": "control-1-0890.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 89000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 87960
+    },
+    {
+      "id": "control-1-0890.png-repeat3",
+      "image": "control-1-0890.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 89000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 88440
+    },
+    {
+      "id": "control-1-0890.png-repeat4",
+      "image": "control-1-0890.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 89000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 88920
+    },
+    {
+      "id": "control-1-0930.png-repeat0",
+      "image": "control-1-0930.png",
+      "sha256": "3892b098e22cfea49690a78f747d9484308555c6b13178e936beb236a1aeb54b",
+      "expected_text": "これは字幕ではありませんとは言いません",
+      "caption_regions": [
+        [
+          0.159375,
+          0.8592592592592593,
+          0.840625,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 93000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 91000
+    },
+    {
+      "id": "control-1-0930.png-repeat1",
+      "image": "control-1-0930.png",
+      "sha256": "3892b098e22cfea49690a78f747d9484308555c6b13178e936beb236a1aeb54b",
+      "expected_text": "これは字幕ではありませんとは言いません",
+      "caption_regions": [
+        [
+          0.159375,
+          0.8592592592592593,
+          0.840625,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 93000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 91480
+    },
+    {
+      "id": "control-1-0930.png-repeat2",
+      "image": "control-1-0930.png",
+      "sha256": "3892b098e22cfea49690a78f747d9484308555c6b13178e936beb236a1aeb54b",
+      "expected_text": "これは字幕ではありませんとは言いません",
+      "caption_regions": [
+        [
+          0.159375,
+          0.8592592592592593,
+          0.840625,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 93000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 91960
+    },
+    {
+      "id": "control-1-0930.png-repeat3",
+      "image": "control-1-0930.png",
+      "sha256": "3892b098e22cfea49690a78f747d9484308555c6b13178e936beb236a1aeb54b",
+      "expected_text": "これは字幕ではありませんとは言いません",
+      "caption_regions": [
+        [
+          0.159375,
+          0.8592592592592593,
+          0.840625,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 93000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 92440
+    },
+    {
+      "id": "control-1-0930.png-repeat4",
+      "image": "control-1-0930.png",
+      "sha256": "3892b098e22cfea49690a78f747d9484308555c6b13178e936beb236a1aeb54b",
+      "expected_text": "これは字幕ではありませんとは言いません",
+      "caption_regions": [
+        [
+          0.159375,
+          0.8592592592592593,
+          0.840625,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 93000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 92920
+    },
+    {
+      "id": "control-1-0930.png-repeat5",
+      "image": "control-1-0930.png",
+      "sha256": "3892b098e22cfea49690a78f747d9484308555c6b13178e936beb236a1aeb54b",
+      "expected_text": "これは字幕ではありませんとは言いません",
+      "caption_regions": [
+        [
+          0.159375,
+          0.8592592592592593,
+          0.840625,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 93000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 93400
+    },
+    {
+      "id": "control-1-0930.png-repeat6",
+      "image": "control-1-0930.png",
+      "sha256": "3892b098e22cfea49690a78f747d9484308555c6b13178e936beb236a1aeb54b",
+      "expected_text": "これは字幕ではありませんとは言いません",
+      "caption_regions": [
+        [
+          0.159375,
+          0.8592592592592593,
+          0.840625,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 93000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 93880
+    },
+    {
+      "id": "control-1-0930.png-repeat7",
+      "image": "control-1-0930.png",
+      "sha256": "3892b098e22cfea49690a78f747d9484308555c6b13178e936beb236a1aeb54b",
+      "expected_text": "これは字幕ではありませんとは言いません",
+      "caption_regions": [
+        [
+          0.159375,
+          0.8592592592592593,
+          0.840625,
+          0.9444444444444444
+        ]
+      ],
+      "media_ms": 93000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 94360
+    },
+    {
+      "id": "control-1-0990.png-repeat0",
+      "image": "control-1-0990.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 99000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 97000
+    },
+    {
+      "id": "control-1-0990.png-repeat1",
+      "image": "control-1-0990.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 99000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 97480
+    },
+    {
+      "id": "control-1-0990.png-repeat2",
+      "image": "control-1-0990.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 99000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 97960
+    },
+    {
+      "id": "control-1-0990.png-repeat3",
+      "image": "control-1-0990.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 99000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 98440
+    },
+    {
+      "id": "control-1-0990.png-repeat4",
+      "image": "control-1-0990.png",
+      "sha256": "1c670b0f736d51e6f2d501cd4df3016608defab8288aad8028509bf8dc218724",
+      "expected_text": "",
+      "caption_regions": [],
+      "media_ms": 99000,
+      "human_verified": false,
+      "annotation_source": "render_spec_pending_visual_verification",
+      "mono_ms": 98920
+    }
+  ]
+}

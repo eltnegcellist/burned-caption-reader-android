@@ -1,0 +1,565 @@
+{
+  "schema_version": 1,
+  "diagnostic_engine": "hybrid_refine",
+  "native_detection": "off",
+  "sampled_peak_pss_kb": 148686,
+  "scope": "manual_caption_regions_only",
+  "metric": "caption_comparison_key_cer",
+  "diagnostic_coarse_width": 0,
+  "crop_preparation": "original",
+  "ground_truth_source": "synthetic_render_spec",
+  "human_verified": false,
+  "speech": [],
+  "label": "b0db532-app-identical-eff6b846",
+  "dataset": "owned-synthetic-common-roi-control-1",
+  "source": "synthetic",
+  "frames": [
+    {
+      "id": "control-1-0030.png",
+      "mono_ms": 3000,
+      "gap_ms": null,
+      "expected_text": "本日の価格は100円です",
+      "ocr_text": "本日の価格は100円です",
+      "stages": {
+        "ocr_text": "本日の価格は100円です",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "本日の価格は100円です",
+            "confidence": 81.86848759651184
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 12,
+      "ocr_processing_ms": 317
+    },
+    {
+      "id": "control-1-0090.png",
+      "mono_ms": 9000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "",
+            "confidence": 55
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 3
+    },
+    {
+      "id": "control-1-0130.png",
+      "mono_ms": 13000,
+      "gap_ms": 4000,
+      "expected_text": "本日の価格は200円です",
+      "ocr_text": "本日の価格は200円です",
+      "stages": {
+        "ocr_text": "本日の価格は200円です",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "本日の価格は200円です",
+            "confidence": 82.55208134651184
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 12,
+      "ocr_processing_ms": 40
+    },
+    {
+      "id": "control-1-0190.png",
+      "mono_ms": 19000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "",
+            "confidence": 55
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 3
+    },
+    {
+      "id": "control-1-0230.png",
+      "mono_ms": 23000,
+      "gap_ms": 4000,
+      "expected_text": "このサービスを利用できます",
+      "ocr_text": "このサービスを利用できます",
+      "stages": {
+        "ocr_text": "このサービスを利用できます",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "このサービスを利用できます",
+            "confidence": 89.0625
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 13,
+      "ocr_processing_ms": 53
+    },
+    {
+      "id": "control-1-0290.png",
+      "mono_ms": 29000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "",
+            "confidence": 55
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 5
+    },
+    {
+      "id": "control-1-0330.png",
+      "mono_ms": 33000,
+      "gap_ms": 4000,
+      "expected_text": "このサービスを利用できません",
+      "ocr_text": "このサービスを利用できません",
+      "stages": {
+        "ocr_text": "このサービスを利用できません",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "このサービスを利用できません",
+            "confidence": 86.24442219734192
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 14,
+      "ocr_processing_ms": 53
+    },
+    {
+      "id": "control-1-0390.png",
+      "mono_ms": 39000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "",
+            "confidence": 55
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 9
+    },
+    {
+      "id": "control-1-0430.png",
+      "mono_ms": 43000,
+      "gap_ms": 4000,
+      "expected_text": "東京都で山田太郎さんに会いました",
+      "ocr_text": "東京都で山田太郎さんに会いました",
+      "stages": {
+        "ocr_text": "東京都で山田太郎さんに会いました",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "東京都で山田太郎さんに会いました",
+            "confidence": 86.1572265625
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 16,
+      "ocr_processing_ms": 63
+    },
+    {
+      "id": "control-1-0490.png",
+      "mono_ms": 49000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "",
+            "confidence": 55
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 4
+    },
+    {
+      "id": "control-1-0530.png",
+      "mono_ms": 53000,
+      "gap_ms": 4000,
+      "expected_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "ocr_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "stages": {
+        "ocr_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "字幕は上から読みます\n二行目にも大切な情報があります",
+            "confidence": 87.29166686534882
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 25,
+      "ocr_processing_ms": 119
+    },
+    {
+      "id": "control-1-0590.png",
+      "mono_ms": 59000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "",
+            "confidence": 55
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 5
+    },
+    {
+      "id": "control-1-0630.png",
+      "mono_ms": 63000,
+      "gap_ms": 4000,
+      "expected_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "ocr_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "stages": {
+        "ocr_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+            "confidence": 87.15672294298808
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 29,
+      "ocr_processing_ms": 122
+    },
+    {
+      "id": "control-1-0690.png",
+      "mono_ms": 69000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "",
+            "confidence": 55
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 4
+    },
+    {
+      "id": "control-1-0730.png",
+      "mono_ms": 73000,
+      "gap_ms": 4000,
+      "expected_text": "同じ字幕がしばらく続きます",
+      "ocr_text": "同じ字幕がしばらく続きます",
+      "stages": {
+        "ocr_text": "同じ字幕がしばらく続きます",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "同じ字幕がしばらく続きます",
+            "confidence": 77.28365659713745
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 13,
+      "ocr_processing_ms": 49
+    },
+    {
+      "id": "control-1-0790.png",
+      "mono_ms": 79000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "",
+            "confidence": 55
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 4
+    },
+    {
+      "id": "control-1-0830.png",
+      "mono_ms": 83000,
+      "gap_ms": 4000,
+      "expected_text": "小さい字幕も読み取れますか",
+      "ocr_text": "小さい字幕も読み取れますか",
+      "stages": {
+        "ocr_text": "小さい字幕も読み取れますか",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "小さい字幕も読み取れますか",
+            "confidence": 89.24278616905212
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 13,
+      "ocr_processing_ms": 81
+    },
+    {
+      "id": "control-1-0890.png",
+      "mono_ms": 89000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "",
+            "confidence": 55
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 5
+    },
+    {
+      "id": "control-1-0930.png",
+      "mono_ms": 93000,
+      "gap_ms": 4000,
+      "expected_text": "これは字幕ではありませんとは言いません",
+      "ocr_text": "これは字幕ではありませんとは言いません",
+      "stages": {
+        "ocr_text": "これは字幕ではありませんとは言いません",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "これは字幕ではありませんとは言いません",
+            "confidence": 87.39720582962036
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 19,
+      "ocr_processing_ms": 81
+    },
+    {
+      "id": "control-1-0990.png",
+      "mono_ms": 99000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "manual_region_readings": [
+          {
+            "region": [
+              0,
+              0.6481481481481481,
+              1,
+              1
+            ],
+            "text": "",
+            "confidence": 55
+          }
+        ],
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 4
+    }
+  ],
+  "edit_distance": 0,
+  "reference_characters": 166,
+  "cer": 0,
+  "device_serial": "emulator-5560",
+  "input_manifest_sha256": "3523c7049273f6e647bd847fadfab98a4c44692ba12a9e32ca3a08b7a39eecae",
+  "apk_sha256": "d7f09add28ca3cb385ee778ed9ec4815ba37f1400ae071dffe68edee5e87a20d",
+  "test_apk_sha256": "8683c8e042acb532dd6be2d0b850647e29d8419832ae1a649bd47ef399812db2"
+}

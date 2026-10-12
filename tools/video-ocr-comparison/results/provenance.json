@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-12",
+  "machine": "arm64",
+  "os": "26.6.2",
+  "android_pr29_sha": "eff6b846d02d74e7995652903ecdcc97144d2baa",
+  "pr31_sha": "b0db5322fa127171212fb7881ec12f368df096e1",
+  "android_local_old_sha": "f58b645617ced82abacd72e67f4c8a984fb3d584",
+  "android_main_sha": "9b3b39f24de30738db81bc68a955ffe353de00da",
+  "baseline_app_source": "PR31 app/src/main equals PR29 eff6b846 (git diff empty); built unchanged in independent checkout",
+  "cloud_ocr": false,
+  "experiment_A": "blocked_missing_pixelcopy_images_and_recapture_permission",
+  "experiment_B": "blocked_missing_authorized_natural_mp4_and_android_local_mp4_path",
+  "gui_subtitle_edit": "5.2.0 arm64 launched; Video OCR menu verified; execution blocked by locked Mac",
+  "upstream": {
+    "vse": {
+      "sha": "85746f7df5bf85978fd05f3ca6ce66e321a87a72",
+      "python": "Python 3.12.14"
+    },
+    "videocr": {
+      "sha": "0078547b53609f2810b13eb602a4a67721d57952",
+      "python": "Python 3.12.14"
+    },
+    "paddle-standalone": {
+      "sha": "6b9dca07636297b93fbb262b41af83caa2a13f4a"
+    },
+    "fast-ssim": {
+      "sha": "8f61acb825d9d9f2a8d2ed1361ec471813ddbb31"
+    },
+    "subtitleedit": {
+      "sha": "d8e3b8b41e856a896c541ce7e59b490a99c21196"
+    }
+  },
+  "sse2neon": {
+    "sha": "60fc9391e378b58c60899791c0e9ee9cdaf43c08",
+    "header_sha256": "0624a1270fc88a67e6b886cd0e33e322d93de4b3a760b3373dc3a66e713bd43f"
+  },
+  "sdk_sha512_verified": true,
+  "se_linked_source_sha256": {
+    "src/ui/Features/Ocr/OcrLanguage2.cs": "a3bf6b2288f16c27d6e274908a28697a4a512a1532d0a254cfaa79029254fb2a",
+    "src/ui/Features/Ocr/Engines/AppleVisionOcr.cs": "b5c87ca2e4b5eb76eefab994c48a12db2d1fe0eeddfc60f5030375d6b5af2b17",
+    "src/ui/Features/Ocr/Engines/AppleVisionTextLayout.cs": "baadbfc95fb28c0540700d7e416d91439aa45f1b3113e759f103c3c3dcc37835",
+    "src/ui/Features/Video/VideoOcr/VideoOcrFrameGrouper.cs": "1fa945fa4d6b8b1e477ccf6f82c5c39f99266cf11900a1eeb628f4fc92aea721",
+    "src/ui/Features/Video/VideoOcr/VideoOcrLineBuilder.cs": "c1e96854fe3d3982e5c856c24f88abd83d1f0312c167c89ad56a620270d935c6",
+    "src/ui/Features/Video/VideoOcr/VideoOcrObservationFilter.cs": "341a88433ee6745882453f58d690ac8165b79e4bd32c920a523c3e1035b37178",
+    "src/ui/Features/Video/VideoOcr/VideoOcrFrameGroup.cs": "0681a395425e2da3cc8ee7884168562b48aadecf2ef1eb8d5052ee4990c1c3c3",
+    "src/ui/Features/Video/VideoOcr/VideoOcrTimingRefiner.cs": "057780ecf48261a1c8a5cfbfaaad4f14d3edc5159d9eedcf08094bc6c55e3b44"
+  },
+  "hardware": {
+    "model": "Mac16,12",
+    "memory_bytes": 17179869184,
+    "chip": "Apple M4 (user environment; arm64 native confirmed)"
+  },
+  "licenses": {
+    "vse": "Apache-2.0",
+    "videocr": "MIT",
+    "subtitleedit": "MIT",
+    "paddle_backend": "Apache-2.0",
+    "fast_ssim": "MIT",
+    "sse2neon": "MIT"
+  },
+  "model_actual_sha256": {
+    "detection.onnx": "a431985659dc921974177a95adcfbb90fd9e51989a5e04d70d0b75f597b6e61d",
+    "recognition.onnx": "da72dc72ca4dc220df0dfde68c1dedc31c58d3e76a25871122e5056227d50092"
+  }
+}

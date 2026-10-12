@@ -1,0 +1,543 @@
+{
+  "sintel/images-vision-full-frame-engine-resource.json": {
+    "command": [
+      "envs/vse/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/compare_images.py",
+      "private/open-movie-benchmark/sintel/pixelcopy-dataset/dataset.json",
+      "--engine",
+      "vision",
+      "--scope",
+      "full-frame-engine",
+      "--limit",
+      "70",
+      "--out",
+      "outputs/open-movie-benchmark/sintel/images-vision-full-frame-engine.json"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 3.571248166030273,
+    "peak_sampled_tree_rss_bytes": 154255360
+  },
+  "sintel/videocr-0.85.json": {
+    "command": [
+      "envs/videocr/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/run_videocr_mac.py",
+      "--tight-box-ssim",
+      "0.85",
+      "--video_path",
+      "$WORKSPACE/private/open-movie-benchmark/sintel/sintel-300s.mp4",
+      "--output",
+      "$WORKSPACE/outputs/open-movie-benchmark/sintel/videocr-0.85.srt",
+      "--ocr_engine",
+      "paddleocr",
+      "--lang",
+      "japan",
+      "--use_gpu",
+      "false",
+      "--crop_x",
+      "0",
+      "--crop_y",
+      "228",
+      "--crop_width",
+      "960",
+      "--crop_height",
+      "180",
+      "--allow_system_sleep",
+      "true"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 83.26793395797722,
+    "peak_sampled_tree_rss_bytes": 1461567488
+  },
+  "sintel/images-vision-manual-roi-resource.json": {
+    "command": [
+      "envs/vse/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/compare_images.py",
+      "private/open-movie-benchmark/sintel/pixelcopy-dataset/dataset.json",
+      "--engine",
+      "vision",
+      "--scope",
+      "manual-roi",
+      "--limit",
+      "70",
+      "--out",
+      "outputs/open-movie-benchmark/sintel/images-vision-manual-roi.json"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 2.4685911249835044,
+    "peak_sampled_tree_rss_bytes": 141377536
+  },
+  "sintel/vse-100.json": {
+    "command": [
+      "$WORKSPACE/envs/vse/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/run_vse.py",
+      "$WORKSPACE/private/open-movie-benchmark/sintel/sintel-300s.mp4",
+      "--roi",
+      "0",
+      "228",
+      "960",
+      "180",
+      "--text-similarity",
+      "100"
+    ],
+    "cwd": "upstream/vse",
+    "exit_code": 0,
+    "elapsed_seconds": 24.875928624998778,
+    "peak_sampled_tree_rss_bytes": 2587705344
+  },
+  "sintel/images-vse-full-frame-engine-resource.json": {
+    "command": [
+      "envs/vse/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/compare_images.py",
+      "private/open-movie-benchmark/sintel/pixelcopy-dataset/dataset.json",
+      "--engine",
+      "vse",
+      "--scope",
+      "full-frame-engine",
+      "--limit",
+      "70",
+      "--out",
+      "outputs/open-movie-benchmark/sintel/images-vse-full-frame-engine.json"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 8.357865375000983,
+    "peak_sampled_tree_rss_bytes": 1164361728
+  },
+  "sintel/images-se-layout-manual-roi-resource.json": {
+    "command": [
+      "private/dotnet/dotnet",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/se-source/bin/Release/net10.0/SeSource.dll",
+      "--images",
+      "private/open-movie-benchmark/sintel/pixelcopy-dataset/dataset.json",
+      "outputs/open-movie-benchmark/sintel/images-se-layout-manual-roi.json",
+      "manual-roi"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 2.011312333866954,
+    "peak_sampled_tree_rss_bytes": 137756672
+  },
+  "sintel/images-videocr-manual-roi-resource.json": {
+    "command": [
+      "envs/videocr/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/compare_images.py",
+      "private/open-movie-benchmark/sintel/pixelcopy-dataset/dataset.json",
+      "--engine",
+      "videocr",
+      "--scope",
+      "manual-roi",
+      "--limit",
+      "70",
+      "--out",
+      "outputs/open-movie-benchmark/sintel/images-videocr-manual-roi.json"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 4.108277417020872,
+    "peak_sampled_tree_rss_bytes": 957382656
+  },
+  "sintel/videocr-1.0.json": {
+    "command": [
+      "envs/videocr/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/run_videocr_mac.py",
+      "--tight-box-ssim",
+      "1.0",
+      "--video_path",
+      "$WORKSPACE/private/open-movie-benchmark/sintel/sintel-300s.mp4",
+      "--output",
+      "$WORKSPACE/outputs/open-movie-benchmark/sintel/videocr-1.0.srt",
+      "--ocr_engine",
+      "paddleocr",
+      "--lang",
+      "japan",
+      "--use_gpu",
+      "false",
+      "--crop_x",
+      "0",
+      "--crop_y",
+      "228",
+      "--crop_width",
+      "960",
+      "--crop_height",
+      "180",
+      "--allow_system_sleep",
+      "true"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 94.83104595798068,
+    "peak_sampled_tree_rss_bytes": 1462665216
+  },
+  "sintel/images-vse-manual-roi-resource.json": {
+    "command": [
+      "envs/vse/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/compare_images.py",
+      "private/open-movie-benchmark/sintel/pixelcopy-dataset/dataset.json",
+      "--engine",
+      "vse",
+      "--scope",
+      "manual-roi",
+      "--limit",
+      "70",
+      "--out",
+      "outputs/open-movie-benchmark/sintel/images-vse-manual-roi.json"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 6.1097254999913275,
+    "peak_sampled_tree_rss_bytes": 1153482752
+  },
+  "sintel/se-source.json": {
+    "command": [
+      "$WORKSPACE/private/dotnet/dotnet",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/se-source/bin/Release/net10.0/SeSource.dll",
+      "$WORKSPACE/upstream/Subtitle Edit.app/Contents/MacOS/ffmpeg",
+      "$WORKSPACE/private/open-movie-benchmark/sintel/sintel-300s.mp4",
+      "$WORKSPACE/outputs/open-movie-benchmark/sintel/se-source.srt",
+      "$WORKSPACE/private/open-movie-benchmark/sintel/se-frames",
+      "refine",
+      "crop=960:180:0:228,scale=720:-2"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 26.10196595801972,
+    "peak_sampled_tree_rss_bytes": 367034368
+  },
+  "sintel/vse-80.json": {
+    "command": [
+      "$WORKSPACE/envs/vse/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/run_vse.py",
+      "$WORKSPACE/private/open-movie-benchmark/sintel/sintel-300s.mp4",
+      "--roi",
+      "0",
+      "228",
+      "960",
+      "180",
+      "--text-similarity",
+      "80"
+    ],
+    "cwd": "upstream/vse",
+    "exit_code": 0,
+    "elapsed_seconds": 25.566928500076756,
+    "peak_sampled_tree_rss_bytes": 2588196864
+  },
+  "sintel/images-se-layout-full-frame-engine-resource.json": {
+    "command": [
+      "private/dotnet/dotnet",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/se-source/bin/Release/net10.0/SeSource.dll",
+      "--images",
+      "private/open-movie-benchmark/sintel/pixelcopy-dataset/dataset.json",
+      "outputs/open-movie-benchmark/sintel/images-se-layout-full-frame-engine.json",
+      "full-frame-engine"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 2.8551677078939974,
+    "peak_sampled_tree_rss_bytes": 147619840
+  },
+  "sintel/images-videocr-full-frame-engine-resource.json": {
+    "command": [
+      "envs/videocr/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/compare_images.py",
+      "private/open-movie-benchmark/sintel/pixelcopy-dataset/dataset.json",
+      "--engine",
+      "videocr",
+      "--scope",
+      "full-frame-engine",
+      "--limit",
+      "70",
+      "--out",
+      "outputs/open-movie-benchmark/sintel/images-videocr-full-frame-engine.json"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 6.680521625094116,
+    "peak_sampled_tree_rss_bytes": 958529536
+  },
+  "elephants/images-vision-full-frame-engine-resource.json": {
+    "command": [
+      "envs/vse/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/compare_images.py",
+      "private/open-movie-benchmark/elephants/pixelcopy-dataset/dataset.json",
+      "--engine",
+      "vision",
+      "--scope",
+      "full-frame-engine",
+      "--limit",
+      "70",
+      "--out",
+      "outputs/open-movie-benchmark/elephants/images-vision-full-frame-engine.json"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 6.884927833918482,
+    "peak_sampled_tree_rss_bytes": 165543936
+  },
+  "elephants/videocr-0.85.json": {
+    "command": [
+      "envs/videocr/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/run_videocr_mac.py",
+      "--tight-box-ssim",
+      "0.85",
+      "--video_path",
+      "$WORKSPACE/private/open-movie-benchmark/elephants/elephants-300s.mp4",
+      "--output",
+      "$WORKSPACE/outputs/open-movie-benchmark/elephants/videocr-0.85.srt",
+      "--ocr_engine",
+      "paddleocr",
+      "--lang",
+      "japan",
+      "--use_gpu",
+      "false",
+      "--crop_x",
+      "0",
+      "--crop_y",
+      "360",
+      "--crop_width",
+      "960",
+      "--crop_height",
+      "180",
+      "--allow_system_sleep",
+      "true"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 109.97056658403017,
+    "peak_sampled_tree_rss_bytes": 1418739712
+  },
+  "elephants/vse-auto.json": {
+    "command": [
+      "$WORKSPACE/envs/vse/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/run_vse.py",
+      "$WORKSPACE/private/open-movie-benchmark/elephants/elephants-300s.mp4",
+      "--auto-accept-region"
+    ],
+    "cwd": "upstream/vse",
+    "exit_code": 0,
+    "elapsed_seconds": 268.4004357501399,
+    "peak_sampled_tree_rss_bytes": 2625863680
+  },
+  "elephants/images-vision-manual-roi-resource.json": {
+    "command": [
+      "envs/vse/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/compare_images.py",
+      "private/open-movie-benchmark/elephants/pixelcopy-dataset/dataset.json",
+      "--engine",
+      "vision",
+      "--scope",
+      "manual-roi",
+      "--limit",
+      "70",
+      "--out",
+      "outputs/open-movie-benchmark/elephants/images-vision-manual-roi.json"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 4.051327500026673,
+    "peak_sampled_tree_rss_bytes": 144408576
+  },
+  "elephants/vse-100.json": {
+    "command": [
+      "$WORKSPACE/envs/vse/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/run_vse.py",
+      "$WORKSPACE/private/open-movie-benchmark/elephants/elephants-300s.mp4",
+      "--roi",
+      "0",
+      "360",
+      "960",
+      "180",
+      "--text-similarity",
+      "100"
+    ],
+    "cwd": "upstream/vse",
+    "exit_code": 0,
+    "elapsed_seconds": 36.924545167014,
+    "peak_sampled_tree_rss_bytes": 2611658752
+  },
+  "elephants/images-vse-full-frame-engine-resource.json": {
+    "command": [
+      "envs/vse/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/compare_images.py",
+      "private/open-movie-benchmark/elephants/pixelcopy-dataset/dataset.json",
+      "--engine",
+      "vse",
+      "--scope",
+      "full-frame-engine",
+      "--limit",
+      "70",
+      "--out",
+      "outputs/open-movie-benchmark/elephants/images-vse-full-frame-engine.json"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 14.800233790883794,
+    "peak_sampled_tree_rss_bytes": 1186988032
+  },
+  "elephants/images-se-layout-manual-roi-resource.json": {
+    "command": [
+      "private/dotnet/dotnet",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/se-source/bin/Release/net10.0/SeSource.dll",
+      "--images",
+      "private/open-movie-benchmark/elephants/pixelcopy-dataset/dataset.json",
+      "outputs/open-movie-benchmark/elephants/images-se-layout-manual-roi.json",
+      "manual-roi"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 3.1536464581731707,
+    "peak_sampled_tree_rss_bytes": 134512640
+  },
+  "elephants/images-videocr-manual-roi-resource.json": {
+    "command": [
+      "envs/videocr/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/compare_images.py",
+      "private/open-movie-benchmark/elephants/pixelcopy-dataset/dataset.json",
+      "--engine",
+      "videocr",
+      "--scope",
+      "manual-roi",
+      "--limit",
+      "70",
+      "--out",
+      "outputs/open-movie-benchmark/elephants/images-videocr-manual-roi.json"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 7.339565417030826,
+    "peak_sampled_tree_rss_bytes": 981942272
+  },
+  "elephants/videocr-1.0.json": {
+    "command": [
+      "envs/videocr/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/run_videocr_mac.py",
+      "--tight-box-ssim",
+      "1.0",
+      "--video_path",
+      "$WORKSPACE/private/open-movie-benchmark/elephants/elephants-300s.mp4",
+      "--output",
+      "$WORKSPACE/outputs/open-movie-benchmark/elephants/videocr-1.0.srt",
+      "--ocr_engine",
+      "paddleocr",
+      "--lang",
+      "japan",
+      "--use_gpu",
+      "false",
+      "--crop_x",
+      "0",
+      "--crop_y",
+      "360",
+      "--crop_width",
+      "960",
+      "--crop_height",
+      "180",
+      "--allow_system_sleep",
+      "true"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 132.6590519999154,
+    "peak_sampled_tree_rss_bytes": 1448001536
+  },
+  "elephants/images-vse-manual-roi-resource.json": {
+    "command": [
+      "envs/vse/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/compare_images.py",
+      "private/open-movie-benchmark/elephants/pixelcopy-dataset/dataset.json",
+      "--engine",
+      "vse",
+      "--scope",
+      "manual-roi",
+      "--limit",
+      "70",
+      "--out",
+      "outputs/open-movie-benchmark/elephants/images-vse-manual-roi.json"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 10.304978667059913,
+    "peak_sampled_tree_rss_bytes": 1182990336
+  },
+  "elephants/se-source.json": {
+    "command": [
+      "$WORKSPACE/private/dotnet/dotnet",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/se-source/bin/Release/net10.0/SeSource.dll",
+      "$WORKSPACE/upstream/Subtitle Edit.app/Contents/MacOS/ffmpeg",
+      "$WORKSPACE/private/open-movie-benchmark/elephants/elephants-300s.mp4",
+      "$WORKSPACE/outputs/open-movie-benchmark/elephants/se-source.srt",
+      "$WORKSPACE/private/open-movie-benchmark/elephants/se-frames",
+      "refine",
+      "crop=960:180:0:360,scale=720:-2"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 26.46974904090166,
+    "peak_sampled_tree_rss_bytes": 604307456
+  },
+  "elephants/vse-80.json": {
+    "command": [
+      "$WORKSPACE/envs/vse/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/run_vse.py",
+      "$WORKSPACE/private/open-movie-benchmark/elephants/elephants-300s.mp4",
+      "--roi",
+      "0",
+      "360",
+      "960",
+      "180",
+      "--text-similarity",
+      "80"
+    ],
+    "cwd": "upstream/vse",
+    "exit_code": 0,
+    "elapsed_seconds": 37.143944333074614,
+    "peak_sampled_tree_rss_bytes": 2690924544
+  },
+  "elephants/images-se-layout-full-frame-engine-resource.json": {
+    "command": [
+      "private/dotnet/dotnet",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/se-source/bin/Release/net10.0/SeSource.dll",
+      "--images",
+      "private/open-movie-benchmark/elephants/pixelcopy-dataset/dataset.json",
+      "outputs/open-movie-benchmark/elephants/images-se-layout-full-frame-engine.json",
+      "full-frame-engine"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 5.176483708899468,
+    "peak_sampled_tree_rss_bytes": 153976832
+  },
+  "elephants/images-videocr-full-frame-engine-resource.json": {
+    "command": [
+      "envs/videocr/bin/python",
+      "$WORKSPACE/benchmark/tools/video-ocr-comparison/compare_images.py",
+      "private/open-movie-benchmark/elephants/pixelcopy-dataset/dataset.json",
+      "--engine",
+      "videocr",
+      "--scope",
+      "full-frame-engine",
+      "--limit",
+      "70",
+      "--out",
+      "outputs/open-movie-benchmark/elephants/images-videocr-full-frame-engine.json"
+    ],
+    "cwd": "$WORKSPACE",
+    "exit_code": 0,
+    "elapsed_seconds": 12.391611375147477,
+    "peak_sampled_tree_rss_bytes": 984055808
+  },
+  "subtitleedit_gui": {
+    "invocation": "Official Subtitle Edit.app: Video > OCR burned-in subtitle; Start OCR; OK; Save As separate SRT",
+    "inputs": [
+      "private/open-movie-benchmark/elephants/elephants-300s.mp4",
+      "private/open-movie-benchmark/sintel/sintel-300s.mp4"
+    ],
+    "engine": "AppleVision ja-JP accurate",
+    "settings_evidence": "subtitleedit-gui-status.json",
+    "resource_sampler": "envs/vse/bin/python benchmark/tools/video-ocr-comparison/sample_gui_process.py --pid OFFICIAL_APP_PID --out MONITOR.json --stop UNIQUE_STOP_FILE",
+    "result_verifier": "envs/vse/bin/python benchmark/tools/video-ocr-comparison/finalize_se_gui.py WORKSPACE",
+    "gui_modified": false,
+    "gui_export_text_modified": false
+  }
+}

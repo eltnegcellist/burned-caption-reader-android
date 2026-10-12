@@ -1,0 +1,10 @@
+{
+  "requested_font": "Noto Sans CJK JP",
+  "observed_font_provider": "coretext",
+  "observed_japanese_font": "HiraginoSans-W4",
+  "observed_latin_font": "Helvetica",
+  "fonts": {
+    "ヒラギノ角ゴシック W4.ttc": "e1ee608f584acdaffc898efac7e2c9fa1c19457474bf215f6b7031ca720993d1",
+    "Helvetica.ttc": "25eceb458d4baf628ee0b6a135a9f8ac5ec7b2826646720834bd2bf00dfc825a"
+  }
+}

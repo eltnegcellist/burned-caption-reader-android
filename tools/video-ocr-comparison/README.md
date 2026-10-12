@@ -1,6 +1,23 @@
-# 動画内字幕リーダー：4方式Video OCR比較（準備版、2026-10-12）
+# 動画内字幕リーダー：OCR比較結果と再現手順
 
-## 目的・現在の到達点
+## 最新の実測（2026-10-12～13）
+
+[公開映画の比較報告](OPEN-MOVIES.md)と[再現手順](OPEN-MOVIES-REPRODUCE.md)を保存した。
+Elephants Dream・Sintelの各5分をVSE/VideOCR/Subtitle Edit GUI＋公式部品/Android hybridの検証専用MP4経路へ入力し、
+同一PixelCopy PNG70枚を4エンジンの手動ROI・全画面に渡した。数値・設定・hash・文字なし対応付けは `open-movies/benchmark-*.json`。
+
+Androidには生認識→字幕選択の欠落、デスクトップには英語タイトル混入・分割重複があった。
+SEの公式行組み立ては同じOCR観測で画像CERを改善した。厳しい重複閾値の丸採用は自然背景で改善せず、VSEは悪化例もあった。
+Subtitle Edit 5.2.0 GUIもロック解除後に2本完走・SRT保存済み。GUIと公式部品を区別し、
+CG映画への追加字幕・エミュレーターの成績を実写テロップ・Galaxy S25の成績と混同しない。本番ソース・モデル・PR29/31は変更しない。
+
+[Android改善の実装計画書](IMPLEMENTATION-PLAN.md)に、変更箇所、P0～P5の実装順序、単独対照、採用条件、実機の負荷予算案とPR分割をまとめた。計画書作成時には本番実装を変更していない。
+
+[合成コントロールの履歴](REPORT.md)と[その再現手順](REPRODUCE.md)も保持した。
+採点器11テスト、画像runner14テスト、nativeモード誤表示ガードを確認済み。
+以下はPR31の準備計画を履歴として残す。
+
+## PR #31時点の準備計画（当時の状態）
 
 既存Androidアプリ（ML Kit + PP-OCRv5の`hybrid`、PR #29 の最新HEAD）を、
 VSE / VideOCR / Subtitle Editの3つと**同じ入力**で比較する。合格した技術のみ後で

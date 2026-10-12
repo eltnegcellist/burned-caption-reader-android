@@ -1,0 +1,138 @@
+{
+  "coarse": {
+    "reference_events": 3,
+    "predicted_events": 3,
+    "matched_events": 3,
+    "missed_events": 0,
+    "extra_events": 0,
+    "possible_duplicate_events": 0,
+    "event_recall": 1.0,
+    "event_precision": 1.0,
+    "normalized_exact_events": 3,
+    "correct_event_recall": 1.0,
+    "unmatched_prediction_fraction": 0.0,
+    "raw_nfc_event_cer": 0.0,
+    "multiline": {
+      "2": {
+        "reference_events": 0,
+        "exact_text_events": 0,
+        "line_structure_exact_events": 0
+      },
+      "3": {
+        "reference_events": 0,
+        "exact_text_events": 0,
+        "line_structure_exact_events": 0
+      }
+    },
+    "time_coverage": null,
+    "possible_merged_predictions": 0,
+    "possible_split_references": 0,
+    "pairs": [
+      {
+        "reference_index": 0,
+        "prediction_index": 0,
+        "reference_text": "本日の価格は100円です",
+        "prediction_text": "本日の価格は100円です",
+        "normalized_exact": true,
+        "start_error_ms": 100,
+        "end_error_ms": 100
+      },
+      {
+        "reference_index": 1,
+        "prediction_index": 1,
+        "reference_text": "本日の価格は200円です",
+        "prediction_text": "本日の価格は200円です",
+        "normalized_exact": true,
+        "start_error_ms": 100,
+        "end_error_ms": 100
+      },
+      {
+        "reference_index": 2,
+        "prediction_index": 2,
+        "reference_text": "このサービスを利用できます",
+        "prediction_text": "このサービスを利用できます",
+        "normalized_exact": true,
+        "start_error_ms": 100,
+        "end_error_ms": 100
+      }
+    ],
+    "unmatched_reference_indices": [],
+    "unmatched_prediction_indices": [],
+    "reference_chars": 37,
+    "character_edits_including_missed_extra": 0,
+    "event_aligned_cer": 0.0,
+    "median_start_error_ms": 100.0,
+    "median_end_error_ms": 100.0,
+    "matching_method": "monotonic DP; temporal overlap >=80ms; maximize cardinality then IoU; text-independent",
+    "metric_caveats": "event_recall counts temporal matches, not correct text; unmatched outputs are not necessarily background false positives; split/merge flags require review",
+    "text_normalization": "NFKC, remove whitespace and Unicode punctuation (NOT Android comparisonKey)"
+  },
+  "refined": {
+    "reference_events": 3,
+    "predicted_events": 3,
+    "matched_events": 3,
+    "missed_events": 0,
+    "extra_events": 0,
+    "possible_duplicate_events": 0,
+    "event_recall": 1.0,
+    "event_precision": 1.0,
+    "normalized_exact_events": 3,
+    "correct_event_recall": 1.0,
+    "unmatched_prediction_fraction": 0.0,
+    "raw_nfc_event_cer": 0.0,
+    "multiline": {
+      "2": {
+        "reference_events": 0,
+        "exact_text_events": 0,
+        "line_structure_exact_events": 0
+      },
+      "3": {
+        "reference_events": 0,
+        "exact_text_events": 0,
+        "line_structure_exact_events": 0
+      }
+    },
+    "time_coverage": null,
+    "possible_merged_predictions": 0,
+    "possible_split_references": 0,
+    "pairs": [
+      {
+        "reference_index": 0,
+        "prediction_index": 0,
+        "reference_text": "本日の価格は100円です",
+        "prediction_text": "本日の価格は100円です",
+        "normalized_exact": true,
+        "start_error_ms": 0,
+        "end_error_ms": 0
+      },
+      {
+        "reference_index": 1,
+        "prediction_index": 1,
+        "reference_text": "本日の価格は200円です",
+        "prediction_text": "本日の価格は200円です",
+        "normalized_exact": true,
+        "start_error_ms": 0,
+        "end_error_ms": 0
+      },
+      {
+        "reference_index": 2,
+        "prediction_index": 2,
+        "reference_text": "このサービスを利用できます",
+        "prediction_text": "このサービスを利用できます",
+        "normalized_exact": true,
+        "start_error_ms": 0,
+        "end_error_ms": 0
+      }
+    ],
+    "unmatched_reference_indices": [],
+    "unmatched_prediction_indices": [],
+    "reference_chars": 37,
+    "character_edits_including_missed_extra": 0,
+    "event_aligned_cer": 0.0,
+    "median_start_error_ms": 0.0,
+    "median_end_error_ms": 0.0,
+    "matching_method": "monotonic DP; temporal overlap >=80ms; maximize cardinality then IoU; text-independent",
+    "metric_caveats": "event_recall counts temporal matches, not correct text; unmatched outputs are not necessarily background false positives; split/merge flags require review",
+    "text_normalization": "NFKC, remove whitespace and Unicode punctuation (NOT Android comparisonKey)"
+  }
+}

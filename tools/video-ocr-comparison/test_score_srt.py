@@ -33,6 +33,50 @@ class ScoreTests(unittest.TestCase):
         self.assertEqual(result["missed_events"], 1)
         self.assertEqual(result["extra_events"], 1)
         self.assertEqual(result["possible_duplicate_events"], 1)
+        self.assertEqual(result["temporally_matched_text_cer"], 0)
+        self.assertGreater(result["event_aligned_cer"], 0)
+
+    def test_no_match_has_no_matched_text_cer(self):
+        r=[{'start':0,'end':1000,'text':'字幕'}]
+        out=compare(r,[])
+        self.assertIsNone(out['temporally_matched_text_cer'])
+        self.assertEqual(out['event_aligned_cer'],1)
+
+    def test_global_alignment_avoids_greedy_loss(self):
+        r=[{'start':0,'end':1000,'text':'前'}, {'start':1000,'end':2000,'text':'後'}]
+        p=[{'start':0,'end':100,'text':'前'}, {'start':100,'end':1500,'text':'後'}]
+        # A greedy IoU matcher steals the long prediction for the first reference.
+        self.assertEqual(compare(r,p)['matched_events'],2)
+
+    def test_text_does_not_choose_temporal_pair(self):
+        r=[{'start':0,'end':1000,'text':'100円'}, {'start':1000,'end':2000,'text':'200円'}]
+        p=[{'start':0,'end':2000,'text':'100円'}]
+        out=compare(r,p)
+        self.assertEqual(out['possible_merged_predictions'],1)
+        self.assertEqual(out['matched_events'],1)
+        self.assertEqual(out['missed_events'],1)
+
+    def test_wrong_text_is_not_correct_event(self):
+        r=[{'start':0,'end':1000,'text':'利用できます'}]
+        p=[{'start':0,'end':1000,'text':'利用できません'}]
+        out=compare(r,p)
+        self.assertEqual(out['event_recall'],1)
+        self.assertEqual(out['correct_event_recall'],0)
+
+    def test_merge_across_blank_is_false_positive_time(self):
+        r=[{'start':1000,'end':2000,'text':'同じ'}, {'start':3000,'end':4000,'text':'同じ'}]
+        p=[{'start':1000,'end':4000,'text':'同じ'}]
+        out=compare(r,p,duration_ms=5000)
+        self.assertEqual(out['extra_events'],0)
+        self.assertEqual(out['time_coverage']['predicted_blank_ms'],1000)
+        self.assertAlmostEqual(out['time_coverage']['blank_false_positive_time_rate'],1/3)
+
+    def test_runtime_threshold_empty_and_multiline(self):
+        r=[{'start':0,'end':1000,'text':'一行\n二行\n三行'}]
+        self.assertEqual(compare(r,r)['multiline']['3']['line_structure_exact_events'],1)
+        self.assertEqual(compare([],[])['event_aligned_cer'],None)
+        self.assertIn('>=100ms',compare(r,r,100)['matching_method'])
+        with self.assertRaises(ValueError): compare(r,r,0)
 
 
 if __name__ == "__main__":

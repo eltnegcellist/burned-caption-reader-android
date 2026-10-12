@@ -1,0 +1,26 @@
+{
+  "command": [
+    "envs/vse/bin/python",
+    "benchmark/tools/video-ocr-comparison/compare_images.py",
+    "private/controls/control-1.manifest.json",
+    "--out",
+    "outputs/images-vse-manual.json",
+    "--engine",
+    "vse",
+    "--scope",
+    "manual-roi"
+  ],
+  "cwd": "<WORKSPACE>",
+  "exit_code": 0,
+  "elapsed_seconds": 7.626001792028546,
+  "peak_sampled_tree_rss_bytes": 1139310592,
+  "rss_sampling_interval_ms": 50,
+  "samples": 131,
+  "rss_caveat": "sum of parent and live children RSS; shared pages may be double-counted; short peaks may be missed",
+  "environment": {
+    "PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK": "True",
+    "OMP_NUM_THREADS": "1",
+    "QT_QPA_PLATFORM": "offscreen"
+  },
+  "log": "images-vse-manual-resource.log"
+}

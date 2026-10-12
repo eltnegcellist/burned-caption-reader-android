@@ -1,0 +1,373 @@
+{
+  "status": "partial_controlled_measurements_complete_natural_experiments_blocked",
+  "natural_A": null,
+  "natural_B": null,
+  "synthetic_video": {
+    "control-1": {
+      "vse": {
+        "normalized_event_cer": 0.1687,
+        "raw_nfc_event_cer": 0.1893,
+        "correct_event_recall": 0.7,
+        "temporal_event_recall": 0.8,
+        "missed_events": 6,
+        "extra_events": 0,
+        "duplicates": 0,
+        "possible_merges": 6,
+        "blank_false_positive_time_rate": 0.2,
+        "median_start_error_ms": 0.0,
+        "median_end_error_ms": 1.0,
+        "multiline": {
+          "2": {
+            "reference_events": 3,
+            "exact_text_events": 3,
+            "line_structure_exact_events": 0
+          },
+          "3": {
+            "reference_events": 3,
+            "exact_text_events": 3,
+            "line_structure_exact_events": 0
+          }
+        },
+        "elapsed_seconds": 27.86488225008361,
+        "peak_sampled_tree_rss_mib": 2369.171875,
+        "ocr_images": 30,
+        "counter_caveat": "VideoSubFinder cleaned/composite OCR images, not full original frames"
+      },
+      "videocr": {
+        "normalized_event_cer": 0.0241,
+        "raw_nfc_event_cer": 0.0237,
+        "correct_event_recall": 0.9667,
+        "temporal_event_recall": 0.9667,
+        "missed_events": 1,
+        "extra_events": 0,
+        "duplicates": 0,
+        "possible_merges": 0,
+        "blank_false_positive_time_rate": 0.0,
+        "median_start_error_ms": 0.0,
+        "median_end_error_ms": 0.0,
+        "multiline": {
+          "2": {
+            "reference_events": 3,
+            "exact_text_events": 3,
+            "line_structure_exact_events": 3
+          },
+          "3": {
+            "reference_events": 3,
+            "exact_text_events": 3,
+            "line_structure_exact_events": 3
+          }
+        },
+        "elapsed_seconds": 10.276309875072911,
+        "peak_sampled_tree_rss_mib": 1190.03125,
+        "frames_after_first_filter": 61,
+        "detection_grids": 4,
+        "second_filter_removed": 32,
+        "recognition_images": 29,
+        "configured_stride_skip_estimate": 1500,
+        "container_frames": 3000,
+        "counter_caveat": "Container frame count and configured stride estimate; measured first/second-filter counters from upstream log. Detection batches are grids, not individual frame OCR calls."
+      },
+      "se-source": {
+        "normalized_event_cer": 0.0,
+        "raw_nfc_event_cer": 0.0059,
+        "correct_event_recall": 1.0,
+        "temporal_event_recall": 1.0,
+        "missed_events": 0,
+        "extra_events": 0,
+        "duplicates": 0,
+        "possible_merges": 0,
+        "blank_false_positive_time_rate": 0.0,
+        "median_start_error_ms": 0.0,
+        "median_end_error_ms": 0.0,
+        "multiline": {
+          "2": {
+            "reference_events": 3,
+            "exact_text_events": 3,
+            "line_structure_exact_events": 3
+          },
+          "3": {
+            "reference_events": 3,
+            "exact_text_events": 3,
+            "line_structure_exact_events": 3
+          }
+        },
+        "elapsed_seconds": 6.2198267499916255,
+        "peak_sampled_tree_rss_mib": 134.859375,
+        "sampled_frames": 1500,
+        "ocr_calls": 30,
+        "non_ocr_sampled_frames": 1470,
+        "group_count": 61,
+        "gui_product_run": false
+      }
+    },
+    "control-2": {
+      "vse": {
+        "normalized_event_cer": 0.1687,
+        "raw_nfc_event_cer": 0.1893,
+        "correct_event_recall": 0.7,
+        "temporal_event_recall": 0.8,
+        "missed_events": 6,
+        "extra_events": 0,
+        "duplicates": 0,
+        "possible_merges": 6,
+        "blank_false_positive_time_rate": 0.2,
+        "median_start_error_ms": 0.0,
+        "median_end_error_ms": 1.0,
+        "multiline": {
+          "2": {
+            "reference_events": 3,
+            "exact_text_events": 3,
+            "line_structure_exact_events": 0
+          },
+          "3": {
+            "reference_events": 3,
+            "exact_text_events": 3,
+            "line_structure_exact_events": 0
+          }
+        },
+        "elapsed_seconds": 21.415833374951035,
+        "peak_sampled_tree_rss_mib": 2164.140625,
+        "ocr_images": 30,
+        "counter_caveat": "VideoSubFinder cleaned/composite OCR images, not full original frames"
+      },
+      "videocr": {
+        "normalized_event_cer": 0.0241,
+        "raw_nfc_event_cer": 0.0237,
+        "correct_event_recall": 0.9667,
+        "temporal_event_recall": 0.9667,
+        "missed_events": 1,
+        "extra_events": 0,
+        "duplicates": 0,
+        "possible_merges": 0,
+        "blank_false_positive_time_rate": 0.0,
+        "median_start_error_ms": 0.0,
+        "median_end_error_ms": 0.0,
+        "multiline": {
+          "2": {
+            "reference_events": 3,
+            "exact_text_events": 3,
+            "line_structure_exact_events": 3
+          },
+          "3": {
+            "reference_events": 3,
+            "exact_text_events": 3,
+            "line_structure_exact_events": 3
+          }
+        },
+        "elapsed_seconds": 26.002003125147894,
+        "peak_sampled_tree_rss_mib": 1077.09375,
+        "frames_after_first_filter": 398,
+        "detection_grids": 23,
+        "second_filter_removed": 302,
+        "recognition_images": 96,
+        "configured_stride_skip_estimate": 1500,
+        "container_frames": 3000,
+        "counter_caveat": "Container frame count and configured stride estimate; measured first/second-filter counters from upstream log. Detection batches are grids, not individual frame OCR calls."
+      },
+      "se-source": {
+        "normalized_event_cer": 0.0,
+        "raw_nfc_event_cer": 0.002,
+        "correct_event_recall": 1.0,
+        "temporal_event_recall": 1.0,
+        "missed_events": 0,
+        "extra_events": 0,
+        "duplicates": 0,
+        "possible_merges": 0,
+        "blank_false_positive_time_rate": 0.0,
+        "median_start_error_ms": 0.0,
+        "median_end_error_ms": 0.0,
+        "multiline": {
+          "2": {
+            "reference_events": 3,
+            "exact_text_events": 3,
+            "line_structure_exact_events": 3
+          },
+          "3": {
+            "reference_events": 3,
+            "exact_text_events": 3,
+            "line_structure_exact_events": 3
+          }
+        },
+        "elapsed_seconds": 5.066257625119761,
+        "peak_sampled_tree_rss_mib": 134.734375,
+        "sampled_frames": 1500,
+        "ocr_calls": 30,
+        "non_ocr_sampled_frames": 1470,
+        "group_count": 61,
+        "gui_product_run": false
+      }
+    },
+    "control-3": {
+      "vse": {
+        "normalized_event_cer": 0.1687,
+        "raw_nfc_event_cer": 0.1893,
+        "correct_event_recall": 0.7,
+        "temporal_event_recall": 0.8,
+        "missed_events": 6,
+        "extra_events": 0,
+        "duplicates": 0,
+        "possible_merges": 6,
+        "blank_false_positive_time_rate": 0.2,
+        "median_start_error_ms": 0.0,
+        "median_end_error_ms": 1.0,
+        "multiline": {
+          "2": {
+            "reference_events": 3,
+            "exact_text_events": 3,
+            "line_structure_exact_events": 0
+          },
+          "3": {
+            "reference_events": 3,
+            "exact_text_events": 3,
+            "line_structure_exact_events": 0
+          }
+        },
+        "elapsed_seconds": 30.70253866701387,
+        "peak_sampled_tree_rss_mib": 2174.4375,
+        "ocr_images": 30,
+        "counter_caveat": "VideoSubFinder cleaned/composite OCR images, not full original frames"
+      },
+      "videocr": {
+        "normalized_event_cer": 0.0241,
+        "raw_nfc_event_cer": 0.0237,
+        "correct_event_recall": 0.9667,
+        "temporal_event_recall": 0.9667,
+        "missed_events": 1,
+        "extra_events": 0,
+        "duplicates": 0,
+        "possible_merges": 0,
+        "blank_false_positive_time_rate": 0.0,
+        "median_start_error_ms": 0.0,
+        "median_end_error_ms": 0.0,
+        "multiline": {
+          "2": {
+            "reference_events": 3,
+            "exact_text_events": 3,
+            "line_structure_exact_events": 3
+          },
+          "3": {
+            "reference_events": 3,
+            "exact_text_events": 3,
+            "line_structure_exact_events": 3
+          }
+        },
+        "elapsed_seconds": 27.44179179193452,
+        "peak_sampled_tree_rss_mib": 1159.09375,
+        "frames_after_first_filter": 412,
+        "detection_grids": 23,
+        "second_filter_removed": 285,
+        "recognition_images": 127,
+        "configured_stride_skip_estimate": 1500,
+        "container_frames": 3000,
+        "counter_caveat": "Container frame count and configured stride estimate; measured first/second-filter counters from upstream log. Detection batches are grids, not individual frame OCR calls."
+      },
+      "se-source": {
+        "normalized_event_cer": 0.3333,
+        "raw_nfc_event_cer": 0.3333,
+        "correct_event_recall": 0.6667,
+        "temporal_event_recall": 0.6667,
+        "missed_events": 10,
+        "extra_events": 0,
+        "duplicates": 0,
+        "possible_merges": 0,
+        "blank_false_positive_time_rate": 0.0,
+        "median_start_error_ms": 0.0,
+        "median_end_error_ms": 0.0,
+        "multiline": {
+          "2": {
+            "reference_events": 3,
+            "exact_text_events": 2,
+            "line_structure_exact_events": 2
+          },
+          "3": {
+            "reference_events": 3,
+            "exact_text_events": 2,
+            "line_structure_exact_events": 2
+          }
+        },
+        "elapsed_seconds": 4.094794458011165,
+        "peak_sampled_tree_rss_mib": 131.234375,
+        "sampled_frames": 1500,
+        "ocr_calls": 21,
+        "non_ocr_sampled_frames": 1479,
+        "group_count": 42,
+        "gui_product_run": false
+      }
+    }
+  },
+  "synthetic_manual_images": {
+    "hybrid": {
+      "images": 20,
+      "positive_images": 10,
+      "normalized_cer": 0.0,
+      "exact_positive_images": 10,
+      "blank_false_positive_images": 0,
+      "mean_frame_ms": 51.2,
+      "median_frame_ms": 24.5,
+      "first_frame_ms": 317,
+      "speed_caveat": "10 positive/10 blank frames; engine adapters except hybrid refine; emulator != Galaxy S25; first use overhead retained",
+      "sampled_pss_kb": 148686
+    },
+    "vse": {
+      "images": 20,
+      "positive_images": 10,
+      "normalized_cer": 0.0,
+      "exact_positive_images": 10,
+      "blank_false_positive_images": 0,
+      "mean_frame_ms": 138.61972489394248,
+      "median_frame_ms": 106.25449987128377,
+      "first_frame_ms": 207.89441606029868,
+      "speed_caveat": "10 positive/10 blank frames; engine adapters except hybrid refine; emulator != Galaxy S25; first use overhead retained"
+    },
+    "videocr": {
+      "images": 20,
+      "positive_images": 10,
+      "normalized_cer": 0.0,
+      "exact_positive_images": 10,
+      "blank_false_positive_images": 0,
+      "mean_frame_ms": 116.36948544764891,
+      "median_frame_ms": 101.86227108351886,
+      "first_frame_ms": 156.02212492376566,
+      "speed_caveat": "10 positive/10 blank frames; engine adapters except hybrid refine; emulator != Galaxy S25; first use overhead retained"
+    },
+    "vision": {
+      "images": 20,
+      "positive_images": 10,
+      "normalized_cer": 0.0,
+      "exact_positive_images": 10,
+      "blank_false_positive_images": 0,
+      "mean_frame_ms": 69.55369174247608,
+      "median_frame_ms": 36.801812471821904,
+      "first_frame_ms": 602.6425000745803,
+      "speed_caveat": "10 positive/10 blank frames; engine adapters except hybrid refine; emulator != Galaxy S25; first use overhead retained"
+    }
+  },
+  "ablations": {
+    "vse-control-1-exactmerge": {
+      "cer": 0.0,
+      "correct_recall": 1.0,
+      "missed_events": 0,
+      "seconds": 43.971742583904415
+    },
+    "videocr-control-1-ssim99": {
+      "cer": 0.0241,
+      "correct_recall": 0.9667,
+      "missed_events": 1,
+      "seconds": 15.774074958171695
+    },
+    "videocr-control-1-tight100": {
+      "cer": 0.0,
+      "correct_recall": 1.0,
+      "missed_events": 0,
+      "seconds": 15.947502207942307
+    }
+  },
+  "android_temporal_control": {
+    "frames": 130,
+    "cer": 0.14834337349397592,
+    "ocr_jobs": 194,
+    "speech_events": 9,
+    "first_200_yen_raw_read_correct_but_no_selected_band": true,
+    "caveat": "Repeated synthetic pixels, sparse temporal control; not real MP4/PixelCopy or Galaxy speed"
+  }
+}

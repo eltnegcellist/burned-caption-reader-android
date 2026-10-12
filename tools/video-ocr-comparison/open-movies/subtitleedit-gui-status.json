@@ -1,0 +1,155 @@
+{
+  "version": "5.2.0 macOS arm64",
+  "status": "completed",
+  "gui_product_run": true,
+  "local_ocr_only": true,
+  "engine": "AppleVision",
+  "language": "ja-JP",
+  "films": {
+    "elephants": {
+      "video_sha256": "64c18561c5c753e15d40e78a5fd67a05a84aee7021b908b675424bcff9a0e7f0",
+      "srt_sha256": "c64c7a54474485e46ba68bf3dbbdade1f5042c5be0722b6fcca921f1a3c8e397",
+      "gui_lines_found": 35,
+      "settings": {
+        "Engine": "AppleVision",
+        "AppleVisionLanguage": "ja-JP",
+        "FramesPerSecond": 5,
+        "ImageSimilarityPercent": 92,
+        "TextSimilarityPercent": 80,
+        "MaxGapMs": 250,
+        "MinDurationMs": 250,
+        "BrightnessMinimum": 190,
+        "MaxImageWidth": 720,
+        "AddAssaPositionTag": false,
+        "FixOcrErrors": false,
+        "CropXPercent": 0,
+        "CropYPercent": 66.66666666666667,
+        "CropWidthPercent": 100,
+        "CropHeightPercent": 33.333333333333336
+      },
+      "observations": {
+        "start_before_ms": 1791838603299,
+        "start_after_ms": 1791838603398,
+        "last_running_observation_before_ms": 1791838626579,
+        "first_complete_observation_after_ms": 1791838641420,
+        "ocr_groups_observed": 809,
+        "gui_lines_found": 35,
+        "running_time_bound_method": "Last running tool began at or after 26.303s minus its entire 3.023s tool duration, providing a conservative lower bound."
+      },
+      "resources": {
+        "exit_code": null,
+        "completion_verified_in_gui": true,
+        "elapsed_seconds": null,
+        "elapsed_seconds_bounds": [
+          23.181,
+          38.121
+        ],
+        "time_caveat": "GUI start-click bracket and last-running/first-complete UI observation bound processing duration. No exact elapsed timer; file chooser, operator idle before start and SRT save are excluded. Interval width prohibits close speed ranking.",
+        "peak_sampled_tree_rss_bytes": 787038208,
+        "baseline_tree_rss_bytes": 235192320,
+        "rss_sampling_interval_ms": 50,
+        "rss_caveat": "Includes already-open GUI plus live children; shared pages may be double-counted, short peaks missed, Apple Vision OS services excluded. Monitoring interval includes UI observation idle time, not processing duration.",
+        "settings": {
+          "Engine": "AppleVision",
+          "AppleVisionLanguage": "ja-JP",
+          "FramesPerSecond": 5,
+          "ImageSimilarityPercent": 92,
+          "TextSimilarityPercent": 80,
+          "MaxGapMs": 250,
+          "MinDurationMs": 250,
+          "BrightnessMinimum": 190,
+          "MaxImageWidth": 720,
+          "AddAssaPositionTag": false,
+          "FixOcrErrors": false,
+          "CropXPercent": 0,
+          "CropYPercent": 66.66666666666667,
+          "CropWidthPercent": 100,
+          "CropHeightPercent": 33.333333333333336
+        },
+        "work_counts": {
+          "ocr_groups_observed": 809,
+          "ocr_calls": null,
+          "mean_ocr_ms": null,
+          "sampled_frames": null,
+          "scheduled_scan_frames_calculated": 1500,
+          "non_ocr_sampled_frames": null,
+          "caveat": "GUI OCR progress denominator counts groups, not calls. Verification/retry can add calls. 1500 is computed from duration*5fps; actual extracted-frame counter not captured."
+        }
+      }
+    },
+    "sintel": {
+      "video_sha256": "2ac9f667efbcd95405377d13c2ba973663a98cb67c18ec6e27b27d7f95db5c60",
+      "srt_sha256": "453c3e0b3fb8806e5d7f3157bddf70d4c5db4795ca837bd1090d1f042935726f",
+      "gui_lines_found": 21,
+      "settings": {
+        "Engine": "AppleVision",
+        "AppleVisionLanguage": "ja-JP",
+        "FramesPerSecond": 5,
+        "ImageSimilarityPercent": 92,
+        "TextSimilarityPercent": 80,
+        "MaxGapMs": 250,
+        "MinDurationMs": 250,
+        "BrightnessMinimum": 190,
+        "MaxImageWidth": 720,
+        "AddAssaPositionTag": false,
+        "FixOcrErrors": false,
+        "CropXPercent": 0,
+        "CropYPercent": 55.88235294117647,
+        "CropWidthPercent": 100,
+        "CropHeightPercent": 44.11764705882353
+      },
+      "observations": {
+        "start_before_ms": 1791838883795,
+        "start_after_ms": 1791838883870,
+        "last_running_observation_before_ms": 1791838899776,
+        "first_complete_observation_after_ms": 1791838923158,
+        "ocr_groups_observed": 893,
+        "gui_lines_found": 21
+      },
+      "resources": {
+        "exit_code": null,
+        "completion_verified_in_gui": true,
+        "elapsed_seconds": null,
+        "elapsed_seconds_bounds": [
+          15.906,
+          39.363
+        ],
+        "time_caveat": "GUI start-click bracket and last-running/first-complete UI observation bound processing duration. No exact elapsed timer; file chooser, operator idle before start and SRT save are excluded. Interval width prohibits close speed ranking.",
+        "peak_sampled_tree_rss_bytes": 655884288,
+        "baseline_tree_rss_bytes": 450592768,
+        "rss_sampling_interval_ms": 50,
+        "rss_caveat": "Includes already-open GUI plus live children; shared pages may be double-counted, short peaks missed, Apple Vision OS services excluded. Monitoring interval includes UI observation idle time, not processing duration.",
+        "settings": {
+          "Engine": "AppleVision",
+          "AppleVisionLanguage": "ja-JP",
+          "FramesPerSecond": 5,
+          "ImageSimilarityPercent": 92,
+          "TextSimilarityPercent": 80,
+          "MaxGapMs": 250,
+          "MinDurationMs": 250,
+          "BrightnessMinimum": 190,
+          "MaxImageWidth": 720,
+          "AddAssaPositionTag": false,
+          "FixOcrErrors": false,
+          "CropXPercent": 0,
+          "CropYPercent": 55.88235294117647,
+          "CropWidthPercent": 100,
+          "CropHeightPercent": 44.11764705882353
+        },
+        "work_counts": {
+          "ocr_groups_observed": 893,
+          "ocr_calls": null,
+          "mean_ocr_ms": null,
+          "sampled_frames": null,
+          "scheduled_scan_frames_calculated": 1500,
+          "non_ocr_sampled_frames": null,
+          "caveat": "GUI OCR progress denominator counts groups, not calls. Verification/retry can add calls. 1500 is computed from duration*5fps; actual extracted-frame counter not captured."
+        }
+      }
+    }
+  },
+  "component_result_label": "se-source, separate from se-gui",
+  "official_app_executable_sha256": "75334072cc70401e12b441778271fbd8e14f53379e9240d6eecde89cf3d070d7",
+  "official_ffmpeg_sha256": "5aa5d4a2b20ad8bf564b16640aad672ad053662cc241c7e3a373ae42e2657d46",
+  "component_difference_caveat": "Same MP4/ROI/visible thresholds and ffmpeg binary. GUI JPEG q:v=2, fps then crop/scale; source adapter default JPEG quality, crop/scale then fps. GUI also verifies/retries alternate group frames. Differences are not a controlled rescue-only ablation."
+}

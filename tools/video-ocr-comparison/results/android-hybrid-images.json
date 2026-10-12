@@ -1,0 +1,1204 @@
+{
+  "schema_version": 1,
+  "native_detection": "off",
+  "sampled_peak_pss_kb": 87136,
+  "scope": "player_components_immediate_tts",
+  "metric": "caption_comparison_key_cer",
+  "diagnostic_coarse_width": 0,
+  "crop_preparation": null,
+  "ground_truth_source": "synthetic_render_spec",
+  "human_verified": false,
+  "speech": [],
+  "label": "b0db532-app-identical-eff6b846",
+  "dataset": "owned-synthetic-control-1-20frames",
+  "source": "synthetic",
+  "frames": [
+    {
+      "id": "control-1-0030.png",
+      "mono_ms": 3000,
+      "gap_ms": null,
+      "expected_text": "本日の価格は100円です",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "bands": [],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "本日の価格は100円です",
+            "confidence": 84.79817509651184,
+            "block": 1,
+            "left": 0.30588236451148987,
+            "top": 0.8682008385658264,
+            "right": 0.6870588064193726,
+            "bottom": 0.926778256893158,
+            "glyph_height": 0.05857742
+          }
+        ],
+        "raw_text": "検証用の固定見出し\n本日の価格は100円です",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "本日の価格は100円です",
+            "confidence": 84.79817509651184,
+            "block": 1,
+            "left": 0.30588236451148987,
+            "top": 0.8682008385658264,
+            "right": 0.6870588064193726,
+            "bottom": 0.926778256893158,
+            "glyph_height": 0.05857742
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 1,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 12,
+      "reference_characters": 12,
+      "ocr_processing_ms": 227
+    },
+    {
+      "id": "control-1-0090.png",
+      "mono_ms": 9000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "bands": [],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "raw_text": "検証用の固定見出し",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 1,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 24
+    },
+    {
+      "id": "control-1-0130.png",
+      "mono_ms": 13000,
+      "gap_ms": 4000,
+      "expected_text": "本日の価格は200円です",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "bands": [],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "本日の価格は200円です",
+            "confidence": 87.5,
+            "block": 1,
+            "left": 0.30588236451148987,
+            "top": 0.8682008385658264,
+            "right": 0.6870588064193726,
+            "bottom": 0.926778256893158,
+            "glyph_height": 0.05857742
+          }
+        ],
+        "raw_text": "検証用の固定見出し\n本日の価格は200円です",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "本日の価格は200円です",
+            "confidence": 87.5,
+            "block": 1,
+            "left": 0.30588236451148987,
+            "top": 0.8682008385658264,
+            "right": 0.6870588064193726,
+            "bottom": 0.926778256893158,
+            "glyph_height": 0.05857742
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 1,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 12,
+      "reference_characters": 12,
+      "ocr_processing_ms": 20
+    },
+    {
+      "id": "control-1-0190.png",
+      "mono_ms": 19000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "bands": [],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "raw_text": "検証用の固定見出し",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 1,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 18
+    },
+    {
+      "id": "control-1-0230.png",
+      "mono_ms": 23000,
+      "gap_ms": 4000,
+      "expected_text": "このサービスを利用できます",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "bands": [],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "このサービスを利用できます",
+            "confidence": 86.29807829856873,
+            "block": 1,
+            "left": 0.2764706015586853,
+            "top": 0.866108775138855,
+            "right": 0.7247058749198914,
+            "bottom": 0.926778256893158,
+            "glyph_height": 0.06066948
+          }
+        ],
+        "raw_text": "検証用の固定見出し\nこのサービスを利用できます",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "このサービスを利用できます",
+            "confidence": 86.29807829856873,
+            "block": 1,
+            "left": 0.2764706015586853,
+            "top": 0.866108775138855,
+            "right": 0.7247058749198914,
+            "bottom": 0.926778256893158,
+            "glyph_height": 0.06066948
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 1,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 13,
+      "reference_characters": 13,
+      "ocr_processing_ms": 20
+    },
+    {
+      "id": "control-1-0290.png",
+      "mono_ms": 29000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "bands": [],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "raw_text": "検証用の固定見出し",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 1,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 12
+    },
+    {
+      "id": "control-1-0330.png",
+      "mono_ms": 33000,
+      "gap_ms": 4000,
+      "expected_text": "このサービスを利用できません",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "bands": [],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "このサービスを利用できません",
+            "confidence": 88.75557780265808,
+            "block": 1,
+            "left": 0.25882354378700256,
+            "top": 0.866108775138855,
+            "right": 0.7435294389724731,
+            "bottom": 0.926778256893158,
+            "glyph_height": 0.06066948
+          }
+        ],
+        "raw_text": "検証用の固定見出し\nこのサービスを利用できません",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "このサービスを利用できません",
+            "confidence": 88.75557780265808,
+            "block": 1,
+            "left": 0.25882354378700256,
+            "top": 0.866108775138855,
+            "right": 0.7435294389724731,
+            "bottom": 0.926778256893158,
+            "glyph_height": 0.06066948
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 1,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 14,
+      "reference_characters": 14,
+      "ocr_processing_ms": 19
+    },
+    {
+      "id": "control-1-0390.png",
+      "mono_ms": 39000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "bands": [],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "raw_text": "検証用の固定見出し",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 1,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 11
+    },
+    {
+      "id": "control-1-0430.png",
+      "mono_ms": 43000,
+      "gap_ms": 4000,
+      "expected_text": "東京都で山田太郎さんに会いました",
+      "ocr_text": "東京都で山田太郎さんに会いました",
+      "stages": {
+        "ocr_text": "東京都で山田太郎さんに会いました",
+        "bands": [
+          {
+            "track_id": 6,
+            "top": 0.8640167117118835,
+            "bottom": 0.930962324142456,
+            "coarse": "東京都で山田太郎さんに会いました",
+            "refined": "東京都で山田太郎さんに会いました",
+            "selected": "東京都で山田太郎さんに会いました",
+            "refinement_backend": "ppocrv5"
+          }
+        ],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "東京都で山田太郎さんに会いました",
+            "confidence": 84.423828125,
+            "block": 1,
+            "left": 0.20352941751480103,
+            "top": 0.8640167117118835,
+            "right": 0.792941153049469,
+            "bottom": 0.930962324142456,
+            "glyph_height": 0.06694561
+          }
+        ],
+        "raw_text": "検証用の固定見出し\n東京都で山田太郎さんに会いました",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "東京都で山田太郎さんに会いました",
+            "confidence": 84.423828125,
+            "block": 1,
+            "left": 0.20352941751480103,
+            "top": 0.8640167117118835,
+            "right": 0.792941153049469,
+            "bottom": 0.930962324142456,
+            "glyph_height": 0.06694561
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 2,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 16,
+      "ocr_processing_ms": 328
+    },
+    {
+      "id": "control-1-0490.png",
+      "mono_ms": 49000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "bands": [],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "raw_text": "検証用の固定見出し",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 1,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 56
+    },
+    {
+      "id": "control-1-0530.png",
+      "mono_ms": 53000,
+      "gap_ms": 4000,
+      "expected_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "ocr_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+      "stages": {
+        "ocr_text": "字幕は上から読みます\n二行目にも大切な情報があります",
+        "bands": [
+          {
+            "track_id": 7,
+            "top": 0.7907949686050415,
+            "bottom": 0.926778256893158,
+            "coarse": "字幕は上から読みます\n二行目にも大切な情報があります",
+            "refined": "字幕は上から読みます\n二行目にも大切な情報があります",
+            "selected": "字幕は上から読みます\n二行目にも大切な情報があります",
+            "refinement_backend": "ppocrv5"
+          }
+        ],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "字幕は上から読みます",
+            "confidence": 83.3984375,
+            "block": 1,
+            "left": 0.32588234543800354,
+            "top": 0.7907949686050415,
+            "right": 0.6717647314071655,
+            "bottom": 0.849372386932373,
+            "glyph_height": 0.05857742
+          },
+          {
+            "text": "二行目にも大切な情報があります",
+            "confidence": 84.01041626930237,
+            "block": 1,
+            "left": 0.23647059500217438,
+            "top": 0.8682008385658264,
+            "right": 0.7623529434204102,
+            "bottom": 0.926778256893158,
+            "glyph_height": 0.05857742
+          }
+        ],
+        "raw_text": "検証用の固定見出し\n字幕は上から読みます\n二行目にも大切な情報があります",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "字幕は上から読みます",
+            "confidence": 83.3984375,
+            "block": 1,
+            "left": 0.32588234543800354,
+            "top": 0.7907949686050415,
+            "right": 0.6717647314071655,
+            "bottom": 0.849372386932373,
+            "glyph_height": 0.05857742
+          },
+          {
+            "text": "二行目にも大切な情報があります",
+            "confidence": 84.01041626930237,
+            "block": 1,
+            "left": 0.23647059500217438,
+            "top": 0.8682008385658264,
+            "right": 0.7623529434204102,
+            "bottom": 0.926778256893158,
+            "glyph_height": 0.05857742
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 2,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 25,
+      "ocr_processing_ms": 222
+    },
+    {
+      "id": "control-1-0590.png",
+      "mono_ms": 59000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "bands": [],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "raw_text": "検証用の固定見出し",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 1,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 13
+    },
+    {
+      "id": "control-1-0630.png",
+      "mono_ms": 63000,
+      "gap_ms": 4000,
+      "expected_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "ocr_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+      "stages": {
+        "ocr_text": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+        "bands": [
+          {
+            "track_id": 8,
+            "top": 0.7133890986442566,
+            "bottom": 0.926778256893158,
+            "coarse": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+            "refined": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+            "selected": "今日は10月12日です\n参加者は25人です\n中止ではありません",
+            "refinement_backend": "ppocrv5"
+          }
+        ],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "今日は10月12日です",
+            "confidence": 85.19176244735718,
+            "block": 1,
+            "left": 0.3294117748737335,
+            "top": 0.7133890986442566,
+            "right": 0.6694117784500122,
+            "bottom": 0.7719665169715881,
+            "glyph_height": 0.05857742
+          },
+          {
+            "text": "参加者は25人です",
+            "confidence": 88.671875,
+            "block": 1,
+            "left": 0.35411766171455383,
+            "top": 0.7907949686050415,
+            "right": 0.6435294151306152,
+            "bottom": 0.849372386932373,
+            "glyph_height": 0.05857742
+          },
+          {
+            "text": "中止ではありません",
+            "confidence": 89.93055820465088,
+            "block": 1,
+            "left": 0.34470587968826294,
+            "top": 0.8682008385658264,
+            "right": 0.6552941203117371,
+            "bottom": 0.926778256893158,
+            "glyph_height": 0.05857742
+          }
+        ],
+        "raw_text": "検証用の固定見出し\n今日は10月12日です\n参加者は25人です\n中止ではありません",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "今日は10月12日です",
+            "confidence": 85.19176244735718,
+            "block": 1,
+            "left": 0.3294117748737335,
+            "top": 0.7133890986442566,
+            "right": 0.6694117784500122,
+            "bottom": 0.7719665169715881,
+            "glyph_height": 0.05857742
+          },
+          {
+            "text": "参加者は25人です",
+            "confidence": 88.671875,
+            "block": 1,
+            "left": 0.35411766171455383,
+            "top": 0.7907949686050415,
+            "right": 0.6435294151306152,
+            "bottom": 0.849372386932373,
+            "glyph_height": 0.05857742
+          },
+          {
+            "text": "中止ではありません",
+            "confidence": 89.93055820465088,
+            "block": 1,
+            "left": 0.34470587968826294,
+            "top": 0.8682008385658264,
+            "right": 0.6552941203117371,
+            "bottom": 0.926778256893158,
+            "glyph_height": 0.05857742
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 2,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 29,
+      "ocr_processing_ms": 242
+    },
+    {
+      "id": "control-1-0690.png",
+      "mono_ms": 69000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "bands": [],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "raw_text": "検証用の固定見出し",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 1,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 17
+    },
+    {
+      "id": "control-1-0730.png",
+      "mono_ms": 73000,
+      "gap_ms": 4000,
+      "expected_text": "同じ字幕がしばらく続きます",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "bands": [],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "同じ宇幕がしばらく続きます",
+            "confidence": 78.515625,
+            "block": 1,
+            "left": 0.2729411721229553,
+            "top": 0.866108775138855,
+            "right": 0.725882351398468,
+            "bottom": 0.9288703203201294,
+            "glyph_height": 0.062761545
+          }
+        ],
+        "raw_text": "検証用の固定見出し\n同じ宇幕がしばらく続きます",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "同じ宇幕がしばらく続きます",
+            "confidence": 78.515625,
+            "block": 1,
+            "left": 0.2729411721229553,
+            "top": 0.866108775138855,
+            "right": 0.725882351398468,
+            "bottom": 0.9288703203201294,
+            "glyph_height": 0.062761545
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 1,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 13,
+      "reference_characters": 13,
+      "ocr_processing_ms": 32
+    },
+    {
+      "id": "control-1-0790.png",
+      "mono_ms": 79000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "bands": [],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "raw_text": "検証用の固定見出し",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 1,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 22
+    },
+    {
+      "id": "control-1-0830.png",
+      "mono_ms": 83000,
+      "gap_ms": 4000,
+      "expected_text": "小さい字幕も読み取れますか",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "bands": [],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "小さい字幕も読み取れますか",
+            "confidence": 87.04928159713745,
+            "block": 1,
+            "left": 0.27176469564437866,
+            "top": 0.8682008385658264,
+            "right": 0.7282353043556213,
+            "bottom": 0.9288703203201294,
+            "glyph_height": 0.06066948
+          }
+        ],
+        "raw_text": "検証用の固定見出し\n小さい字幕も読み取れますか",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "小さい字幕も読み取れますか",
+            "confidence": 87.04928159713745,
+            "block": 1,
+            "left": 0.27176469564437866,
+            "top": 0.8682008385658264,
+            "right": 0.7282353043556213,
+            "bottom": 0.9288703203201294,
+            "glyph_height": 0.06066948
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 1,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 13,
+      "reference_characters": 13,
+      "ocr_processing_ms": 15
+    },
+    {
+      "id": "control-1-0890.png",
+      "mono_ms": 89000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "bands": [],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "raw_text": "検証用の固定見出し",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 1,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 15
+    },
+    {
+      "id": "control-1-0930.png",
+      "mono_ms": 93000,
+      "gap_ms": 4000,
+      "expected_text": "これは字幕ではありませんとは言いません",
+      "ocr_text": "これは字幕ではありませんとは言いません",
+      "stages": {
+        "ocr_text": "これは字幕ではありませんとは言いません",
+        "bands": [
+          {
+            "track_id": 11,
+            "top": 0.8682008385658264,
+            "bottom": 0.926778256893158,
+            "coarse": "これは字幕ではありませんとは言いません",
+            "refined": "これは字幕ではありませんとは言いません",
+            "selected": "これは字幕ではありませんとは言いません",
+            "refinement_backend": "ppocrv5"
+          }
+        ],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "これは字幕ではありませんとは言いません",
+            "confidence": 85.60855388641357,
+            "block": 1,
+            "left": 0.169411763548851,
+            "top": 0.8682008385658264,
+            "right": 0.8329411745071411,
+            "bottom": 0.926778256893158,
+            "glyph_height": 0.05857742
+          }
+        ],
+        "raw_text": "検証用の固定見出し\nこれは字幕ではありませんとは言いません",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          },
+          {
+            "text": "これは字幕ではありませんとは言いません",
+            "confidence": 85.60855388641357,
+            "block": 1,
+            "left": 0.169411763548851,
+            "top": 0.8682008385658264,
+            "right": 0.8329411745071411,
+            "bottom": 0.926778256893158,
+            "glyph_height": 0.05857742
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 2,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 19,
+      "ocr_processing_ms": 137
+    },
+    {
+      "id": "control-1-0990.png",
+      "mono_ms": 99000,
+      "gap_ms": 6000,
+      "expected_text": "",
+      "ocr_text": "",
+      "stages": {
+        "ocr_text": "",
+        "bands": [],
+        "raw_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "raw_text": "検証用の固定見出し",
+        "recognition_rows": [
+          {
+            "text": "検証用の固定見出し",
+            "confidence": 81.72743320465088,
+            "block": 0,
+            "left": 0.02705882303416729,
+            "top": 0.048117153346538544,
+            "right": 0.25647059082984924,
+            "bottom": 0.0920502096414566,
+            "glyph_height": 0.043933056
+          }
+        ],
+        "strip_recovery": null,
+        "selection_api": "selectForRecognition",
+        "ocr_jobs": 1,
+        "native_detector_status": "not_run",
+        "native_detector_ms": 0
+      },
+      "edit_distance": 0,
+      "reference_characters": 0,
+      "ocr_processing_ms": 15
+    }
+  ],
+  "edit_distance": 77,
+  "reference_characters": 166,
+  "cer": 0.463855421686747,
+  "device_serial": "emulator-5560",
+  "input_manifest_sha256": "c18ca7b250649c9da0a0fa0c8d6e6c43a690dbce7d170be18c602bc926bdc352",
+  "apk_sha256": "d7f09add28ca3cb385ee778ed9ec4815ba37f1400ae071dffe68edee5e87a20d",
+  "test_apk_sha256": "3e957958a5c0255edf98d0b54ab7cf8abc90f3216c960c059901fa6f23d3d15a"
+}

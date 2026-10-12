@@ -5,9 +5,11 @@ import java.util.Map;
 
 public final class SubtitleStabilizer {
     public enum State { EMPTY, CANDIDATE, STABILIZING, COMMITTED, WAITING_CHANGE }
+    public enum CommitMode { FIRST_OBSERVATION, REOBSERVE }
 
     public static final class Config {
         public long stableMs = 450L;
+        public CommitMode commitMode = CommitMode.REOBSERVE;
         public long blankResetMs = 650L;
         public double minConfidence = 35.0;
         public double similarityThreshold = 0.86;
@@ -36,6 +38,7 @@ public final class SubtitleStabilizer {
     private long lastCommittedSeenAt = -1L;
     private long blankSince = -1L;
     private long sequence;
+    private int lastCommitObservations;
 
     public SubtitleStabilizer(Config config) {
         this.config = config;
@@ -61,7 +64,8 @@ public final class SubtitleStabilizer {
 
         if (candidate == null) {
             startCandidate(text, confidence, timestamp, timestamp);
-            return null;
+            return config.commitMode == CommitMode.FIRST_OBSERVATION
+                    ? commitCandidate(timestamp, text) : null;
         }
 
         String current = candidate.text;
@@ -108,21 +112,38 @@ public final class SubtitleStabilizer {
             return null;
         }
 
+        return commitCandidate(timestamp, text);
+    }
+
+
+    private SubtitleEvent commitCandidate(long timestamp, String observedText) {
         String preferred = preferredVariant();
         Variant stats = candidate.variants.get(preferred);
         double meanConfidence = stats.confidenceTotal / stats.count;
         SubtitleEvent event = new SubtitleEvent(
                 timestamp + "-" + (++sequence),
-                TrailingPunctuation.repair(preferred, text),
+                TrailingPunctuation.repair(preferred, observedText),
                 candidate.detectedAt,
                 timestamp,
                 Math.round(meanConfidence * 10.0) / 10.0
         );
+        lastCommitObservations = candidate.observations;
         lastCommitted = event;
         lastCommittedSeenAt = timestamp;
         candidate = null;
         state = State.COMMITTED;
         return event;
+    }
+
+    /** Clear a pending observation on mode change, preserving committed duplicate state. */
+    public synchronized void clearPendingCandidate() {
+        candidate = null;
+        blankSince = -1L;
+        state = lastCommitted == null ? State.EMPTY : State.WAITING_CHANGE;
+    }
+
+    public synchronized int getLastCommitObservations() {
+        return lastCommitObservations;
     }
 
     private void observeBlank(long timestamp) {

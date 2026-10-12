@@ -64,7 +64,7 @@ final class SettingsPanel extends ScrollView {
             CaptionOcrMode next = CaptionOcrMode.of(old.v6Detection, on);
             if (old != next) { preferences.setOcrMode(next); onChanged.run(); }
         });
-        note("初期設定はON/ONのD方式です。2つのスイッチで4パターンを比較できます。OFF/OFFは従来のA方式です。"
+        note("2つのスイッチで4パターンを比較。既定はON/ONのD方式です。OFF/OFFは比較用のA方式です。"
                 + "検出をv6にした場合、ML Kitによる粗い文字認識は実行しません。");
         note(inPlayer ? "処理中の画像が終わってから切替。動画の再生は継続します。"
                 : "選択は保存され、次に開いた動画で使用されます。");
@@ -115,8 +115,20 @@ final class SettingsPanel extends ScrollView {
         section.addView(volume);
         note("100%を超えると声だけを増幅。動画の音量は変わりません。声が割れる場合は下げてください。");
 
-        heading("字幕の安定待ち時間");
-        TextView stableValue = value(preferences.getStableMs() + " ms");
+        Switch recheck = toggle("字幕を再確認してから読み上げる",
+                preferences.isSubtitleRecheckEnabled());
+        recheck.setTag("subtitle_recheck_enabled");
+        recheck.setContentDescription("字幕を再確認してから読み上げる");
+        note("OFFでは最初に読み取った字幕をすぐ読み上げます。ONではもう一度確認するため、開始が遅くなりますが、認識の揺れを抑えられる場合があります。");
+        LinearLayout stableGroup = new LinearLayout(context);
+        stableGroup.setOrientation(LinearLayout.VERTICAL);
+        TextView stableHeading = ReaderUi.text(context, "再確認時の安定待ち時間", 17,
+                ReaderUi.INK, true);
+        stableHeading.setPadding(0, dp(22), 0, dp(8));
+        stableGroup.addView(stableHeading);
+        TextView stableValue = ReaderUi.text(context, preferences.getStableMs() + " ms",
+                15, ReaderUi.TEAL, false);
+        stableGroup.addView(stableValue);
         SeekBar stable = new SeekBar(context);
         stable.setMax(15);
         stable.setProgress((int) ((preferences.getStableMs() - 250L) / 50L));
@@ -129,7 +141,16 @@ final class SettingsPanel extends ScrollView {
                 onChanged.run();
             }
         });
-        section.addView(stable);
+        stableGroup.addView(stable);
+        stableGroup.setVisibility(preferences.isSubtitleRecheckEnabled()
+                ? View.VISIBLE : View.GONE);
+        section.addView(stableGroup);
+        recheck.setOnCheckedChangeListener((button, checked) -> {
+            if (checked == preferences.isSubtitleRecheckEnabled()) return;
+            preferences.setSubtitleRecheckEnabled(checked);
+            stableGroup.setVisibility(checked ? View.VISIBLE : View.GONE);
+            onChanged.run();
+        });
 
         section = ReaderUi.card(context);
         page.addView(section, ReaderUi.block(context, 16));
@@ -146,6 +167,18 @@ final class SettingsPanel extends ScrollView {
             preferences.setKeepScreenOn(checked);
             onChanged.run();
         });
+        if ((context.getApplicationInfo().flags
+                & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            Switch rescue = toggle("実験：字幕帯の再検出（D/C方式・診断専用）",
+                    preferences.isDebugRegionRescueEnabled());
+            rescue.setTag("debug_region_rescue");
+            rescue.setOnCheckedChangeListener((button, checked) -> {
+                preferences.setDebugRegionRescueEnabled(checked);
+                onChanged.run();
+            });
+            note("通常はOFF。前に確定した字幕帯で文字が消えた場合に限り、追加検出1回＋文字認識最大2行を試します。"
+                    + "処理が遅くなる可能性があります。診断ZIPで結果を比較してください。");
+        }
 
         section = ReaderUi.card(context);
         page.addView(section, ReaderUi.block(context, 16));
@@ -157,8 +190,25 @@ final class SettingsPanel extends ScrollView {
             if (checked) recorder.start(); else recorder.stop();
             diagnosticStatus.setText(recorder.status());
         });
-        note("オンにした後の動画部分の画像とOCR・発話ログを端末内に保存します。"
-                + "直近約2分・最大64MB。外部へ自動送信しません。新しくオンにすると前の記録を消去します。");
+        note("通常記録は直近約2分・最大64MB。外部へ自動送信しません。"
+                + "新しくオンにすると前の記録を消去します。");
+        if ((context.getApplicationInfo().flags
+                & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            android.widget.Button full = ReaderUi.button(context,
+                    "5分比較向け・全期間の診断記録を開始", false);
+            full.setOnClickListener(v -> {
+                try {
+                    recorder.startFullEvaluation();
+                    diagnosticSwitch.setChecked(true);
+                    diagnosticStatus.setText(recorder.status() + " · 全期間記録");
+                } catch (IllegalStateException error) {
+                    diagnosticStatus.setText(error.getMessage());
+                }
+            });
+            section.addView(full, ReaderUi.block(context, 12));
+            note("デバッグAPK限定。画像を含み、最大3GBまで端末内に保存します。"
+                    + "保存容量を確認してください。終了後は記録をOFFにして診断ZIPを出力します。");
+        }
         android.widget.Button export = ReaderUi.button(context, "診断ZIPを書き出す", false);
         export.setOnClickListener(v -> {
             if (context instanceof Activity) DiagnosticExport.request((Activity) context);

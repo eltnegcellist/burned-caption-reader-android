@@ -6,3 +6,6 @@ local.properties
 
 __pycache__/
 tools/replay-evaluator/out/
+
+# Downloaded at build-time, pinned and SHA-256 verified by prepare_v6.py
+app/src/main/assets/ppocrv6/

@@ -50,6 +50,7 @@ final class SettingsPanel extends ScrollView {
 
         heading("文字位置の検出");
         Switch detectionV6 = toggle("PP-OCRv6 Small（OFF: ML Kit）", preferences.getOcrMode().v6Detection);
+        detectionV6.setTag("ocr_detector_v6");
         detectionV6.setOnCheckedChangeListener((b, on) -> {
             CaptionOcrMode old = preferences.getOcrMode();
             CaptionOcrMode next = CaptionOcrMode.of(on, old.v6Recognition);
@@ -57,6 +58,7 @@ final class SettingsPanel extends ScrollView {
         });
         heading("文字の読み取り");
         Switch recognitionV6 = toggle("PP-OCRv6 Small（OFF: PP-OCRv5 Mobile）", preferences.getOcrMode().v6Recognition);
+        recognitionV6.setTag("ocr_recognizer_v6");
         recognitionV6.setOnCheckedChangeListener((b, on) -> {
             CaptionOcrMode old = preferences.getOcrMode();
             CaptionOcrMode next = CaptionOcrMode.of(old.v6Detection, on);

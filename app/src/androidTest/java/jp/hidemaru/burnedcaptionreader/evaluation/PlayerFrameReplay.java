@@ -10,7 +10,10 @@ import jp.hidemaru.burnedcaptionreader.subtitle.*;
 
 /** Timestamp-driven component replay. TTS completes immediately; no live timing claims. */
 final class PlayerFrameReplay {
-    interface Recognize { OcrResult run(Bitmap input) throws Exception; }
+    interface Recognize {
+        OcrResult run(Bitmap input) throws Exception;
+        default OcrResult refine(Bitmap input) throws Exception { return run(input); }
+    }
     private final int diagnosticCoarseWidth;
     PlayerFrameReplay() { this(0); }
     PlayerFrameReplay(int diagnosticCoarseWidth) { this.diagnosticCoarseWidth = diagnosticCoarseWidth; }
@@ -80,19 +83,20 @@ final class PlayerFrameReplay {
             OcrResult masked = null;
             OcrRefinementSelector.Result chosen;
             try {
-                rerun = recognize.run(refined); ocrJobs++;
+                rerun = recognize.refine(refined); ocrJobs++;
                 chosen = selector.select(band.getText(), band.getConfidence(), rerun);
-                if (adaptiveSelector != null && (boolean) OcrRefinementSelector.class
+                if (!ppOcrUsed(rerun) && adaptiveSelector != null && (boolean) OcrRefinementSelector.class
                         .getMethod("shouldTryWhiteCore", OcrRefinementSelector.Result.class).invoke(selector, chosen)) {
                     Bitmap mask = (Bitmap) OcrBitmapInputs.class.getMethod("whiteCore", Bitmap.class).invoke(null, refined);
-                    try { masked = recognize.run(mask); ocrJobs++; }
+                    try { masked = recognize.refine(mask); ocrJobs++; }
                     finally { if (mask != frame && mask != refined) mask.recycle(); }
                     chosen = (OcrRefinementSelector.Result) adaptiveSelector.invoke(selector, band.getText(), band.getConfidence(), rerun, masked);
                 }
             } finally { if (refined != frame) refined.recycle(); }
             JSONObject stages = new JSONObject().put("track_id", band.getTrackId()).put("top", band.getTop())
                     .put("bottom", band.getBottom()).put("coarse", band.getText())
-                    .put("refined", rerun.getText()).put("selected", chosen.getText());
+                    .put("refined", rerun.getText()).put("selected", chosen.getText())
+                    .put("refinement_backend", backend(rerun));
             if (masked != null) stages.put("white_core", masked.getText());
             bands.put(stages);
             texts.add(chosen.getText());
@@ -123,6 +127,11 @@ final class PlayerFrameReplay {
                 .put("strip_recovery", strip == null ? JSONObject.NULL : strip.getText()).put("selection_api", candidateSelector == null ? "selectAll" : "selectForRecognition")
                 .put("ocr_jobs", ocrJobs);
     }
+    private static String backend(OcrResult result) {
+        try { return (String) result.getClass().getMethod("getBackend").invoke(result); }
+        catch (ReflectiveOperationException legacy) { return "mlkit"; }
+    }
+    private static boolean ppOcrUsed(OcrResult result) { return "ppocrv5".equals(backend(result)); }
     private JSONArray rawRows(OcrResult raw) throws Exception {
         JSONArray rows = new JSONArray();
         for (OcrLine row : raw.getLines()) {

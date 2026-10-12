@@ -47,6 +47,7 @@ public final class OcrRefinementSelector {
     }
 
     public Result select(String originalText, double originalConfidence, OcrResult refined) {
+        boolean trustedPp = "ppocrv5".equals(refined.getBackend());
         String original = SubtitleNormalizer.normalize(originalText);
         Result fallback = new Result(original, confidence(originalConfidence), false);
         if (original.isEmpty()) return fallback;
@@ -80,7 +81,8 @@ public final class OcrRefinementSelector {
                         restored = new Result(candidate, meanConfidence);
                         restoredScore = score;
                     }
-                } else if (preservesText(original, candidate)
+                } else if (preservesText(original, candidate, trustedPp
+                        && group.stream().allMatch(row -> row.getModelProbability() >= .65))
                         && meanConfidence >= Math.max(20, confidence(originalConfidence) - 25)
                         && score > bestScore) {
                     best = new Result(candidate, meanConfidence);
@@ -151,6 +153,10 @@ public final class OcrRefinementSelector {
     }
 
     private boolean preservesText(String original, String candidate) {
+        return preservesText(original, candidate, false);
+    }
+
+    private boolean preservesText(String original, String candidate, boolean trustedPp) {
         String a = SubtitleNormalizer.comparisonKey(original);
         String b = SubtitleNormalizer.comparisonKey(candidate);
         if (b.isEmpty()) return false;
@@ -160,9 +166,11 @@ public final class OcrRefinementSelector {
         if (!a.equals(b) && a.contains(b)) return false;
         if (!a.equals(b) && candidate.split("\n").length < original.split("\n").length) return false;
         if (candidate.split("\n").length > original.split("\n").length) return false;
-        return bLength >= Math.ceil(aLength * 0.85)
-                && bLength <= Math.ceil(aLength * 1.20)
-                && Similarity.textSimilarity(original, candidate) >= 0.80;
+        // PP already passed per-line agreement against ML Kit on the high-resolution input.
+        // A coarse, corrupted caption must not veto those corrections using the old OCR gate.
+        return bLength >= Math.ceil(aLength * (trustedPp ? 0.50 : 0.85))
+                && bLength <= (trustedPp ? Math.floor(aLength * 1.50) : Math.ceil(aLength * 1.20))
+                && Similarity.textSimilarity(original, candidate) >= (trustedPp ? 0.50 : 0.80);
     }
 
     private String text(List<OcrLine> lines) {

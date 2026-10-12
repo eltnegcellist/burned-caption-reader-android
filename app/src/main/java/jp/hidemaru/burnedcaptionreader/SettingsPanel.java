@@ -11,6 +11,7 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import java.util.Locale;
+import jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode;
 import jp.hidemaru.burnedcaptionreader.tts.SpeechLevel;
 import android.app.Activity;
 import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticExport;
@@ -46,6 +47,29 @@ final class SettingsPanel extends ScrollView {
         page.addView(section, ReaderUi.block(context, inPlayer ? 12 : 22));
         note(inPlayer ? "動画は再生を続けます。声の変更は次の読み上げから反映されます。"
                 : "次に開く動画から反映されます。");
+
+        heading("字幕の読み取り方式");
+        CaptionOcrMode[] ocrModes = CaptionOcrMode.values();
+        String[] ocrLabels = new String[ocrModes.length];
+        for (int i = 0; i < ocrModes.length; i++) ocrLabels[i] = ocrModes[i].label;
+        Spinner ocrChoice = spinner(ocrLabels);
+        ocrChoice.setTag("ocr_mode_selector");
+        ocrChoice.setContentDescription("字幕の読み取り方式");
+        ocrChoice.setSelection(preferences.getOcrMode().ordinal());
+        TextView ocrDescription = value(preferences.getOcrMode().description);
+        ocrChoice.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int index, long id) {
+                CaptionOcrMode selected = ocrModes[index];
+                ocrDescription.setText(selected.description);
+                if (selected != preferences.getOcrMode()) {
+                    preferences.setOcrMode(selected);
+                    onChanged.run();
+                }
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        note(inPlayer ? "処理中の画像が完了した後に切り替わります。動画の再生は続きます。"
+                : "選択は保存され、次に開く動画で使われます。");
 
         heading("字幕が続いたとき");
         Spinner mode = spinner(new String[]{

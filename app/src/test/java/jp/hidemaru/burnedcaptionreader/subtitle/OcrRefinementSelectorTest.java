@@ -149,4 +149,36 @@ public class OcrRefinementSelectorTest {
         assertFalse(selector.shouldTryWhiteCore(selector.select("", 40, new OcrResult("", 40))));
         assertFalse(selector.shouldTryWhiteCore(selector.select("ONLY ENGLISH", 40, new OcrResult("ONLY ENGLISH", 40))));
     }
+
+    private OcrLine ppRow(String text, float top) {
+        return new OcrLine(0, text, 85, .20f, top, .80f, top + .12f, Collections.emptyList(), 0, .99);
+    }
+    @Test public void ppCorrectionsAreNotVetoedByCorruptedCoarseText() {
+        String original = "-おるほど。oありがとうごぎいます。\n急きやっておかないとoop-";
+        String corrected = "なるほど・・・ありがとうございます、\n急ぎやっておかないと・・・";
+        OcrLine top = ppRow("なるほど・・・ありがとうございます、", .1f);
+        OcrLine bottom = ppRow("急ぎやっておかないと・・・", .27f);
+        assertEquals(normalized(original), choose(original, top, bottom));
+        OcrResult pp = new OcrResult(corrected, 85, Arrays.asList(top, bottom), "ppocrv5", .99);
+        assertEquals(normalized(corrected), selector.select(original, 85, pp).getText());
+    }
+    @Test public void ppStillRejectsAnIncompletePrefix() {
+        String original = "今日の字幕の文章です";
+        OcrResult pp = new OcrResult("今日の字幕", 85,
+                Collections.singletonList(ppRow("今日の字幕", .1f)), "ppocrv5", .99);
+        assertEquals(normalized(original), selector.select(original, 85, pp).getText());
+    }
+    @Test public void ppStillRejectsUnrelatedContent() {
+        String original = "動画の字幕です";
+        OcrResult pp = new OcrResult("本日の天気予報", 85,
+                Collections.singletonList(ppRow("本日の天気予報", .1f)), "ppocrv5", .99);
+        assertEquals(normalized(original), selector.select(original, 85, pp).getText());
+    }
+    @Test public void onePpRowDoesNotRelaxOtherUnvalidatedRows() {
+        String original = "-おるほど。oありがとうごぎいます。\n急きやっておかないとoop-";
+        OcrResult mixed = new OcrResult("", 85, Arrays.asList(
+                ppRow("なるほど・・・ありがとうございます、", .1f),
+                row("急ぎやっておかないと・・・", 85, .27f)), "ppocrv5", .99);
+        assertEquals(normalized(original), selector.select(original, 85, mixed).getText());
+    }
 }

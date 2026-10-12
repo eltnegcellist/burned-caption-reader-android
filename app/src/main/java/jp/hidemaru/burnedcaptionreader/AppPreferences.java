@@ -3,10 +3,12 @@ package jp.hidemaru.burnedcaptionreader;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.RectF;
+import jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode;
 import jp.hidemaru.burnedcaptionreader.tts.SpeechLevel;
 
 public final class AppPreferences {
     public static final String PREFERENCES_FILE = "burned_caption_reader";
+    public static final String OCR_MODE = "ocr_mode";
     public static final String SPEECH_VOLUME = "speech_volume";
     public static final String SPEECH_BOOST = "speech_boost";
     private static final String SPEECH_LEVEL = "speech_level_percent";
@@ -35,6 +37,14 @@ public final class AppPreferences {
 
     public AppPreferences(Context context) {
         preferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+    }
+
+    public CaptionOcrMode getOcrMode() {
+        return CaptionOcrMode.fromStoredValue(preferences.getString(OCR_MODE, null));
+    }
+
+    public void setOcrMode(CaptionOcrMode mode) {
+        preferences.edit().putString(OCR_MODE, mode.storedValue).apply();
     }
 
     public boolean hasRoi() {

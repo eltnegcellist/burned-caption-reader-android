@@ -1,0 +1,1775 @@
+{
+  "datasets": {
+    "dev-cat": {
+      "split": "development",
+      "frames": 28,
+      "modes": {
+        "hybrid": {
+          "cer": 0.12603062426383982,
+          "edits": [
+            107,
+            22,
+            85,
+            0
+          ],
+          "reference_characters": 849,
+          "ser": 0.5,
+          "error_frames": 14,
+          "raw_cer": 0.21144519883608148,
+          "raw_ser": 0.8928571428571429,
+          "complete_misses": 0,
+          "caption_frames": 28,
+          "blank_false_positives": 0,
+          "blank_frames": 0,
+          "known_noncaption_contamination_frames": 4,
+          "warm_pipeline": {
+            "n": 54,
+            "median_ms": 180.5,
+            "p95_ms": 249
+          },
+          "warm_excluded_ids": [
+            [
+              "00000001791806939890"
+            ],
+            [
+              "00000001791806939890"
+            ]
+          ],
+          "all_pipeline": {
+            "n": 56,
+            "median_ms": 181.5,
+            "p95_ms": 279
+          },
+          "cold_first_frame_ms": [
+            441,
+            476
+          ],
+          "sampled_peak_pss_kb": [
+            348266,
+            348437
+          ],
+          "vmhwm_kb": [
+            478016,
+            476912
+          ],
+          "ocr_jobs": [
+            66,
+            66
+          ],
+          "speech_requests": [
+            8,
+            8
+          ],
+          "repeat_changed_frames": [],
+          "engine_class": "jp.hidemaru.burnedcaptionreader.ocr.HybridCaptionOcrEngine",
+          "apk_sha256": "5944c384459f2aee3c29680c24608c76ea9e43761266b221acf82fe7db061901"
+        },
+        "v6_rec": {
+          "cer": 0.12838633686690223,
+          "edits": [
+            109,
+            8,
+            101,
+            0
+          ],
+          "reference_characters": 849,
+          "ser": 0.5,
+          "error_frames": 14,
+          "raw_cer": 0.19786614936954414,
+          "raw_ser": 0.8928571428571429,
+          "complete_misses": 0,
+          "caption_frames": 28,
+          "blank_false_positives": 0,
+          "blank_frames": 0,
+          "known_noncaption_contamination_frames": 4,
+          "warm_pipeline": {
+            "n": 54,
+            "median_ms": 193.5,
+            "p95_ms": 296
+          },
+          "warm_excluded_ids": [
+            [
+              "00000001791806939890"
+            ],
+            [
+              "00000001791806939890"
+            ]
+          ],
+          "all_pipeline": {
+            "n": 56,
+            "median_ms": 198.0,
+            "p95_ms": 362
+          },
+          "cold_first_frame_ms": [
+            433,
+            423
+          ],
+          "sampled_peak_pss_kb": [
+            340385,
+            351454
+          ],
+          "vmhwm_kb": [
+            482280,
+            482136
+          ],
+          "ocr_jobs": [
+            66,
+            66
+          ],
+          "speech_requests": [
+            7,
+            7
+          ],
+          "repeat_changed_frames": [],
+          "engine_class": "jp.hidemaru.burnedcaptionreader.ocr.V6ComparisonOcrEngine",
+          "apk_sha256": "5944c384459f2aee3c29680c24608c76ea9e43761266b221acf82fe7db061901",
+          "engine_metrics": {
+            "mlkit_calls": 66,
+            "mlkit_ns": 1263617294,
+            "detector_calls": 0,
+            "detector_ns": 0,
+            "recognizer_calls": 91,
+            "recognizer_ns": 3483851919,
+            "detector_init_ns": 0,
+            "recognizer_init_ns": 65592042
+          }
+        },
+        "v6_det": {
+          "cer": 0.02591283863368669,
+          "edits": [
+            22,
+            22,
+            0,
+            0
+          ],
+          "reference_characters": 849,
+          "ser": 0.5,
+          "error_frames": 14,
+          "raw_cer": 0.1338506304558681,
+          "raw_ser": 0.9285714285714286,
+          "complete_misses": 0,
+          "caption_frames": 28,
+          "blank_false_positives": 0,
+          "blank_frames": 0,
+          "known_noncaption_contamination_frames": 0,
+          "warm_pipeline": {
+            "n": 54,
+            "median_ms": 469.0,
+            "p95_ms": 578
+          },
+          "warm_excluded_ids": [
+            [
+              "00000001791806939890"
+            ],
+            [
+              "00000001791806939890"
+            ]
+          ],
+          "all_pipeline": {
+            "n": 56,
+            "median_ms": 470.0,
+            "p95_ms": 595
+          },
+          "cold_first_frame_ms": [
+            651,
+            622
+          ],
+          "sampled_peak_pss_kb": [
+            288452,
+            288581
+          ],
+          "vmhwm_kb": [
+            478604,
+            478680
+          ],
+          "ocr_jobs": [
+            56,
+            56
+          ],
+          "speech_requests": [
+            9,
+            9
+          ],
+          "repeat_changed_frames": [],
+          "engine_class": "jp.hidemaru.burnedcaptionreader.ocr.V6ComparisonOcrEngine",
+          "apk_sha256": "5944c384459f2aee3c29680c24608c76ea9e43761266b221acf82fe7db061901",
+          "engine_metrics": {
+            "mlkit_calls": 0,
+            "mlkit_ns": 0,
+            "detector_calls": 56,
+            "detector_ns": 4647981378,
+            "recognizer_calls": 188,
+            "recognizer_ns": 8047508556,
+            "detector_init_ns": 57686625,
+            "recognizer_init_ns": 51213416
+          }
+        },
+        "v6_both": {
+          "cer": 0.009422850412249705,
+          "edits": [
+            8,
+            8,
+            0,
+            0
+          ],
+          "reference_characters": 849,
+          "ser": 0.21428571428571427,
+          "error_frames": 6,
+          "raw_cer": 0.12027158098933075,
+          "raw_ser": 0.8928571428571429,
+          "complete_misses": 0,
+          "caption_frames": 28,
+          "blank_false_positives": 0,
+          "blank_frames": 0,
+          "known_noncaption_contamination_frames": 0,
+          "warm_pipeline": {
+            "n": 54,
+            "median_ms": 468.5,
+            "p95_ms": 587
+          },
+          "warm_excluded_ids": [
+            [
+              "00000001791806939890"
+            ],
+            [
+              "00000001791806939890"
+            ]
+          ],
+          "all_pipeline": {
+            "n": 56,
+            "median_ms": 473.5,
+            "p95_ms": 599
+          },
+          "cold_first_frame_ms": [
+            656,
+            620
+          ],
+          "sampled_peak_pss_kb": [
+            299198,
+            299508
+          ],
+          "vmhwm_kb": [
+            465092,
+            465468
+          ],
+          "ocr_jobs": [
+            56,
+            56
+          ],
+          "speech_requests": [
+            9,
+            9
+          ],
+          "repeat_changed_frames": [],
+          "engine_class": "jp.hidemaru.burnedcaptionreader.ocr.V6ComparisonOcrEngine",
+          "apk_sha256": "5944c384459f2aee3c29680c24608c76ea9e43761266b221acf82fe7db061901",
+          "engine_metrics": {
+            "mlkit_calls": 0,
+            "mlkit_ns": 0,
+            "detector_calls": 56,
+            "detector_ns": 4285821255,
+            "recognizer_calls": 188,
+            "recognizer_ns": 8405894513,
+            "detector_init_ns": 51822708,
+            "recognizer_init_ns": 41815625
+          }
+        }
+      },
+      "manifest_sha256": "c927d62f79814a626c347c1ab74a07a3372f75e3591926bbb6b07d56856469d4",
+      "initialization": {
+        "mlkit_constructor_ms": 12.870667,
+        "v6_detector_constructor_ms": 72.129208,
+        "v5_recognizer_constructor_ms": 90.837959,
+        "v6_recognizer_constructor_ms": 41.256416
+      },
+      "detection": {
+        "mlkit": {
+          "frames": 11,
+          "truth_boxes": 46,
+          "predicted_boxes": 41,
+          "tp_at_iou_0_5": 35,
+          "recall": 0.7608695652173914,
+          "precision": 0.8536585365853658,
+          "matched_mean_iou": 0.7349824210350195,
+          "mean_best_iou_including_misses": 0.6394972622421622,
+          "caption_recall": 1.0,
+          "warm_inference": {
+            "n": 22,
+            "median_ms": 14.045042,
+            "p95_ms": 17.249084
+          },
+          "first_inference_ms": 52.416875
+        },
+        "v6": {
+          "frames": 11,
+          "truth_boxes": 46,
+          "predicted_boxes": 46,
+          "tp_at_iou_0_5": 44,
+          "recall": 0.9565217391304348,
+          "precision": 0.9565217391304348,
+          "matched_mean_iou": 0.780452659517534,
+          "mean_best_iou_including_misses": 0.757147530966119,
+          "caption_recall": 1.0,
+          "warm_inference": {
+            "n": 22,
+            "median_ms": 86.85487499999999,
+            "p95_ms": 89.221625
+          },
+          "first_inference_ms": 128.198
+        }
+      },
+      "recognition": {
+        "v5": {
+          "crops": 81,
+          "cer": 0.0447585394581861,
+          "edit_distance": 38,
+          "reference_characters": 849,
+          "raw_cer": 0.12883435582822086,
+          "warm_inference": {
+            "n": 162,
+            "median_ms": 68.7020415,
+            "p95_ms": 78.651166
+          },
+          "first_inference_ms": 73.680875,
+          "errors": [
+            {
+              "frame_id": "00000001791806939890",
+              "expected": "ここまで調べて同じ失敗事例が",
+              "actual": "」ここまで調べて同じ失敗事例が一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806939920",
+              "expected": "ここまで調べて同じ失敗事例が",
+              "actual": "」ここまで調べて同じ失敗事例が一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806939935",
+              "expected": "ここまで調べて同じ失敗事例が",
+              "actual": "」ここまで調べて同じ失敗事例が一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806939962",
+              "expected": "方式レベルの致命的な話じゃなくて、",
+              "actual": "方式レベルの致命的な話じやなくて、",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806939964",
+              "expected": "方式レベルの致命的な話じゃなくて、",
+              "actual": "方式レベルの致命的な話じやなくて、",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806939981",
+              "expected": "方式レベルの致命的な話じゃなくて、",
+              "actual": "方式レベルの致命的な話じやなくて、",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940005",
+              "expected": "サポートからようやく",
+              "actual": "ロュサポートからようやく",
+              "edits": 2
+            },
+            {
+              "frame_id": "00000001791806940005",
+              "expected": "具体的な回答がありました！",
+              "actual": "具体的な回答がありました！一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940012",
+              "expected": "サポートからようやく",
+              "actual": "ロュサポートからようやく",
+              "edits": 2
+            },
+            {
+              "frame_id": "00000001791806940012",
+              "expected": "具体的な回答がありました！",
+              "actual": "具体的な回答がありました！一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940024",
+              "expected": "サポートからようやく",
+              "actual": "ロュサポートからようやく",
+              "edits": 2
+            },
+            {
+              "frame_id": "00000001791806940024",
+              "expected": "具体的な回答がありました！",
+              "actual": "具体的な回答がありました！一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940125",
+              "expected": "何しに来たんだ・・・？",
+              "actual": "何しに来たんだ・「一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940142",
+              "expected": "・・・んん？？",
+              "actual": "C.んん??",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940142",
+              "expected": "何しに来たんだ・・・？",
+              "actual": "何しに来んだ・一",
+              "edits": 2
+            },
+            {
+              "frame_id": "00000001791806940159",
+              "expected": "ダメだと判断した！",
+              "actual": "ダメだと判断したー",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940169",
+              "expected": "ダメだと判断した！",
+              "actual": "ダメだと判断したーー",
+              "edits": 2
+            },
+            {
+              "frame_id": "00000001791806940187",
+              "expected": "ダメだと判断した！",
+              "actual": "ダメだと判断したーー",
+              "edits": 2
+            },
+            {
+              "frame_id": "00000001791806940209",
+              "expected": "ゼロベースで解決に当たってもらう！！",
+              "actual": "ゼロベ一スで解決に当たってもらう！！",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940231",
+              "expected": "ゼロベースで解決に当たってもらう！！",
+              "actual": "ゼロベ一スで解決に当たってもらう！！",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940255",
+              "expected": "ゼロベースで解決に当たってもらう！！",
+              "actual": "ゼロベ一スで解決に当たってもらう！！",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940267",
+              "expected": "ちょっ・・・待ってください！",
+              "actual": "ちよっ・…待ってください!",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940267",
+              "expected": "ようやくサポートから",
+              "actual": "ュようやくサポートから",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940267",
+              "expected": "回答が来たんです！！",
+              "actual": "回答が来たんです』一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940302",
+              "expected": "ちょっ・・・待ってください！",
+              "actual": "ちよっ・…待ってください!",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940302",
+              "expected": "ようやくサポートから",
+              "actual": "ュようやくサポートから",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940302",
+              "expected": "回答が来たんです！！",
+              "actual": "回答が来たんです』一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940344",
+              "expected": "ちょうど今その検証を",
+              "actual": "ちようど今その検証を",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940363",
+              "expected": "ちょうど今その検証を",
+              "actual": "ちようど今その検証を",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940387",
+              "expected": "ちょうど今その検証を",
+              "actual": "ちようど今その検証を",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940415",
+              "expected": "ちょうど今その検証を",
+              "actual": "ちようど今その検証を",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940445",
+              "expected": "その繰り返しだったじゃないか！！",
+              "actual": "その繰り返しだったじやないか！！",
+              "edits": 1
+            }
+          ]
+        },
+        "v6": {
+          "crops": 81,
+          "cer": 0.02237926972909305,
+          "edit_distance": 19,
+          "reference_characters": 849,
+          "raw_cer": 0.10429447852760736,
+          "warm_inference": {
+            "n": 162,
+            "median_ms": 71.6205415,
+            "p95_ms": 82.133167
+          },
+          "first_inference_ms": 56.450166,
+          "errors": [
+            {
+              "frame_id": "00000001791806939890",
+              "expected": "出てこないってことは",
+              "actual": "1出てこないってことは",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806939920",
+              "expected": "出てこないってことは",
+              "actual": "1出てこないってことは",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806939935",
+              "expected": "出てこないってことは",
+              "actual": "1出てこないってことは",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940044",
+              "expected": "実機検証を進めてくれ！",
+              "actual": "1実機検証を進めてくれ！",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940142",
+              "expected": "・・・んん？？",
+              "actual": "hん??",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940159",
+              "expected": "ダメだと判断した！",
+              "actual": "1ダメだと判断した！ー",
+              "edits": 2
+            },
+            {
+              "frame_id": "00000001791806940169",
+              "expected": "ダメだと判断した！",
+              "actual": "1ダメだと判断した！ー",
+              "edits": 2
+            },
+            {
+              "frame_id": "00000001791806940187",
+              "expected": "ダメだと判断した！",
+              "actual": "1ダメだと判断した！ー",
+              "edits": 2
+            },
+            {
+              "frame_id": "00000001791806940209",
+              "expected": "ゼロベースで解決に当たってもらう！！",
+              "actual": "ゼロべースで解決に当たってもらう！！",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940231",
+              "expected": "ゼロベースで解決に当たってもらう！！",
+              "actual": "ゼロべースで解決に当たってもらう！！",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940255",
+              "expected": "ゼロベースで解決に当たってもらう！！",
+              "actual": "ゼロべースで解決に当たってもらう！！",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940267",
+              "expected": "ちょっ・・・待ってください！",
+              "actual": "ちよっ…待ってください！",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940267",
+              "expected": "回答が来たんです！！",
+              "actual": "1回答が来たんです！！",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940302",
+              "expected": "ちょっ・・・待ってください！",
+              "actual": "ちよっ…待ってください！",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940302",
+              "expected": "回答が来たんです！！",
+              "actual": "1回答が来たんです！！",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791806940445",
+              "expected": "その繰り返しだったじゃないか！！",
+              "actual": "その繰り返しだったじやないか！！",
+              "edits": 1
+            }
+          ]
+        }
+      }
+    },
+    "dev-watch": {
+      "split": "development",
+      "frames": 28,
+      "modes": {
+        "hybrid": {
+          "cer": 0.10142348754448399,
+          "edits": [
+            57,
+            4,
+            0,
+            53
+          ],
+          "reference_characters": 562,
+          "ser": 0.32142857142857145,
+          "error_frames": 9,
+          "raw_cer": 0.1001727115716753,
+          "raw_ser": 0.32142857142857145,
+          "complete_misses": 2,
+          "caption_frames": 20,
+          "blank_false_positives": 0,
+          "blank_frames": 8,
+          "known_noncaption_contamination_frames": 0,
+          "warm_pipeline": {
+            "n": 52,
+            "median_ms": 108.0,
+            "p95_ms": 132
+          },
+          "warm_excluded_ids": [
+            [
+              "00000001791807269272",
+              "00000001791807269336"
+            ],
+            [
+              "00000001791807269272",
+              "00000001791807269336"
+            ]
+          ],
+          "all_pipeline": {
+            "n": 56,
+            "median_ms": 108.0,
+            "p95_ms": 175
+          },
+          "cold_first_frame_ms": [
+            164,
+            175
+          ],
+          "sampled_peak_pss_kb": [
+            351729,
+            351546
+          ],
+          "vmhwm_kb": [
+            474224,
+            473980
+          ],
+          "ocr_jobs": [
+            46,
+            46
+          ],
+          "speech_requests": [
+            5,
+            5
+          ],
+          "repeat_changed_frames": [],
+          "engine_class": "jp.hidemaru.burnedcaptionreader.ocr.HybridCaptionOcrEngine",
+          "apk_sha256": "5944c384459f2aee3c29680c24608c76ea9e43761266b221acf82fe7db061901"
+        },
+        "v6_rec": {
+          "cer": 0.08540925266903915,
+          "edits": [
+            48,
+            0,
+            0,
+            48
+          ],
+          "reference_characters": 562,
+          "ser": 0.07142857142857142,
+          "error_frames": 2,
+          "raw_cer": 0.0846286701208981,
+          "raw_ser": 0.07142857142857142,
+          "complete_misses": 2,
+          "caption_frames": 20,
+          "blank_false_positives": 0,
+          "blank_frames": 8,
+          "known_noncaption_contamination_frames": 0,
+          "warm_pipeline": {
+            "n": 52,
+            "median_ms": 113.0,
+            "p95_ms": 147
+          },
+          "warm_excluded_ids": [
+            [
+              "00000001791807269272",
+              "00000001791807269336"
+            ],
+            [
+              "00000001791807269272",
+              "00000001791807269336"
+            ]
+          ],
+          "all_pipeline": {
+            "n": 56,
+            "median_ms": 114.5,
+            "p95_ms": 184
+          },
+          "cold_first_frame_ms": [
+            184,
+            182
+          ],
+          "sampled_peak_pss_kb": [
+            363083,
+            363279
+          ],
+          "vmhwm_kb": [
+            481044,
+            481236
+          ],
+          "ocr_jobs": [
+            46,
+            46
+          ],
+          "speech_requests": [
+            5,
+            5
+          ],
+          "repeat_changed_frames": [],
+          "engine_class": "jp.hidemaru.burnedcaptionreader.ocr.V6ComparisonOcrEngine",
+          "apk_sha256": "5944c384459f2aee3c29680c24608c76ea9e43761266b221acf82fe7db061901",
+          "engine_metrics": {
+            "mlkit_calls": 46,
+            "mlkit_ns": 584542206,
+            "detector_calls": 0,
+            "detector_ns": 0,
+            "recognizer_calls": 18,
+            "recognizer_ns": 1650417792,
+            "detector_init_ns": 0,
+            "recognizer_init_ns": 58593000
+          }
+        },
+        "v6_det": {
+          "cer": 0.1619217081850534,
+          "edits": [
+            91,
+            6,
+            0,
+            85
+          ],
+          "reference_characters": 562,
+          "ser": 0.7142857142857143,
+          "error_frames": 20,
+          "raw_cer": 0.15889464594127806,
+          "raw_ser": 0.7142857142857143,
+          "complete_misses": 2,
+          "caption_frames": 20,
+          "blank_false_positives": 0,
+          "blank_frames": 8,
+          "known_noncaption_contamination_frames": 0,
+          "warm_pipeline": {
+            "n": 54,
+            "median_ms": 297.0,
+            "p95_ms": 344
+          },
+          "warm_excluded_ids": [
+            [
+              "00000001791807269272"
+            ],
+            [
+              "00000001791807269272"
+            ]
+          ],
+          "all_pipeline": {
+            "n": 56,
+            "median_ms": 296.0,
+            "p95_ms": 344
+          },
+          "cold_first_frame_ms": [
+            280,
+            289
+          ],
+          "sampled_peak_pss_kb": [
+            328052,
+            328352
+          ],
+          "vmhwm_kb": [
+            494140,
+            494252
+          ],
+          "ocr_jobs": [
+            46,
+            46
+          ],
+          "speech_requests": [
+            6,
+            6
+          ],
+          "repeat_changed_frames": [],
+          "engine_class": "jp.hidemaru.burnedcaptionreader.ocr.V6ComparisonOcrEngine",
+          "apk_sha256": "5944c384459f2aee3c29680c24608c76ea9e43761266b221acf82fe7db061901",
+          "engine_metrics": {
+            "mlkit_calls": 0,
+            "mlkit_ns": 0,
+            "detector_calls": 46,
+            "detector_ns": 3120174622,
+            "recognizer_calls": 26,
+            "recognizer_ns": 3449807792,
+            "detector_init_ns": 56259208,
+            "recognizer_init_ns": 46190709
+          }
+        },
+        "v6_both": {
+          "cer": 0.08540925266903915,
+          "edits": [
+            48,
+            0,
+            0,
+            48
+          ],
+          "reference_characters": 562,
+          "ser": 0.07142857142857142,
+          "error_frames": 2,
+          "raw_cer": 0.0846286701208981,
+          "raw_ser": 0.07142857142857142,
+          "complete_misses": 2,
+          "caption_frames": 20,
+          "blank_false_positives": 0,
+          "blank_frames": 8,
+          "known_noncaption_contamination_frames": 0,
+          "warm_pipeline": {
+            "n": 54,
+            "median_ms": 249.0,
+            "p95_ms": 281
+          },
+          "warm_excluded_ids": [
+            [
+              "00000001791807269272"
+            ],
+            [
+              "00000001791807269272"
+            ]
+          ],
+          "all_pipeline": {
+            "n": 56,
+            "median_ms": 250.5,
+            "p95_ms": 288
+          },
+          "cold_first_frame_ms": [
+            288,
+            263
+          ],
+          "sampled_peak_pss_kb": [
+            335642,
+            335294
+          ],
+          "vmhwm_kb": [
+            501628,
+            501424
+          ],
+          "ocr_jobs": [
+            46,
+            46
+          ],
+          "speech_requests": [
+            5,
+            5
+          ],
+          "repeat_changed_frames": [],
+          "engine_class": "jp.hidemaru.burnedcaptionreader.ocr.V6ComparisonOcrEngine",
+          "apk_sha256": "5944c384459f2aee3c29680c24608c76ea9e43761266b221acf82fe7db061901",
+          "engine_metrics": {
+            "mlkit_calls": 0,
+            "mlkit_ns": 0,
+            "detector_calls": 46,
+            "detector_ns": 3009838378,
+            "recognizer_calls": 26,
+            "recognizer_ns": 2588773499,
+            "detector_init_ns": 60852458,
+            "recognizer_init_ns": 43978625
+          }
+        }
+      },
+      "manifest_sha256": "15bcd55d7105a95ac14f97f324d810c4eb76242b821b64fd45af3e2b7b7e7d53",
+      "initialization": {
+        "mlkit_constructor_ms": 15.820708,
+        "v6_detector_constructor_ms": 67.077792,
+        "v5_recognizer_constructor_ms": 91.344792,
+        "v6_recognizer_constructor_ms": 40.698042
+      },
+      "detection": {
+        "mlkit": {
+          "frames": 10,
+          "truth_boxes": 5,
+          "predicted_boxes": 5,
+          "tp_at_iou_0_5": 5,
+          "recall": 1.0,
+          "precision": 1.0,
+          "matched_mean_iou": 0.8844141183360463,
+          "mean_best_iou_including_misses": 0.8844141183360463,
+          "caption_recall": 1.0,
+          "warm_inference": {
+            "n": 20,
+            "median_ms": 14.0511455,
+            "p95_ms": 27.655333
+          },
+          "first_inference_ms": 46.982
+        },
+        "v6": {
+          "frames": 10,
+          "truth_boxes": 5,
+          "predicted_boxes": 5,
+          "tp_at_iou_0_5": 5,
+          "recall": 1.0,
+          "precision": 1.0,
+          "matched_mean_iou": 0.8734676124824091,
+          "mean_best_iou_including_misses": 0.8734676124824091,
+          "caption_recall": 1.0,
+          "warm_inference": {
+            "n": 20,
+            "median_ms": 135.3524585,
+            "p95_ms": 161.610958
+          },
+          "first_inference_ms": 115.172041
+        }
+      },
+      "recognition": {
+        "v5": {
+          "crops": 20,
+          "cer": 0.06227758007117438,
+          "edit_distance": 35,
+          "reference_characters": 562,
+          "raw_cer": 0.06217616580310881,
+          "warm_inference": {
+            "n": 40,
+            "median_ms": 124.631417,
+            "p95_ms": 161.208375
+          },
+          "first_inference_ms": 100.0485,
+          "errors": [
+            {
+              "frame_id": "00000001791807269494",
+              "expected": "よく観察すると至る所にサビが見られます",
+              "actual": "よく観察すると至る所にサビが見られす",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807269561",
+              "expected": "よく観察すると至る所にサビが見られます",
+              "actual": "よく観察すると至る所にサビが見られす",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807269599",
+              "expected": "よく観察すると至る所にサビが見られます",
+              "actual": "よく観察すると至る所にサビが見られす",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807270117",
+              "expected": "ローターによる巻き上げと手巻き、どちらも正常に作動しています",
+              "actual": "",
+              "edits": 29
+            },
+            {
+              "frame_id": "00000001791807270171",
+              "expected": "テンプが動きません、エネルギーがうまく伝達されていないようです",
+              "actual": "テンプが動さません、エネルギーがうまく伝達されていないようです",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807270231",
+              "expected": "テンプが動きません、エネルギーがうまく伝達されていないようです",
+              "actual": "テンプが動さません、エネルギーがうまく伝達されていないようです",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807270280",
+              "expected": "テンプが動きません、エネルギーがうまく伝達されていないようです",
+              "actual": "テンプが動さません、エネルギーがうまく伝達されていないようです",
+              "edits": 1
+            }
+          ]
+        },
+        "v6": {
+          "crops": 20,
+          "cer": 0.051601423487544484,
+          "edit_distance": 29,
+          "reference_characters": 562,
+          "raw_cer": 0.05181347150259067,
+          "warm_inference": {
+            "n": 40,
+            "median_ms": 133.48556200000002,
+            "p95_ms": 170.287042
+          },
+          "first_inference_ms": 86.277375,
+          "errors": [
+            {
+              "frame_id": "00000001791807270117",
+              "expected": "ローターによる巻き上げと手巻き、どちらも正常に作動しています",
+              "actual": "",
+              "edits": 29
+            }
+          ]
+        }
+      }
+    },
+    "heldout": {
+      "split": "held_out",
+      "frames": 43,
+      "modes": {
+        "hybrid": {
+          "cer": 0.1164021164021164,
+          "edits": [
+            132,
+            32,
+            35,
+            65
+          ],
+          "reference_characters": 1134,
+          "ser": 0.6976744186046512,
+          "error_frames": 30,
+          "raw_cer": 0.18764129615674455,
+          "raw_ser": 0.8604651162790697,
+          "complete_misses": 0,
+          "caption_frames": 39,
+          "blank_false_positives": 3,
+          "blank_frames": 4,
+          "known_noncaption_contamination_frames": 2,
+          "warm_pipeline": {
+            "n": 84,
+            "median_ms": 325.5,
+            "p95_ms": 522
+          },
+          "warm_excluded_ids": [
+            [
+              "00000001791807506103"
+            ],
+            [
+              "00000001791807506103"
+            ]
+          ],
+          "all_pipeline": {
+            "n": 86,
+            "median_ms": 337.0,
+            "p95_ms": 575
+          },
+          "cold_first_frame_ms": [
+            686,
+            904
+          ],
+          "sampled_peak_pss_kb": [
+            244269,
+            215183
+          ],
+          "vmhwm_kb": [
+            377836,
+            344064
+          ],
+          "ocr_jobs": [
+            90,
+            90
+          ],
+          "speech_requests": [
+            16,
+            16
+          ],
+          "repeat_changed_frames": [],
+          "engine_class": "jp.hidemaru.burnedcaptionreader.ocr.HybridCaptionOcrEngine",
+          "apk_sha256": "5944c384459f2aee3c29680c24608c76ea9e43761266b221acf82fe7db061901"
+        },
+        "v6_rec": {
+          "cer": 0.10317460317460317,
+          "edits": [
+            117,
+            16,
+            39,
+            62
+          ],
+          "reference_characters": 1134,
+          "ser": 0.3953488372093023,
+          "error_frames": 17,
+          "raw_cer": 0.16880180859080632,
+          "raw_ser": 0.813953488372093,
+          "complete_misses": 0,
+          "caption_frames": 39,
+          "blank_false_positives": 3,
+          "blank_frames": 4,
+          "known_noncaption_contamination_frames": 2,
+          "warm_pipeline": {
+            "n": 84,
+            "median_ms": 351.5,
+            "p95_ms": 504
+          },
+          "warm_excluded_ids": [
+            [
+              "00000001791807506103"
+            ],
+            [
+              "00000001791807506103"
+            ]
+          ],
+          "all_pipeline": {
+            "n": 86,
+            "median_ms": 353.5,
+            "p95_ms": 551
+          },
+          "cold_first_frame_ms": [
+            757,
+            951
+          ],
+          "sampled_peak_pss_kb": [
+            226734,
+            223770
+          ],
+          "vmhwm_kb": [
+            367556,
+            354520
+          ],
+          "ocr_jobs": [
+            90,
+            90
+          ],
+          "speech_requests": [
+            14,
+            14
+          ],
+          "repeat_changed_frames": [],
+          "engine_class": "jp.hidemaru.burnedcaptionreader.ocr.V6ComparisonOcrEngine",
+          "apk_sha256": "5944c384459f2aee3c29680c24608c76ea9e43761266b221acf82fe7db061901",
+          "engine_metrics": {
+            "mlkit_calls": 90,
+            "mlkit_ns": 3744797205,
+            "detector_calls": 0,
+            "detector_ns": 0,
+            "recognizer_calls": 122,
+            "recognizer_ns": 8653314589,
+            "detector_init_ns": 0,
+            "recognizer_init_ns": 102591750
+          }
+        },
+        "v6_det": {
+          "cer": 0.08641975308641975,
+          "edits": [
+            98,
+            16,
+            28,
+            54
+          ],
+          "reference_characters": 1134,
+          "ser": 0.4186046511627907,
+          "error_frames": 18,
+          "raw_cer": 0.1544837980406933,
+          "raw_ser": 0.8604651162790697,
+          "complete_misses": 0,
+          "caption_frames": 39,
+          "blank_false_positives": 3,
+          "blank_frames": 4,
+          "known_noncaption_contamination_frames": 2,
+          "warm_pipeline": {
+            "n": 84,
+            "median_ms": 1129.5,
+            "p95_ms": 1505
+          },
+          "warm_excluded_ids": [
+            [
+              "00000001791807506103"
+            ],
+            [
+              "00000001791807506103"
+            ]
+          ],
+          "all_pipeline": {
+            "n": 86,
+            "median_ms": 1127.0,
+            "p95_ms": 1505
+          },
+          "cold_first_frame_ms": [
+            1058,
+            962
+          ],
+          "sampled_peak_pss_kb": [
+            202585,
+            200921
+          ],
+          "vmhwm_kb": [
+            364748,
+            363536
+          ],
+          "ocr_jobs": [
+            89,
+            89
+          ],
+          "speech_requests": [
+            16,
+            16
+          ],
+          "repeat_changed_frames": [],
+          "engine_class": "jp.hidemaru.burnedcaptionreader.ocr.V6ComparisonOcrEngine",
+          "apk_sha256": "5944c384459f2aee3c29680c24608c76ea9e43761266b221acf82fe7db061901",
+          "engine_metrics": {
+            "mlkit_calls": 0,
+            "mlkit_ns": 0,
+            "detector_calls": 89,
+            "detector_ns": 17388899507,
+            "recognizer_calls": 258,
+            "recognizer_ns": 31589011635,
+            "detector_init_ns": 219088209,
+            "recognizer_init_ns": 112778542
+          }
+        },
+        "v6_both": {
+          "cer": 0.07671957671957672,
+          "edits": [
+            87,
+            5,
+            28,
+            54
+          ],
+          "reference_characters": 1134,
+          "ser": 0.3023255813953488,
+          "error_frames": 13,
+          "raw_cer": 0.1492087415222306,
+          "raw_ser": 0.7674418604651163,
+          "complete_misses": 0,
+          "caption_frames": 39,
+          "blank_false_positives": 3,
+          "blank_frames": 4,
+          "known_noncaption_contamination_frames": 1,
+          "warm_pipeline": {
+            "n": 84,
+            "median_ms": 1139.0,
+            "p95_ms": 1342
+          },
+          "warm_excluded_ids": [
+            [
+              "00000001791807506103"
+            ],
+            [
+              "00000001791807506103"
+            ]
+          ],
+          "all_pipeline": {
+            "n": 86,
+            "median_ms": 1137.5,
+            "p95_ms": 1342
+          },
+          "cold_first_frame_ms": [
+            1045,
+            968
+          ],
+          "sampled_peak_pss_kb": [
+            208604,
+            213285
+          ],
+          "vmhwm_kb": [
+            371208,
+            372044
+          ],
+          "ocr_jobs": [
+            89,
+            89
+          ],
+          "speech_requests": [
+            16,
+            16
+          ],
+          "repeat_changed_frames": [],
+          "engine_class": "jp.hidemaru.burnedcaptionreader.ocr.V6ComparisonOcrEngine",
+          "apk_sha256": "5944c384459f2aee3c29680c24608c76ea9e43761266b221acf82fe7db061901",
+          "engine_metrics": {
+            "mlkit_calls": 0,
+            "mlkit_ns": 0,
+            "detector_calls": 89,
+            "detector_ns": 17477819506,
+            "recognizer_calls": 258,
+            "recognizer_ns": 28092221849,
+            "detector_init_ns": 100891792,
+            "recognizer_init_ns": 95213000
+          }
+        }
+      },
+      "manifest_sha256": "b6d1a41f1b6f0f418314febd4db6d05cb0c2e41314fab23de28dfb748c771c17",
+      "initialization": {
+        "mlkit_constructor_ms": 38.181083,
+        "v6_detector_constructor_ms": 234.7525,
+        "v5_recognizer_constructor_ms": 299.557833,
+        "v6_recognizer_constructor_ms": 91.784375
+      },
+      "detection": {
+        "mlkit": {
+          "frames": 19,
+          "truth_boxes": 57,
+          "predicted_boxes": 55,
+          "tp_at_iou_0_5": 52,
+          "recall": 0.9122807017543859,
+          "precision": 0.9454545454545454,
+          "matched_mean_iou": 0.750748880710792,
+          "mean_best_iou_including_misses": 0.7100864560381233,
+          "caption_recall": 1.0,
+          "warm_inference": {
+            "n": 38,
+            "median_ms": 40.2605625,
+            "p95_ms": 51.388584
+          },
+          "first_inference_ms": 150.576542
+        },
+        "v6": {
+          "frames": 19,
+          "truth_boxes": 57,
+          "predicted_boxes": 106,
+          "tp_at_iou_0_5": 55,
+          "recall": 0.9649122807017544,
+          "precision": 0.5188679245283019,
+          "matched_mean_iou": 0.8214456795612759,
+          "mean_best_iou_including_misses": 0.8091837872734686,
+          "caption_recall": 1.0,
+          "warm_inference": {
+            "n": 38,
+            "median_ms": 220.10375,
+            "p95_ms": 267.277833
+          },
+          "first_inference_ms": 340.684458
+        }
+      },
+      "recognition": {
+        "v5": {
+          "crops": 117,
+          "cer": 0.037037037037037035,
+          "edit_distance": 42,
+          "reference_characters": 1134,
+          "raw_cer": 0.0744595676541233,
+          "warm_inference": {
+            "n": 234,
+            "median_ms": 133.58193749999998,
+            "p95_ms": 161.889708
+          },
+          "first_inference_ms": 189.350916,
+          "errors": [
+            {
+              "frame_id": "00000001791807506171",
+              "expected": "アプリ設定で",
+              "actual": "アフリ設定で",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506186",
+              "expected": "アプリ設定で",
+              "actual": "アフリ設定で",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506204",
+              "expected": "結構あるし、",
+              "actual": "結構ある",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506228",
+              "expected": "結構あるし、",
+              "actual": "結構ある",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506238",
+              "expected": "結構あるし、",
+              "actual": "結構ある",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506252",
+              "expected": "まあ1日1回",
+              "actual": "まあ1日回",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506252",
+              "expected": "バックアップ走らせれば十分かな？",
+              "actual": "ハックアップ走らせれば十分かな？",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506266",
+              "expected": "まあ1日1回",
+              "actual": "まあ1日回",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506266",
+              "expected": "バックアップ走らせれば十分かな？",
+              "actual": "ハックアップ走らせれば十分かな？",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506275",
+              "expected": "まあ1日1回",
+              "actual": "まあ1日回",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506275",
+              "expected": "バックアップ走らせれば十分かな？",
+              "actual": "ハックアップ走らせれば十分かな？",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506427",
+              "expected": "もしデータベースレベルで",
+              "actual": "ュもしデータベースレベルで",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506427",
+              "expected": "成り立つんだとすると・・・",
+              "actual": "成り立つんだとすると・一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506444",
+              "expected": "もしデータベースレベルで",
+              "actual": "ュもしデータベースレベルで",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506444",
+              "expected": "成り立つんだとすると・・・",
+              "actual": "成り立つんだとすると・一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506459",
+              "expected": "バックアップさせられれば",
+              "actual": "ハックアップさせられればー",
+              "edits": 2
+            },
+            {
+              "frame_id": "00000001791807506481",
+              "expected": "バックアップさせられれば",
+              "actual": "ハックアップさせられればー",
+              "edits": 2
+            },
+            {
+              "frame_id": "00000001791807506496",
+              "expected": "バックアップさせられれば",
+              "actual": "ハックアップさせられればー",
+              "edits": 2
+            },
+            {
+              "frame_id": "00000001791807506520",
+              "expected": "テーブルやレコードを",
+              "actual": "ュテーブルやレコードを",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506522",
+              "expected": "テーブルやレコードを",
+              "actual": "ュテーブルやレコードを",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506539",
+              "expected": "テーブルやレコードを",
+              "actual": "ュテーブルやレコードを",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506592",
+              "expected": "いやいや・・・",
+              "actual": "Cwやwp.",
+              "edits": 4
+            },
+            {
+              "frame_id": "00000001791807506592",
+              "expected": "設定情報とか良く分からんから",
+              "actual": "設定情報とか良く分からんから一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506604",
+              "expected": "いやいや・・・",
+              "actual": "Cwやwp.",
+              "edits": 4
+            },
+            {
+              "frame_id": "00000001791807506604",
+              "expected": "設定情報とか良く分からんから",
+              "actual": "設定情報とか良く分からんから一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506613",
+              "expected": "いやいや・・・",
+              "actual": "Cwやwや.",
+              "edits": 3
+            },
+            {
+              "frame_id": "00000001791807506613",
+              "expected": "データベースソフトウェアの",
+              "actual": "データベースソフトウェアのー",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506613",
+              "expected": "設定情報とか良く分からんから",
+              "actual": "設定情報とか良く分からんから一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506635",
+              "expected": "次期でちゃんと動くのかすら",
+              "actual": "次期でちやんと動くのかすら」",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506733",
+              "expected": "まあ無理だよな・・・",
+              "actual": "ま無理だよな…。",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506746",
+              "expected": "まあ無理だよな・・・",
+              "actual": "ま無理だよな…。",
+              "edits": 1
+            }
+          ]
+        },
+        "v6": {
+          "crops": 117,
+          "cer": 0.02204585537918871,
+          "edit_distance": 25,
+          "reference_characters": 1134,
+          "raw_cer": 0.08646917534027222,
+          "warm_inference": {
+            "n": 234,
+            "median_ms": 144.609792,
+            "p95_ms": 177.246042
+          },
+          "first_inference_ms": 139.165751,
+          "errors": [
+            {
+              "frame_id": "00000001791807506140",
+              "expected": "バックアップ取ってないな・・・",
+              "actual": "バックアッフ取ってないな…",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506287",
+              "expected": "機能が盛沢山なんだなー",
+              "actual": "機能が盛沢山なんだな一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506309",
+              "expected": "機能が盛沢山なんだなー",
+              "actual": "機能が盛沢山なんだな一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506427",
+              "expected": "成り立つんだとすると・・・",
+              "actual": "1成り立つんだとすると…",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506444",
+              "expected": "成り立つんだとすると・・・",
+              "actual": "1成り立つんだとすると…",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506459",
+              "expected": "バックアップさせられれば",
+              "actual": "1バックアップさせられればー",
+              "edits": 2
+            },
+            {
+              "frame_id": "00000001791807506481",
+              "expected": "バックアップさせられれば",
+              "actual": "1バックアップさせられればー",
+              "edits": 2
+            },
+            {
+              "frame_id": "00000001791807506496",
+              "expected": "バックアップさせられれば",
+              "actual": "1バックアップさせられればー",
+              "edits": 2
+            },
+            {
+              "frame_id": "00000001791807506561",
+              "expected": "移行完了？？？",
+              "actual": "移行完了？？一",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506592",
+              "expected": "いやいや・・・",
+              "actual": "や",
+              "edits": 3
+            },
+            {
+              "frame_id": "00000001791807506604",
+              "expected": "いやいや・・・",
+              "actual": "や",
+              "edits": 3
+            },
+            {
+              "frame_id": "00000001791807506613",
+              "expected": "いやいや・・・",
+              "actual": "やいや",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506635",
+              "expected": "次期でちゃんと動くのかすら",
+              "actual": "次期でちやんと動くのかすら",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506650",
+              "expected": "最新バージョンなんだから",
+              "actual": "1最新バージョンなんだから",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506665",
+              "expected": "最新バージョンなんだから",
+              "actual": "1最新バージョンなんだから",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506687",
+              "expected": "最新バージョンなんだから",
+              "actual": "1最新バージョンなんだから",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506733",
+              "expected": "誰かがやってるだろうし・・・",
+              "actual": "1誰かがやってるだろうし……",
+              "edits": 1
+            },
+            {
+              "frame_id": "00000001791807506746",
+              "expected": "誰かがやってるだろうし・・・",
+              "actual": "1誰かがやってるだろうし……",
+              "edits": 1
+            }
+          ]
+        }
+      }
+    }
+  },
+  "pairs": {
+    "dev-cat": {
+      "hybrid->v6_rec": {
+        "cer_percentage_points": 0.23557126030624154,
+        "ser_percentage_points": 0.0,
+        "median_pipeline_ms_delta": 13.0,
+        "edits_delta": 2
+      },
+      "hybrid->v6_det": {
+        "cer_percentage_points": -10.011778563015312,
+        "ser_percentage_points": 0.0,
+        "median_pipeline_ms_delta": 288.5,
+        "edits_delta": -85
+      },
+      "v6_rec->v6_both": {
+        "cer_percentage_points": -11.896348645465253,
+        "ser_percentage_points": -28.57142857142857,
+        "median_pipeline_ms_delta": 275.0,
+        "edits_delta": -101
+      },
+      "v6_det->v6_both": {
+        "cer_percentage_points": -1.6489988221436984,
+        "ser_percentage_points": -28.57142857142857,
+        "median_pipeline_ms_delta": -0.5,
+        "edits_delta": -14
+      },
+      "interaction_cer_percentage_points": -1.8845700824499407
+    },
+    "dev-watch": {
+      "hybrid->v6_rec": {
+        "cer_percentage_points": -1.6014234875444844,
+        "ser_percentage_points": -25.0,
+        "median_pipeline_ms_delta": 5.0,
+        "edits_delta": -9
+      },
+      "hybrid->v6_det": {
+        "cer_percentage_points": 6.049822064056939,
+        "ser_percentage_points": 39.285714285714285,
+        "median_pipeline_ms_delta": 189.0,
+        "edits_delta": 34
+      },
+      "v6_rec->v6_both": {
+        "cer_percentage_points": 0.0,
+        "ser_percentage_points": 0.0,
+        "median_pipeline_ms_delta": 136.0,
+        "edits_delta": 0
+      },
+      "v6_det->v6_both": {
+        "cer_percentage_points": -7.6512455516014235,
+        "ser_percentage_points": -64.28571428571429,
+        "median_pipeline_ms_delta": -48.0,
+        "edits_delta": -43
+      },
+      "interaction_cer_percentage_points": -6.049822064056939
+    },
+    "heldout": {
+      "hybrid->v6_rec": {
+        "cer_percentage_points": -1.3227513227513228,
+        "ser_percentage_points": -30.232558139534888,
+        "median_pipeline_ms_delta": 26.0,
+        "edits_delta": -15
+      },
+      "hybrid->v6_det": {
+        "cer_percentage_points": -2.9982363315696645,
+        "ser_percentage_points": -27.906976744186046,
+        "median_pipeline_ms_delta": 804.0,
+        "edits_delta": -34
+      },
+      "v6_rec->v6_both": {
+        "cer_percentage_points": -2.6455026455026456,
+        "ser_percentage_points": -9.30232558139535,
+        "median_pipeline_ms_delta": 787.5,
+        "edits_delta": -30
+      },
+      "v6_det->v6_both": {
+        "cer_percentage_points": -0.9700176366843033,
+        "ser_percentage_points": -11.62790697674419,
+        "median_pipeline_ms_delta": 9.5,
+        "edits_delta": -11
+      },
+      "interaction_cer_percentage_points": 0.3527336860670194
+    }
+  },
+  "metric_note": "First pass accuracy; two passes warm latency excludes the first image and model-initialization image in each fresh process; nearest-rank p95. Frame SER, not unique subtitle-event SER."
+}

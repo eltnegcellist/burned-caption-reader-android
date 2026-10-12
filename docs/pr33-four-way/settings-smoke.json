@@ -1,0 +1,45 @@
+{
+  "modes": [
+    {
+      "mode": "hybrid",
+      "detector_v6": false,
+      "recognizer_v6": false,
+      "raw_backend": "mlkit",
+      "refined_backend": "ppocrv5",
+      "raw": "動画の字幕です\n文字を読み取ります\n最後の字幕です",
+      "refined": "動画の字幕です\n文字を読み取ります\n最後の字幕です"
+    },
+    {
+      "mode": "v6_rec",
+      "detector_v6": false,
+      "recognizer_v6": true,
+      "raw_backend": "mlkit",
+      "refined_backend": "ppocrv6_small",
+      "raw": "動画の字幕です\n文字を読み取ります\n最後の字幕です",
+      "refined": "動画の字幕です\n文字を読み取ります\n最後の字幕です"
+    },
+    {
+      "mode": "v6_det",
+      "detector_v6": true,
+      "recognizer_v6": false,
+      "raw_backend": "v6det_v5rec",
+      "refined_backend": "v6det_v5rec",
+      "raw": "動画の字幕です\n文字を読み取ります\n最後の字幕です",
+      "refined": "動画の字幕です\n文字を読み取ります\n最後の字幕です"
+    },
+    {
+      "mode": "v6_both",
+      "detector_v6": true,
+      "recognizer_v6": true,
+      "raw_backend": "v6det_v6rec",
+      "refined_backend": "v6det_v6rec",
+      "raw": "動画の字幕です\n文字を読み取ります\n最後の字幕です",
+      "refined": "動画の字幕です\n文字を読み取ります\n最後の字幕です"
+    }
+  ],
+  "independent_switches": true,
+  "settings_persistence": true,
+  "player_busy_deferral": true,
+  "player_live_modes": 4,
+  "scope": "Synthetic image; emulator only, no measured real-device latency\/accuracy"
+}

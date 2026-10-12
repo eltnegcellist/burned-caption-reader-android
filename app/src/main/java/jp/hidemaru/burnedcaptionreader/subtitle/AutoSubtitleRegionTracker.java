@@ -586,7 +586,12 @@ public final class AutoSubtitleRegionTracker {
             clearPendingTransition(state);
         } else {
             double similarity = Similarity.textSimilarity(state.lastText, candidate.text);
-            if (isEquivalentOcr(state.lastText, candidate.text, similarity)) {
+            // A changed number or negation can have >0.9 whole-string similarity.
+            // Require an established caption-shaped lane and two corroborating
+            // observations before treating it as a genuine transition.
+            if (isMeaningfulSubtitleTransition(state, candidate, similarity)) {
+                observePendingTransition(timestamp, state, candidate);
+            } else if (isEquivalentOcr(state.lastText, candidate.text, similarity)) {
                 state.stableObservations++;
                 clearPendingTransition(state);
             } else if (Similarity.isPrefixRelation(state.lastText, candidate.text)) {
@@ -841,6 +846,20 @@ public final class AutoSubtitleRegionTracker {
                 ? Math.min(2.0, (timestamp - lane.firstSeenAt - 2_000L) / 2_000.0)
                 : 0.0;
         return candidate.visualScore + transitionEvidence + diversityEvidence - staticPenalty;
+    }
+
+    /**
+     * Keep the existing visual/temporal gates, but do not let the whole-string
+     * similarity hide a protected price/number or affirmation/negation change.
+     * Fixed small labels and one-frame noisy text cannot establish a lane.
+     */
+    private boolean isMeaningfulSubtitleTransition(
+            LaneState lane, Candidate candidate, double similarity) {
+        if (lane.observations < 2 || !candidate.japanese
+                || candidate.textLength < 10 || candidate.width() < .45f
+                || !isStrongCaptionShape(candidate)
+                || similarity < .72 || similarity >= 1.0) return false;
+        return Similarity.hasMeaningfulTokenChange(lane.lastText, candidate.text);
     }
 
     private boolean isEquivalentOcr(String previous, String current, double similarity) {

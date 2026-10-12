@@ -42,6 +42,7 @@ import jp.hidemaru.burnedcaptionreader.ocr.SubtitleCropPlan;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrBitmapInputs;
 import jp.hidemaru.burnedcaptionreader.ocr.CaptionStripRecovery;
 import jp.hidemaru.burnedcaptionreader.subtitle.OcrRefinementSelector;
+import jp.hidemaru.burnedcaptionreader.subtitle.OcrVisualLineComposer;
 import jp.hidemaru.burnedcaptionreader.subtitle.TemporalOcrConsensus;
 import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticRecorder;
 import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticExport;
@@ -647,6 +648,20 @@ public final class SharedPlayerActivity extends Activity {
     }
 
     private void selectBands(Bitmap frame, int generation, long timestamp, long frameId, OcrResult raw) {
+        // Debug-only shadow: compare precisely the same PP-rescued boxes. Do not
+        // change the text sent to the candidate selector or call OCR again.
+        if (diagnostics.isRecording() && "ppocrv5_detection_rescue".equals(raw.getBackend())) {
+            List<jp.hidemaru.burnedcaptionreader.ocr.OcrLine> reordered =
+                    OcrVisualLineComposer.compose(raw.getLines());
+            StringBuilder composed = new StringBuilder();
+            for (jp.hidemaru.burnedcaptionreader.ocr.OcrLine row : reordered) {
+                if (composed.length() > 0) composed.append('\n');
+                composed.append(row.getText());
+            }
+            diagnostics.event("line_layout_shadow", "frame_id", frameId,
+                    "original_rows", raw.getLines().size(), "composed_rows", reordered.size(),
+                    "original", raw.getText(), "composed", composed.toString());
+        }
         AutoSubtitleRegionTracker.DecisionTrace trace = diagnostics.isRecording()
                 ? (stage, reason, text, top, bottom, confidence) ->
                     diagnostics.event("selection_trace", "frame_id", frameId,

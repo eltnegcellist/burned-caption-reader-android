@@ -50,6 +50,7 @@ jobs:
       - run: bash tools/replay-evaluator/run.sh
       - run: python3 tools/image-evaluator/test_run.py
       - run: python3 tools/device-ad-compare/test_analyze.py
+      - run: python3 tools/device-ad-compare/test_selection.py
       - name: Restore persistent signing key when configured
         env:
           CAPTION_SIGNING_KEYSTORE_BASE64: ${{ secrets.CAPTION_SIGNING_KEYSTORE_BASE64 }}

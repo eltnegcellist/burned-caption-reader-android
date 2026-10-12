@@ -30,8 +30,8 @@ def analyze(events, manifest):
                  e.get("type") == "capture_poll" and e.get("ocr_mode") == mode]
         per_mode[mode] = {
             "letter": MODES[mode],
-            "capture_requested_polls": polls.count("requested"),
-            "busy_skip_polls": polls.count("busy_skip"),
+            "capture_requested_polls": polls.count("requested") if polls else None,
+            "busy_skip_polls": polls.count("busy_skip") if polls else None,
             "frames_captured": sum(e.get("type") == "video_frame" and
                                    e.get("ocr_mode") == mode for e in events),
             "first_completed_ms": durations[0] if durations else None,

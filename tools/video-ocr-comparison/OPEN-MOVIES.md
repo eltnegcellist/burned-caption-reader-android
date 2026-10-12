@@ -202,3 +202,5 @@ VSEはApache-2.0、VideOCR/SE/Fast-SSIM/SSE2NEONはMITを現物で確認済み�
 - 日本語字幕：[Elephants Dream](https://commons.wikimedia.org/wiki/TimedText:Elephants_Dream_(2006).webm.ja.srt) revision1052627867、[Sintel](https://commons.wikimedia.org/wiki/TimedText:Sintel_movie_-_Blender_Fondation.ogv.ja.srt) revision937798514。
 
 Galaxy S25、3本目の独立5分動画、実写の日本語固定文字・書影、3行字幕、自然動画での否定語/数字の網羅成績、ONNX/Core ML別実行は未測定。入力画像や大きい中間物は、結果保存・hash照合と再現確認が済むまで削除しない。
+
+次期実装の段取り・採用条件は[実装計画書](IMPLEMENTATION-PLAN.md)。負荷予算・改善目標は今後の判定用の案であり、今回の実測値ではない。

@@ -51,7 +51,7 @@ def main():
         (local/name).write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n')
     for name in ['scorer-tests-final.log','image-runner-tests-final.log']:
         shutil.copyfile(local/name,public/name)
-    for name in ['OPEN-MOVIES.md','OPEN-MOVIES-REPRODUCE.md']:
+    for name in ['OPEN-MOVIES.md','OPEN-MOVIES-REPRODUCE.md','IMPLEMENTATION-PLAN.md']:
         shutil.copyfile(repo/name,local/name)
     reproduction=local/'reproduction';reproduction.mkdir(exist_ok=True)
     for file in repo.glob('*.py'):shutil.copyfile(file,reproduction/file.name)

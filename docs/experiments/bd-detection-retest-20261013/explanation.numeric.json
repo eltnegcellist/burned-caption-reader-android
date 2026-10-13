@@ -274,6 +274,39 @@
       }
     }
   },
+  "B_only_saved_output_oracle": {
+    "method": "GT-position exclusion of cat nameplate bands, then GT-best choice of selected/refined whole-band text; no D output or new inference",
+    "uses_ground_truth": true,
+    "additional_ocr_inferences": 0,
+    "selection_runtime_ms": null,
+    "datasets": {
+      "dev-cat": {
+        "reference_characters": 849,
+        "B_original_edits": 109,
+        "GT_nameplate_exclusion_edits": 29,
+        "GT_best_existing_B_edits": 7
+      },
+      "dev-watch": {
+        "reference_characters": 562,
+        "B_original_edits": 48,
+        "GT_nameplate_exclusion_edits": 48,
+        "GT_best_existing_B_edits": 48
+      },
+      "heldout": {
+        "reference_characters": 1134,
+        "B_original_edits": 117,
+        "GT_nameplate_exclusion_edits": 117,
+        "GT_best_existing_B_edits": 96
+      }
+    },
+    "overall": {
+      "reference_characters": 2545,
+      "B_original_edits": 274,
+      "GT_nameplate_exclusion_edits": 194,
+      "GT_best_existing_B_edits": 151,
+      "cer": 0.05933202357563851
+    }
+  },
   "fallback_gate_examples": [
     {
       "id": "00000001791806940101",

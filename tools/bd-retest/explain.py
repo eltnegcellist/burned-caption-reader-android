@@ -26,6 +26,23 @@ def main():
             if name=='dev-cat':d['GT_position_posthoc_exclusion']=position_counterfactual
             details[mode]=d
         out['datasets'][name]=details
+    # Oracle uses GT to choose among EXISTING B strings; never deploy this policy.
+    bound={'method':'GT-position exclusion of cat nameplate bands, then GT-best choice of selected/refined whole-band text; no D output or new inference',
+           'uses_ground_truth':True,'additional_ocr_inferences':0,'selection_runtime_ms':None,'datasets':{}}
+    for name in ['dev-cat','dev-watch','heldout']:
+        frames=json.loads((a.results/f'{name}-v6_rec-1.json').read_text())['frames']
+        original=trimmed=best=characters=0
+        for frame in frames:
+            truth=key(frame['expected_text']);characters+=len(truth);original+=frame['edit_distance']
+            bands=frame['stages']['bands']
+            if name=='dev-cat':bands=[b for b in bands if b['top']<.6]
+            selected=distance(truth,key('\n'.join(b['selected'] for b in bands)))
+            refined=distance(truth,key('\n'.join(b['refined'] for b in bands)))
+            trimmed+=selected;best+=min(selected,refined)
+        bound['datasets'][name]=dict(reference_characters=characters,B_original_edits=original,GT_nameplate_exclusion_edits=trimmed,GT_best_existing_B_edits=best)
+    bound['overall']={k:sum(d[k] for d in bound['datasets'].values()) for k in bound['datasets']['dev-cat']}
+    bound['overall']['cer']=bound['overall']['GT_best_existing_B_edits']/bound['overall']['reference_characters']
+    out['B_only_saved_output_oracle']=bound
     cat=json.loads((a.results/'dev-cat-v6_rec-1.json').read_text())['frames'];out['fallback_gate_examples']=[]
     for frame in cat:
         if frame['id'] not in ['00000001791806940101','00000001791806940115','00000001791806940125','00000001791806940142']:continue

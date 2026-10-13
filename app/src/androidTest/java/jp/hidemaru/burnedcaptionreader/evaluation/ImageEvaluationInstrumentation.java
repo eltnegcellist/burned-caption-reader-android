@@ -28,6 +28,10 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
     @Override public void onStart() {
         Bundle report = new Bundle();
         try {
+            if ("bd-components".equals(arguments.getString("mode"))) {
+                BdComponents.run(this);
+                report.putString("stream", "B/D components PASS\n"); finish(-1, report); return;
+            }
             if ("four-way-components".equals(arguments.getString("mode"))) {
                 FourWayComponents.run(this);
                 report.putString("stream", "Four-way components PASS\n"); finish(-1, report); return;
@@ -81,7 +85,7 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
                 throw new IllegalArgumentException("Coarse width override requires player replay");
             if (!cropMode && !"original".equals(arguments.getString("crop_preparation", "original")))
                 throw new IllegalArgumentException("Crop preparation requires manual crop mode");
-            PlayerFrameReplay replay = new PlayerFrameReplay(diagnosticCoarseWidth);
+            PlayerFrameReplay replay = new PlayerFrameReplay(diagnosticCoarseWidth,"e_mlkit_v6".equals(arguments.getString("ocr_mode")),!"off".equals(arguments.getString("subtitle_recheck", "on")));
             long peakPssKb = android.os.Debug.getPss();
             try {
                 for (int i = 0; i < frames.length(); i++) {
@@ -135,7 +139,7 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
                     .put("process_status",new String(Files.readAllBytes(new File("/proc/self/status").toPath()),StandardCharsets.UTF_8))
                     .put("scope", playerMode ? (diagnosticCoarseWidth == 0 ? "player_components_immediate_tts" : "player_components_diagnostic_coarse_width") : cropMode ? "manual_caption_regions_only" : "raw_image_ocr_only")
                     .put("metric", playerMode || cropMode ? "caption_comparison_key_cer" : "raw_codepoint_cer")
-                    .put("diagnostic_coarse_width", diagnosticCoarseWidth)
+                    .put("subtitle_recheck_enabled",!"off".equals(arguments.getString("subtitle_recheck", "on"))).put("diagnostic_coarse_width", diagnosticCoarseWidth)
                     .put("crop_preparation", cropMode ? arguments.getString("crop_preparation", "original") : JSONObject.NULL)
                     .put("ground_truth_source", dataset.optString("ground_truth_source", "human_review"))
                     .put("human_verified", dataset.optBoolean("human_verified"))

@@ -31,6 +31,7 @@ import android.util.DisplayMetrics;
 import android.view.WindowManager;
 import jp.hidemaru.burnedcaptionreader.capture.SceneChangeDetector;
 import jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrEngines;
+import jp.hidemaru.burnedcaptionreader.ocr.ECaptionOcrPolicy;
 import jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
@@ -350,6 +351,12 @@ public final class CaptureService extends Service {
             autoTrackLastSeen.clear();
         }
 
+        if (ocrMode == CaptionOcrMode.E) {
+            ECaptionOcrPolicy.Filtered filtered = ECaptionOcrPolicy.filter(result);
+            result = filtered.result;
+            diagnostics.event("e_background_selection", "frame_id", timestamp, "removed_rows", filtered.removed);
+        }
+        final OcrResult selectedInput = result;
         // The video ROI already excludes most browser/page content. Do not discard
         // the upper 18% of that ROI: real burned-in captions can live there.
         List<AutoSubtitleRegionTracker.Selection> selections = regionTracker.selectAll(
@@ -362,7 +369,7 @@ public final class CaptureService extends Service {
 
         refineSelections(highResSource, timestamp, selections, 0, new ArrayList<>(), refined -> {
             try {
-                processAutomaticSelections(result, timestamp, refined);
+                processAutomaticSelections(selectedInput, timestamp, refined);
             } finally {
                 completion.run();
             }
@@ -419,7 +426,7 @@ public final class CaptureService extends Service {
 
     private RefinedSelection selectBestRefinement(AutoSubtitleRegionTracker.Selection selection,
                                                   OcrResult refinedResult) {
-        OcrRefinementSelector.Result result = new OcrRefinementSelector().select(
+        OcrRefinementSelector.Result result = new OcrRefinementSelector().selectForMode(ocrMode,
                 selection.getText(), selection.getConfidence(), refinedResult);
         return new RefinedSelection(selection, result.getText(), result.getConfidence());
     }

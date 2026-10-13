@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrEngines;
+import jp.hidemaru.burnedcaptionreader.ocr.ECaptionOcrPolicy;
 import jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrEngine;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
@@ -647,6 +648,11 @@ public final class SharedPlayerActivity extends Activity {
     }
 
     private void selectBands(Bitmap frame, int generation, long timestamp, long frameId, OcrResult raw) {
+        if (ocrMode == CaptionOcrMode.E) {
+            ECaptionOcrPolicy.Filtered filtered = ECaptionOcrPolicy.filter(raw);
+            raw = filtered.result;
+            diagnostics.event("e_background_selection", "frame_id", frameId, "removed_rows", filtered.removed);
+        }
         List<AutoSubtitleRegionTracker.Selection> selections = tracker.selectForRecognition(timestamp, raw);
         diagnostics.event("selection_summary", "frame_id", frameId, "raw_rows", raw.getLines().size(),
                 "selected_bands", selections.size(), "policy", "subtitle_tracker");
@@ -687,7 +693,7 @@ public final class SharedPlayerActivity extends Activity {
                 finishFrame(frame); return;
             }
             diagnostics.ocr("ocr_refined", frameId, selection.getTrackId(), result);
-            OcrRefinementSelector.Result regular = refinement.select(selection.getText(), selection.getConfidence(), result);
+            OcrRefinementSelector.Result regular = refinement.selectForMode(ocrMode, selection.getText(), selection.getConfidence(), result);
             Bitmap white = null;
             try {
                 if (!result.getBackend().startsWith("ppocr") && !result.getBackend().startsWith("v6det_")
@@ -706,7 +712,7 @@ public final class SharedPlayerActivity extends Activity {
                 mask.recycle();
                 if (!acceptsFrame(generation)) { finishFrame(frame); return; }
                 diagnostics.ocr("ocr_white_core", frameId, selection.getTrackId(), alternate);
-                OcrRefinementSelector.Result chosen = refinement.select(selection.getText(), selection.getConfidence(), result, alternate);
+                OcrRefinementSelector.Result chosen = refinement.selectForMode(ocrMode, selection.getText(), selection.getConfidence(), result, alternate);
                 acceptRefinement(frame, generation, timestamp, frameId, selections, index, bands, selection, chosen);
             }, error -> {
                 mask.recycle();

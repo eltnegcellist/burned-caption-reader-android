@@ -1,0 +1,109 @@
+{
+  "scope": "E adoption regression; first-observation replay has simulated immediate-completion TTS, not audible latency",
+  "datasets": {
+    "dev-cat": {
+      "frames": 28,
+      "reference_characters": 849,
+      "edit_distance": 29,
+      "cer": 0.03415783274440518,
+      "raw_cer": 0.13191076624636275,
+      "ser": 0.17857142857142858,
+      "exact_frames": 23,
+      "complete_misses": 0,
+      "blank_false_positives": 0,
+      "known_noncaption_contamination_frames": 1,
+      "contamination_audited_frames": 11,
+      "numeric_mismatch_frames": 0,
+      "negation_token_mismatch_frames": 0,
+      "exact_row_permutation_frames": 0,
+      "manifest_sha256": "c927d62f79814a626c347c1ab74a07a3372f75e3591926bbb6b07d56856469d4",
+      "result_sha256": "88dc2b6ea44bee3bb0935b92c135c141df1703a0357bdfaf3a7278fd334a225b",
+      "exact_output_matches": 28,
+      "engine_metrics": {
+        "mlkit_calls": 58,
+        "mlkit_ns": 3443325914,
+        "detector_calls": 0,
+        "detector_ns": 0,
+        "recognizer_calls": 83,
+        "recognizer_ns": 8244993834,
+        "detector_init_ns": 0,
+        "recognizer_init_ns": 137090958
+      }
+    },
+    "dev-watch": {
+      "frames": 28,
+      "reference_characters": 562,
+      "edit_distance": 48,
+      "cer": 0.08540925266903915,
+      "raw_cer": 0.0846286701208981,
+      "ser": 0.07142857142857142,
+      "exact_frames": 26,
+      "complete_misses": 2,
+      "blank_false_positives": 0,
+      "known_noncaption_contamination_frames": 0,
+      "contamination_audited_frames": 10,
+      "numeric_mismatch_frames": 0,
+      "negation_token_mismatch_frames": 0,
+      "exact_row_permutation_frames": 0,
+      "manifest_sha256": "15bcd55d7105a95ac14f97f324d810c4eb76242b821b64fd45af3e2b7b7e7d53",
+      "result_sha256": "f5981c63200a4cfb024a0b4ff1df15ecda7777d2cb3c80a57448a086c356f4f6",
+      "exact_output_matches": 28,
+      "engine_metrics": {
+        "mlkit_calls": 46,
+        "mlkit_ns": 2225823665,
+        "detector_calls": 0,
+        "detector_ns": 0,
+        "recognizer_calls": 18,
+        "recognizer_ns": 4215906460,
+        "detector_init_ns": 0,
+        "recognizer_init_ns": 159156708
+      }
+    },
+    "heldout": {
+      "frames": 43,
+      "reference_characters": 1134,
+      "edit_distance": 103,
+      "cer": 0.09082892416225749,
+      "raw_cer": 0.15975885455915598,
+      "ser": 0.3488372093023256,
+      "exact_frames": 28,
+      "complete_misses": 0,
+      "blank_false_positives": 3,
+      "known_noncaption_contamination_frames": 2,
+      "contamination_audited_frames": 19,
+      "numeric_mismatch_frames": 5,
+      "negation_token_mismatch_frames": 0,
+      "exact_row_permutation_frames": 0,
+      "manifest_sha256": "b6d1a41f1b6f0f418314febd4db6d05cb0c2e41314fab23de28dfb748c771c17",
+      "result_sha256": "82f6e7c25455b30914f1672823a20ab0025887ec6769151aebd59e7dee3af6a8",
+      "exact_output_matches": 43,
+      "engine_metrics": {
+        "mlkit_calls": 90,
+        "mlkit_ns": 3496908919,
+        "detector_calls": 0,
+        "detector_ns": 0,
+        "recognizer_calls": 122,
+        "recognizer_ns": 9192366953,
+        "detector_init_ns": 0,
+        "recognizer_init_ns": 154205459
+      }
+    }
+  },
+  "unit_tests": {
+    "tests": 258,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "models": {
+    "assets/ppocrv6/characters.json": "a49d51120786924a642c9e8a14b2a2ab73c019699abf5b2b6970ec7355c0415f",
+    "assets/ppocrv6/detection.onnx": "d73e0058b7a8086bbd57f3d10b8bcd4ff95363f67e06e2762b5e814fe9c9410e",
+    "assets/ppocrv6/detection.yml": "193f435274bf9f0b5f71a929bbfbcf148282df7e633b34e7c373e8f44741b516",
+    "assets/ppocrv6/model-provenance.json": "e21c605b1fbbb8ac421dd5851cc9de3421fb8943de8c08de1661a5b08420732f",
+    "assets/ppocrv6/recognition.onnx": "5435fd747c9e0efe15a96d0b378d5bd157e9492ed8fd80edf08f30d02fa24634",
+    "assets/ppocrv6/recognition.yml": "ab078671bb49f06228eadccd34f1bb501e157f7a047095ffb943ba81512c77d1"
+  },
+  "app_apk_sha256": "c19c42c09420c45db92febb96fdb37d9ce58e760df131d99a7d16649b433d694",
+  "test_apk_sha256": "673146b0b2184ab07b655e9d60d2e2e4a48cbaf5901fbb329bcda1d792ff879b",
+  "E_policy_present_in_normal_app": true
+}

@@ -52,6 +52,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    // E remains outside all normal app source sets.
+    sourceSets.getByName("androidTest").java.srcDir("src/experiment/java")
+    sourceSets.getByName("test").java.srcDir("src/experiment/java")
+
     testOptions {
         unitTests.all {
             it.useJUnit()

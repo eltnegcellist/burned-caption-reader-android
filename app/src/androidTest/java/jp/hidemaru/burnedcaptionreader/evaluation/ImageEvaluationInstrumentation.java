@@ -85,7 +85,7 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
                 throw new IllegalArgumentException("Coarse width override requires player replay");
             if (!cropMode && !"original".equals(arguments.getString("crop_preparation", "original")))
                 throw new IllegalArgumentException("Crop preparation requires manual crop mode");
-            PlayerFrameReplay replay = new PlayerFrameReplay(diagnosticCoarseWidth);
+            PlayerFrameReplay replay = new PlayerFrameReplay(diagnosticCoarseWidth,"e_mlkit_v6".equals(arguments.getString("ocr_mode")));
             long peakPssKb = android.os.Debug.getPss();
             try {
                 for (int i = 0; i < frames.length(); i++) {
@@ -262,6 +262,7 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
     private OcrEngine productionEngine() throws Exception {
         if (arguments.containsKey("ocr_mode")) {
             String value = arguments.getString("ocr_mode");
+            if("e_mlkit_v6".equals(value))return jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrEngines.create(getTargetContext(),jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode.REC_V6);
             for (jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode mode : jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode.values())
                 if (mode.storedValue.equals(value)) return jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrEngines.create(getTargetContext(), mode);
             throw new IllegalArgumentException("Invalid four-way OCR mode: " + value);

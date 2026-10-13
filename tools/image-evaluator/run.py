@@ -15,7 +15,7 @@ parser.add_argument("--adb", required=True)
 parser.add_argument("--device", required=True)
 parser.add_argument("--label", required=True, help="Git SHA or build label")
 parser.add_argument("--mode", choices=["raw", "player-replay", "caption-crops"], default="raw")
-parser.add_argument("--ocr-mode", choices=["hybrid", "v6_rec", "v6_det", "v6_both"],
+parser.add_argument("--ocr-mode", choices=["hybrid", "v6_rec", "v6_det", "v6_both", "e_mlkit_v6"],
                     help="Explicit four-way production engine; requires player-replay")
 parser.add_argument("--pp-detection", choices=["off","rescue"], default="off", help="Native PP detector rescue, requires player-replay")
 parser.add_argument("--crop-preparation", choices=["original", "double", "white-core", "dark-core"], default="original", help="Diagnostic manual-caption-region preparation; never automatic detection")

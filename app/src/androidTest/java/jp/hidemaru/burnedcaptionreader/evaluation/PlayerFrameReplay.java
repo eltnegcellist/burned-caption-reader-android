@@ -16,9 +16,11 @@ final class PlayerFrameReplay {
     }
     private final int diagnosticCoarseWidth;
     private final boolean experimentalE;
+    private final boolean subtitleRecheckEnabled;
     PlayerFrameReplay() { this(0); }
     PlayerFrameReplay(int diagnosticCoarseWidth) { this(diagnosticCoarseWidth,false); }
-    PlayerFrameReplay(int diagnosticCoarseWidth,boolean experimentalE) { this.diagnosticCoarseWidth = diagnosticCoarseWidth; this.experimentalE=experimentalE; }
+    PlayerFrameReplay(int diagnosticCoarseWidth,boolean experimentalE) { this(diagnosticCoarseWidth,experimentalE,true); }
+    PlayerFrameReplay(int diagnosticCoarseWidth,boolean experimentalE,boolean recheck) { this.diagnosticCoarseWidth = diagnosticCoarseWidth; this.experimentalE=experimentalE; this.subtitleRecheckEnabled=recheck; }
     private final AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
     private final Method candidateSelector = recognitionSelector();
     private static Method recognitionSelector() {
@@ -81,7 +83,7 @@ final class PlayerFrameReplay {
         } catch (NoSuchMethodException legacy) { /* Same harness preserves old APK's detection path. */ }
         if(experimentalE) {
             clock=android.os.SystemClock.elapsedRealtimeNanos();
-            ExperimentalEPolicy.Filtered filtered=ExperimentalEPolicy.filter(detection);
+            ECaptionOcrPolicy.Filtered filtered=ECaptionOcrPolicy.filter(detection);
             detection=filtered.result;eRemovedRows=filtered.removed;ePolicyCalls++;
             long elapsed=android.os.SystemClock.elapsedRealtimeNanos()-clock;
             ePolicyNs+=elapsed;selectionNs+=elapsed;selectionCalls++;
@@ -119,7 +121,7 @@ final class PlayerFrameReplay {
             boolean eChoiceChanged=false;
             if(experimentalE) {
                 clock=android.os.SystemClock.elapsedRealtimeNanos();
-                ExperimentalEPolicy.Choice e=ExperimentalEPolicy.choose(band.getText(),rerun,chosenText,chosenConfidence);
+                ECaptionOcrPolicy.Choice e=ECaptionOcrPolicy.choose(band.getText(),rerun,chosenText,chosenConfidence);
                 chosenText=e.text;chosenConfidence=e.confidence;eChoiceChanged=e.changed;
                 if(e.changed)eChangedChoices++;ePolicyCalls++;
                 long elapsed=android.os.SystemClock.elapsedRealtimeNanos()-clock;
@@ -135,10 +137,13 @@ final class PlayerFrameReplay {
             texts.add(chosenText);
             if (!JAPANESE.matcher(chosenText).find()) continue;
             int id = band.getTrackId(); visible.add(id); lastSeen.put(id, now);
-            TemporalOcrConsensus.Result fused = consensus.computeIfAbsent(id, ignored -> new TemporalOcrConsensus())
-                    .observe(now, chosenText, chosenConfidence, band.getText());
+            TemporalOcrConsensus.Result fused = subtitleRecheckEnabled
+                    ? consensus.computeIfAbsent(id, ignored -> new TemporalOcrConsensus())
+                            .observe(now, chosenText, chosenConfidence, band.getText())
+                    : TemporalOcrConsensus.singleFrame(chosenText, chosenConfidence, band.getText());
             SubtitleStabilizer stabilizer = stabilizers.computeIfAbsent(id, ignored -> {
                 SubtitleStabilizer.Config config = new SubtitleStabilizer.Config(); config.stableMs = 300;
+                config.commitMode = subtitleRecheckEnabled ? SubtitleStabilizer.CommitMode.REOBSERVE : SubtitleStabilizer.CommitMode.FIRST_OBSERVATION;
                 return new SubtitleStabilizer(config);
             });
             SubtitleEvent event = stabilizer.observe(now, fused.getText(), fused.getConfidence());
@@ -156,7 +161,7 @@ final class PlayerFrameReplay {
         emit(now, order.offer(now, committed, waiting));
         return new JSONObject().put("e_policy_ns",ePolicyNs).put("e_policy_calls",ePolicyCalls)
                 .put("e_removed_rows",eRemovedRows).put("e_changed_choices",eChangedChoices)
-                .put("selection_ns", selectionNs).put("selection_calls", selectionCalls)
+                .put("subtitle_recheck_enabled",subtitleRecheckEnabled).put("selection_ns", selectionNs).put("selection_calls", selectionCalls)
                 .put("crop_ns", cropNs).put("crop_calls", cropCalls).put("ocr_text", String.join("\n", texts)).put("bands", bands)
                 .put("raw_rows", rawRows(raw))
                 .put("raw_text", raw.getText()).put("recognition_rows", rawRows(detection))

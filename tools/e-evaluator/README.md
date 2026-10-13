@@ -1,8 +1,11 @@
 # Experimental E: ML Kit detection + v6 recognition + diagnostic selection
 
-`e_mlkit_v6` uses the same explicit `REC_V6` factory as B. No v6 detector is called.
-`ExperimentalEPolicy` lives in `app/src/experiment/java`, included only in instrumentation
-and unit tests. The normal D-fixed APK and general UI remain unchanged.
+The original PR #55 experiment (`815d0b8`) kept `ExperimentalEPolicy` in test-only sources.
+The adopted policy is now `ECaptionOcrPolicy` in `app/src/main/java/.../ocr`.
+`e_mlkit_v6` selects `CaptionOcrMode.E`, with the same ML Kit/v6 engine branch as B
+and the shared E selection policy. No v6 detector is called. Normal app preferences
+now select E; A/B/C/D explicit diagnostics remain available. See
+`docs/2026-10-13-adopt-e-ocr.md` for adoption and first-observation validation.
 
 The policy receives OCR geometry, strings and PP row probabilities only. It receives
 neither GT, video names nor D outputs. Current choices were frozen before running E

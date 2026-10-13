@@ -85,7 +85,7 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
                 throw new IllegalArgumentException("Coarse width override requires player replay");
             if (!cropMode && !"original".equals(arguments.getString("crop_preparation", "original")))
                 throw new IllegalArgumentException("Crop preparation requires manual crop mode");
-            PlayerFrameReplay replay = new PlayerFrameReplay(diagnosticCoarseWidth,"e_mlkit_v6".equals(arguments.getString("ocr_mode")));
+            PlayerFrameReplay replay = new PlayerFrameReplay(diagnosticCoarseWidth,"e_mlkit_v6".equals(arguments.getString("ocr_mode")),!"off".equals(arguments.getString("subtitle_recheck", "on")));
             long peakPssKb = android.os.Debug.getPss();
             try {
                 for (int i = 0; i < frames.length(); i++) {
@@ -139,7 +139,7 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
                     .put("process_status",new String(Files.readAllBytes(new File("/proc/self/status").toPath()),StandardCharsets.UTF_8))
                     .put("scope", playerMode ? (diagnosticCoarseWidth == 0 ? "player_components_immediate_tts" : "player_components_diagnostic_coarse_width") : cropMode ? "manual_caption_regions_only" : "raw_image_ocr_only")
                     .put("metric", playerMode || cropMode ? "caption_comparison_key_cer" : "raw_codepoint_cer")
-                    .put("diagnostic_coarse_width", diagnosticCoarseWidth)
+                    .put("subtitle_recheck_enabled",!"off".equals(arguments.getString("subtitle_recheck", "on"))).put("diagnostic_coarse_width", diagnosticCoarseWidth)
                     .put("crop_preparation", cropMode ? arguments.getString("crop_preparation", "original") : JSONObject.NULL)
                     .put("ground_truth_source", dataset.optString("ground_truth_source", "human_review"))
                     .put("human_verified", dataset.optBoolean("human_verified"))
@@ -262,7 +262,6 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
     private OcrEngine productionEngine() throws Exception {
         if (arguments.containsKey("ocr_mode")) {
             String value = arguments.getString("ocr_mode");
-            if("e_mlkit_v6".equals(value))return jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrEngines.create(getTargetContext(),jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode.REC_V6);
             for (jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode mode : jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode.values())
                 if (mode.storedValue.equals(value)) return jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrEngines.create(getTargetContext(), mode);
             throw new IllegalArgumentException("Invalid four-way OCR mode: " + value);

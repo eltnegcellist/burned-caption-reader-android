@@ -1,0 +1,36 @@
+{
+  "user_mode": "e_mlkit_v6",
+  "default_recheck_enabled": false,
+  "default_commit_mode": "FIRST_OBSERVATION",
+  "recheck_toggle_preserved": true,
+  "model_selection_controls": 0,
+  "legacy_mode_migration": true,
+  "explicit_diagnostics": [
+    {
+      "mode": "hybrid",
+      "raw_backend": "mlkit",
+      "refined_backend": "ppocrv5"
+    },
+    {
+      "mode": "v6_rec",
+      "raw_backend": "mlkit",
+      "refined_backend": "ppocrv6_small"
+    },
+    {
+      "mode": "v6_det",
+      "raw_backend": "v6det_v5rec",
+      "refined_backend": "v6det_v5rec"
+    },
+    {
+      "mode": "v6_both",
+      "raw_backend": "v6det_v6rec",
+      "refined_backend": "v6det_v6rec"
+    },
+    {
+      "mode": "e_mlkit_v6",
+      "raw_backend": "mlkit",
+      "refined_backend": "ppocrv6_small"
+    }
+  ],
+  "scope": "Emulator/bitmap and UI smoke; Galaxy S25/audio latency not measured"
+}

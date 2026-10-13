@@ -1,14 +1,12 @@
-package jp.hidemaru.burnedcaptionreader.evaluation;
+package jp.hidemaru.burnedcaptionreader.ocr;
 
 import java.util.*;
 import java.util.regex.Pattern;
 import jp.hidemaru.burnedcaptionreader.ocr.*;
 import jp.hidemaru.burnedcaptionreader.subtitle.*;
 
-/** E experiment only. No expected text, dataset ID, D result or v6 detector is accepted.
- * Compiled into instrumentation/unit tests, never the normal app APK.
- */
-public final class ExperimentalEPolicy {
+/** Adopted E policy. No expected text, dataset ID, D result or v6 detector is accepted. */
+public final class ECaptionOcrPolicy {
     private static final Pattern JAPANESE = Pattern.compile("[\\u3040-\\u30ff\\u3400-\\u9fff]");
     private static final Pattern NOUN = Pattern.compile("^[\\p{IsHan}\\p{IsHiragana}\\p{IsKatakana}ー]{2,12}$");
     private static final Pattern SENTENCE_END = Pattern.compile("(?:です|ます|でした|ました|ません|ない|たい|する|した|して|いる|ある|なる|った|って|[はがをにへとでもねよだかうる])$");

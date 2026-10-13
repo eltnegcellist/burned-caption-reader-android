@@ -16,7 +16,7 @@ def main():
         'Cold excludes frame 0 and any frame with changed lazy model init counters. No additional prewarm.',
         'Pipeline clock excludes image decode/install/upload/TTS. Selection includes E policy time; never add it twice.',
         'Same three already-known videos. Heldout is not independent unused material.',
-        'E filter and selector are in experiment test source; normal D-fixed APK is identical to prior PR54 APK.']}
+        'Source-set/default mode depend on the recorded build; interpret E adoption using frozen_build and the matching source commit.']}
     public=[];pairs={label:[] for label in MODES.values()};rawdata={};global_times={label:[] for label in MODES.values()}
     for name in NAMES:
         path=a.datasets/name/'dataset.json';truth=json.loads(path.read_text())['frames'];manifest_hash=hashlib.sha256(path.read_bytes()).hexdigest();labs=[lookup[(name,t['id'])] for t in truth];data={};modes={}

@@ -41,25 +41,25 @@ public final class AppPreferences {
     }
 
     /**
-     * Production OCR is fixed to PP-OCRv6 Small detection + recognition.
+     * Production OCR is fixed to E: ML Kit detection + PP-OCRv6 Small recognition and E selection.
      * Migrate EVERY previously saved A/B/C/legacy value (not just unset)
      * so an update does not silently retain an older engine.
      */
     public CaptionOcrMode getOcrMode() {
-        if (!CaptionOcrMode.BOTH_V6.storedValue.equals(preferences.getString(OCR_MODE, null))) {
-            preferences.edit().putString(OCR_MODE, CaptionOcrMode.BOTH_V6.storedValue).apply();
+        if (!CaptionOcrMode.E.storedValue.equals(preferences.getString(OCR_MODE, null))) {
+            preferences.edit().putString(OCR_MODE, CaptionOcrMode.E.storedValue).apply();
         }
-        return CaptionOcrMode.BOTH_V6;
+        return CaptionOcrMode.E;
     }
 
     /**
      * Kept for compatibility with previous instrumentation call sites.
      * App/user preferences can no longer override the production OCR engine.
-     * Explicit four-way engine construction remains available to development tests.
+     * Explicit diagnostic engine construction remains available to development tests.
      */
     @Deprecated
     public void setOcrMode(CaptionOcrMode ignored) {
-        preferences.edit().putString(OCR_MODE, CaptionOcrMode.BOTH_V6.storedValue).apply();
+        preferences.edit().putString(OCR_MODE, CaptionOcrMode.E.storedValue).apply();
     }
 
     public boolean hasRoi() {

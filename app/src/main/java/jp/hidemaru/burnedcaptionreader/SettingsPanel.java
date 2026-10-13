@@ -47,7 +47,7 @@ final class SettingsPanel extends ScrollView {
         note(inPlayer ? "動画は再生を続けます。声の変更は次の読み上げから反映されます。"
                 : "次に開く動画から反映されます。");
 
-        note("字幕の検出・文字認識にはPP-OCRv6 Smallを使用します。");
+        note("字幕の検出にはML Kit、文字認識にはPP-OCRv6 Smallを使用します。");
 
         heading("字幕が続いたとき");
         Spinner mode = spinner(new String[]{

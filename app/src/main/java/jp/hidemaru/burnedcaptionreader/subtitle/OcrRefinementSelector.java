@@ -5,6 +5,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrLine;
+import jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode;
+import jp.hidemaru.burnedcaptionreader.ocr.ECaptionOcrPolicy;
 import jp.hidemaru.burnedcaptionreader.ocr.OcrResult;
 
 /** Chooses text from a second OCR of the SAME frame, never from a later frame. */
@@ -29,6 +31,22 @@ public final class OcrRefinementSelector {
         }
         public String getText() { return text; }
         public double getConfidence() { return confidence; }
+    }
+
+    /** Same legacy selection for A/B/C/D; adopted E may retain a qualified v6 correction. */
+    public Result selectForMode(CaptionOcrMode mode, String originalText, double originalConfidence, OcrResult refined) {
+        return applyE(mode, originalText, refined, select(originalText, originalConfidence, refined));
+    }
+
+    public Result selectForMode(CaptionOcrMode mode, String originalText, double originalConfidence,
+            OcrResult refined, OcrResult whiteCore) {
+        return applyE(mode, originalText, refined, select(originalText, originalConfidence, refined, whiteCore));
+    }
+
+    private Result applyE(CaptionOcrMode mode, String originalText, OcrResult refined, Result legacy) {
+        if (mode != CaptionOcrMode.E) return legacy;
+        ECaptionOcrPolicy.Choice chosen = ECaptionOcrPolicy.choose(originalText, refined, legacy.getText(), legacy.getConfidence());
+        return new Result(chosen.text, chosen.confidence);
     }
 
     /** White-core OCR is a same-frame alternative, never permission to lose colored captions. */

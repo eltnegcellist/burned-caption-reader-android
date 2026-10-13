@@ -23,6 +23,7 @@ import jp.hidemaru.burnedcaptionreader.AppPreferences;
 import jp.hidemaru.burnedcaptionreader.SettingsActivity;
 import jp.hidemaru.burnedcaptionreader.SharedPlayerActivity;
 import jp.hidemaru.burnedcaptionreader.ocr.*;
+import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleStabilizer;
 
 /**
  * User-facing OCR is fixed at D even for users with saved A/B/C settings.
@@ -34,25 +35,29 @@ final class OcrSettingsNativeSmoke {
         Context context = instrumentation.getTargetContext();
         SharedPreferences stored = context.getSharedPreferences(AppPreferences.PREFERENCES_FILE, 0);
         String original = stored.getString(AppPreferences.OCR_MODE, null);
+        boolean originalRecheckPresent = stored.contains("subtitle_recheck_enabled");
+        boolean originalRecheck = stored.getBoolean("subtitle_recheck_enabled",false);
         AppPreferences preferences = new AppPreferences(context);
         Activity settings = null;
         SharedPlayerActivity player = null;
         Bitmap bitmap = sample();
         try {
-            for (String legacy : new String[]{null, "hybrid", "v6_rec", "v6_det", "v6_both",
+            stored.edit().remove("subtitle_recheck_enabled").commit();
+            check(!preferences.isSubtitleRecheckEnabled(), "Recheck unexpectedly enabled by default");
+            for (String legacy : new String[]{null, "hybrid", "v6_rec", "v6_det", "v6_both", "e_mlkit_v6",
                     "mlkit", "pp_detection", "unknown-value"}) {
                 if (legacy == null) stored.edit().remove(AppPreferences.OCR_MODE).commit();
                 else stored.edit().putString(AppPreferences.OCR_MODE, legacy).commit();
-                check(preferences.getOcrMode() == CaptionOcrMode.BOTH_V6,
-                        "Persisted OCR value escaped D: " + legacy);
-                check(CaptionOcrMode.BOTH_V6.storedValue.equals(stored.getString(AppPreferences.OCR_MODE, null)),
-                        "OCR setting was not migrated to D: " + legacy);
-                check(new AppPreferences(context).getOcrMode() == CaptionOcrMode.BOTH_V6,
-                        "D selection lost on recreation");
+                check(preferences.getOcrMode() == CaptionOcrMode.E,
+                        "Persisted OCR value escaped E: " + legacy);
+                check(CaptionOcrMode.E.storedValue.equals(stored.getString(AppPreferences.OCR_MODE, null)),
+                        "OCR setting was not migrated to E: " + legacy);
+                check(new AppPreferences(context).getOcrMode() == CaptionOcrMode.E,
+                        "E selection lost on recreation");
             }
             preferences.setOcrMode(CaptionOcrMode.BASELINE);
-            check(preferences.getOcrMode() == CaptionOcrMode.BOTH_V6,
-                    "Deprecated writer reverted D");
+            check(preferences.getOcrMode() == CaptionOcrMode.E,
+                    "Deprecated writer reverted E");
             settings = instrumentation.startActivitySync(new Intent(context, SettingsActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             instrumentation.waitForIdleSync();
@@ -63,7 +68,7 @@ final class OcrSettingsNativeSmoke {
 
             JSONArray explicitDiagnostics = new JSONArray();
             for (CaptionOcrMode mode : CaptionOcrMode.values()) {
-                check(preferences.getOcrMode() == CaptionOcrMode.BOTH_V6,
+                check(preferences.getOcrMode() == CaptionOcrMode.E,
                         "User preferences became configurable");
                 try (OcrEngine engine = CaptionOcrEngines.create(context, mode)) {
                     OcrResult raw = read(engine, bitmap, false);
@@ -108,13 +113,23 @@ final class OcrSettingsNativeSmoke {
                             (Runnable)field(current,"sampler").get(current));
                     Method apply = SharedPlayerActivity.class.getDeclaredMethod("applyOcrModeIfIdle");
                     apply.setAccessible(true);
-                    check(field(current,"ocrMode").get(current) == CaptionOcrMode.BOTH_V6,
-                            "Player started with non-v6 OCR");
+                    check(field(current,"ocrMode").get(current) == CaptionOcrMode.E,
+                            "Player started with non-E OCR");
                     OcrEngine existing = (OcrEngine)field(current,"ocr").get(current);
                     check(existing instanceof V6ComparisonOcrEngine,
-                            "Production OCR engine not v6");
-                    check(field(existing,"mlkit").get(existing) == null,
-                            "Production v6 engine instantiated ML Kit");
+                            "Production E engine missing");
+                    check(field(existing,"mlkit").get(existing) != null,
+                            "Production E engine did not instantiate ML Kit");
+                    check(!field(existing,"v6Detection").getBoolean(existing), "E enabled v6 detector");
+                    check(field(existing,"v6Recognition").getBoolean(existing), "E disabled v6 recognition");
+                    check(!field(current,"subtitleRecheckEnabled").getBoolean(current), "E enabled second-frame recheck");
+                    SubtitleStabilizer.Config config=(SubtitleStabilizer.Config)field(current,"stableConfig").get(current);
+                    check(config.commitMode==SubtitleStabilizer.CommitMode.FIRST_OBSERVATION, "First-observation mode lost");
+                    Method live=SharedPlayerActivity.class.getDeclaredMethod("applyLiveSettings");live.setAccessible(true);
+                    preferences.setSubtitleRecheckEnabled(true);live.invoke(current);
+                    check(config.commitMode==SubtitleStabilizer.CommitMode.REOBSERVE, "Optional recheck no longer works");
+                    preferences.setSubtitleRecheckEnabled(false);live.invoke(current);
+                    check(config.commitMode==SubtitleStabilizer.CommitMode.FIRST_OBSERVATION, "Recheck off did not restore immediate mode");
                     field(current,"busy").setBoolean(current,true);
                     preferences.setOcrMode(CaptionOcrMode.BASELINE);
                     apply.invoke(current);
@@ -122,15 +137,16 @@ final class OcrSettingsNativeSmoke {
                             "OCR changed during active frame");
                     field(current,"busy").setBoolean(current,false);
                     apply.invoke(current);
-                    check(field(current,"ocrMode").get(current) == CaptionOcrMode.BOTH_V6,
+                    check(field(current,"ocrMode").get(current) == CaptionOcrMode.E,
                             "Old preference restored after idle");
                     check(field(current,"ocr").get(current) == existing,
                             "OCR switched despite fixed production mode");
                 } catch (Throwable error) { failure.set(error); }
             });
             if (failure.get() != null) throw new IllegalStateException("Fixed OCR lifecycle test failed", failure.get());
-            return new JSONObject().put("user_mode","v6_both")
-                    .put("model_selection_controls",0)
+            return new JSONObject().put("user_mode","e_mlkit_v6")
+                    .put("default_recheck_enabled",false).put("default_commit_mode","FIRST_OBSERVATION")
+                    .put("recheck_toggle_preserved",true).put("model_selection_controls",0)
                     .put("legacy_mode_migration",true)
                     .put("explicit_diagnostics", explicitDiagnostics)
                     .put("scope","Emulator/bitmap and UI smoke; Galaxy S25/audio latency not measured");
@@ -145,6 +161,8 @@ final class OcrSettingsNativeSmoke {
             }
             if (original == null) stored.edit().remove(AppPreferences.OCR_MODE).commit();
             else stored.edit().putString(AppPreferences.OCR_MODE, original).commit();
+            if(originalRecheckPresent)stored.edit().putBoolean("subtitle_recheck_enabled",originalRecheck).commit();
+            else stored.edit().remove("subtitle_recheck_enabled").commit();
             bitmap.recycle();
         }
     }

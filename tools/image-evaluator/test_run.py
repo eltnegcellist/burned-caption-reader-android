@@ -57,7 +57,7 @@ class DiagnosticPreflightTest(unittest.TestCase):
         self.rejected("Four-way engine requires", "--mode", "player-replay", "--ocr-mode", "v6_det", "--pp-detection", "rescue")
 
     def test_all_four_explicit_modes_are_allowed(self):
-        for mode in ["hybrid", "v6_rec", "v6_det", "v6_both"]:
+        for mode in ["hybrid", "v6_rec", "v6_det", "v6_both", "e_mlkit_v6"]:
             with self.subTest(mode=mode):
                 self.reaches_stub("--mode", "player-replay", "--ocr-mode", mode)
 
@@ -94,6 +94,12 @@ class DiagnosticPreflightTest(unittest.TestCase):
         self.dataset.pop("manual_caption_regions")
         self.dataset["frames"][0].pop("caption_regions")
         self.reaches_stub()
+
+    def test_speech_recheck_override_requires_replay(self):
+        self.rejected("Speech recheck override requires", "--subtitle-recheck", "off")
+
+    def test_first_observation_replay_is_allowed(self):
+        self.reaches_stub("--mode", "player-replay", "--ocr-mode", "e_mlkit_v6", "--subtitle-recheck", "off")
 
     def test_player_override_is_allowed(self):
         self.reaches_stub("--mode", "player-replay", "--coarse-width", "1100")

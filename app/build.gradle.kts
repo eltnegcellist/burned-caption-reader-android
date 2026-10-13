@@ -10,8 +10,8 @@ android {
         applicationId = "jp.hidemaru.burnedcaptionreader"
         minSdk = 26
         targetSdk = 36
-        versionCode = 36
-        versionName = "1.0.5-v6-fixed"
+        versionCode = 37
+        versionName = "1.0.6-e-fixed"
 
         testInstrumentationRunner = "jp.hidemaru.burnedcaptionreader.evaluation.ImageEvaluationInstrumentation"
     }
@@ -51,10 +51,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-
-    // E remains outside all normal app source sets.
-    sourceSets.getByName("androidTest").java.srcDir("src/experiment/java")
-    sourceSets.getByName("test").java.srcDir("src/experiment/java")
 
     testOptions {
         unitTests.all {

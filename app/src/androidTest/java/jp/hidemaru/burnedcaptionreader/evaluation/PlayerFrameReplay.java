@@ -43,7 +43,12 @@ final class PlayerFrameReplay {
     private static final Pattern JAPANESE = Pattern.compile("[\\u3040-\\u30ff\\u3400-\\u9fff]");
 
     JSONObject process(Bitmap frame, long now, Recognize recognize) throws Exception {
+        long selectionNs = 0, cropNs = 0;
+        int selectionCalls = 0, cropCalls = 0;
+        long clock = android.os.SystemClock.elapsedRealtimeNanos();
         flushBefore(now);
+        selectionNs += android.os.SystemClock.elapsedRealtimeNanos() - clock;
+        clock = android.os.SystemClock.elapsedRealtimeNanos();
         Bitmap coarse;
         if (diagnosticCoarseWidth == 0) coarse = OcrBitmapInputs.coarse(frame);
         else {
@@ -52,6 +57,7 @@ final class PlayerFrameReplay {
             coarse = Bitmap.createScaledBitmap(frame, Math.max(1, Math.round(frame.getWidth()*scale)),
                     Math.max(1, Math.round(frame.getHeight()*scale)), true);
         }
+        cropNs += android.os.SystemClock.elapsedRealtimeNanos() - clock; cropCalls++;
         OcrResult raw;
         try { raw = recognize.run(coarse); }
         finally { if (coarse != frame) coarse.recycle(); }
@@ -70,21 +76,27 @@ final class PlayerFrameReplay {
                         .invoke(null, raw, strip, plan, frame.getHeight());
             }
         } catch (NoSuchMethodException legacy) { /* Same harness preserves old APK's detection path. */ }
+        clock = android.os.SystemClock.elapsedRealtimeNanos();
         List<AutoSubtitleRegionTracker.Selection> selected = select(now, detection);
+        selectionNs += android.os.SystemClock.elapsedRealtimeNanos() - clock; selectionCalls++;
         JSONArray bands = new JSONArray();
         List<String> texts = new ArrayList<>();
         List<SubtitleSpeechOrderBuffer.Entry> committed = new ArrayList<>();
         List<SubtitleSpeechOrderBuffer.Band> waiting = new ArrayList<>();
         Set<Integer> visible = new HashSet<>();
         for (AutoSubtitleRegionTracker.Selection band : selected) {
+            clock = android.os.SystemClock.elapsedRealtimeNanos();
             SubtitleCropPlan plan = SubtitleCropPlan.create(frame.getWidth(), frame.getHeight(), band.getTop(), band.getBottom());
             Bitmap refined = OcrBitmapInputs.refined(frame, plan);
+            cropNs += android.os.SystemClock.elapsedRealtimeNanos() - clock; cropCalls++;
             OcrResult rerun;
             OcrResult masked = null;
             OcrRefinementSelector.Result chosen;
             try {
                 rerun = recognize.refine(refined); ocrJobs++;
+                clock = android.os.SystemClock.elapsedRealtimeNanos();
                 chosen = selector.select(band.getText(), band.getConfidence(), rerun);
+                selectionNs += android.os.SystemClock.elapsedRealtimeNanos() - clock; selectionCalls++;
                 if (!ppOcrUsed(rerun) && adaptiveSelector != null && (boolean) OcrRefinementSelector.class
                         .getMethod("shouldTryWhiteCore", OcrRefinementSelector.Result.class).invoke(selector, chosen)) {
                     Bitmap mask = (Bitmap) OcrBitmapInputs.class.getMethod("whiteCore", Bitmap.class).invoke(null, refined);
@@ -121,7 +133,8 @@ final class PlayerFrameReplay {
             stabilizers.remove(entry.getKey()); consensus.remove(entry.getKey()); return true;
         });
         emit(now, order.offer(now, committed, waiting));
-        return new JSONObject().put("ocr_text", String.join("\n", texts)).put("bands", bands)
+        return new JSONObject().put("selection_ns", selectionNs).put("selection_calls", selectionCalls)
+                .put("crop_ns", cropNs).put("crop_calls", cropCalls).put("ocr_text", String.join("\n", texts)).put("bands", bands)
                 .put("raw_rows", rawRows(raw))
                 .put("raw_text", raw.getText()).put("recognition_rows", rawRows(detection))
                 .put("strip_recovery", strip == null ? JSONObject.NULL : strip.getText()).put("selection_api", candidateSelector == null ? "selectAll" : "selectForRecognition")

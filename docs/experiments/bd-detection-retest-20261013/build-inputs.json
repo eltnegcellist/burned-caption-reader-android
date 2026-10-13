@@ -1,0 +1,12 @@
+{
+  "app/src/androidTest/java/jp/hidemaru/burnedcaptionreader/evaluation/PpOcrNativeSmoke.java": "c20e51ddf0f0dc9ad0d477ffa07e4726e2a998c743596fa9835cd670585b4092",
+  "app/src/androidTest/java/jp/hidemaru/burnedcaptionreader/evaluation/PpDetectionNativeSmoke.java": "70d966e73203f6dcc50e387f887591e6253c39c613d3d664b6263a0224a11c06",
+  "app/src/androidTest/java/jp/hidemaru/burnedcaptionreader/evaluation/CaptionRegionDiagnostic.java": "75489cd0954d6f0cd21ce7ef5ed759f963376114d6732c1c9384d1fb9293fc2c",
+  "app/src/androidTest/java/jp/hidemaru/burnedcaptionreader/evaluation/PlayerFrameReplay.java": "54e36fb534969b522237f965d54f14a3005e99657ed5be7a9beef912d36cdcb2",
+  "app/src/androidTest/java/jp/hidemaru/burnedcaptionreader/evaluation/ImageEvaluationInstrumentation.java": "d5165079457e48a426ad7544525fadd894b140b740a99e3163e1c59e088d6d84",
+  "app/src/androidTest/java/jp/hidemaru/burnedcaptionreader/evaluation/OcrSettingsNativeSmoke.java": "6d6bafc42bc7c0d721f1331c4000a590bf8f0dd8b90c057736ef7d24f8932f90",
+  "app/src/androidTest/java/jp/hidemaru/burnedcaptionreader/evaluation/FourWayComponents.java": "2e72848b6e9c983daa4f3eb93355776cf2849c66741504970fd1d010f4bb8d3b",
+  "app/src/androidTest/java/jp/hidemaru/burnedcaptionreader/evaluation/BdComponents.java": "0479e3c113607492c870970c7059de34e0c89a60ab30571bbff0bb4f13f3619c",
+  "app/build/outputs/apk/debug/app-debug.apk": "29401639309768ac189421cb2a68628bbaf15b7607f66c64803878891a15970b",
+  "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": "8d40f7a619d59f3b9199c4b780973731047866e61b78e849ed341849bf3233ed"
+}

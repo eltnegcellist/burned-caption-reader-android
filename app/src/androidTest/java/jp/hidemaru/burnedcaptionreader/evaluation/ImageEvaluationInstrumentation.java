@@ -28,6 +28,10 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
     @Override public void onStart() {
         Bundle report = new Bundle();
         try {
+            if ("bd-components".equals(arguments.getString("mode"))) {
+                BdComponents.run(this);
+                report.putString("stream", "B/D components PASS\n"); finish(-1, report); return;
+            }
             if ("four-way-components".equals(arguments.getString("mode"))) {
                 FourWayComponents.run(this);
                 report.putString("stream", "Four-way components PASS\n"); finish(-1, report); return;

@@ -40,12 +40,26 @@ public final class AppPreferences {
         preferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
     }
 
+    /**
+     * Production OCR is fixed to PP-OCRv6 Small detection + recognition.
+     * Migrate EVERY previously saved A/B/C/legacy value (not just unset)
+     * so an update does not silently retain an older engine.
+     */
     public CaptionOcrMode getOcrMode() {
-        return CaptionOcrMode.fromStoredValue(preferences.getString(OCR_MODE, null));
+        if (!CaptionOcrMode.BOTH_V6.storedValue.equals(preferences.getString(OCR_MODE, null))) {
+            preferences.edit().putString(OCR_MODE, CaptionOcrMode.BOTH_V6.storedValue).apply();
+        }
+        return CaptionOcrMode.BOTH_V6;
     }
 
-    public void setOcrMode(CaptionOcrMode mode) {
-        preferences.edit().putString(OCR_MODE, mode.storedValue).apply();
+    /**
+     * Kept for compatibility with previous instrumentation call sites.
+     * App/user preferences can no longer override the production OCR engine.
+     * Explicit four-way engine construction remains available to development tests.
+     */
+    @Deprecated
+    public void setOcrMode(CaptionOcrMode ignored) {
+        preferences.edit().putString(OCR_MODE, CaptionOcrMode.BOTH_V6.storedValue).apply();
     }
 
     public boolean hasRoi() {

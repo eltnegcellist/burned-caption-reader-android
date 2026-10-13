@@ -11,7 +11,6 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import java.util.Locale;
-import jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode;
 import jp.hidemaru.burnedcaptionreader.tts.SpeechLevel;
 import android.app.Activity;
 import jp.hidemaru.burnedcaptionreader.diagnostics.DiagnosticExport;
@@ -48,26 +47,7 @@ final class SettingsPanel extends ScrollView {
         note(inPlayer ? "動画は再生を続けます。声の変更は次の読み上げから反映されます。"
                 : "次に開く動画から反映されます。");
 
-        heading("文字位置の検出");
-        Switch detectionV6 = toggle("PP-OCRv6 Small（OFF: ML Kit）", preferences.getOcrMode().v6Detection);
-        detectionV6.setTag("ocr_detector_v6");
-        detectionV6.setOnCheckedChangeListener((b, on) -> {
-            CaptionOcrMode old = preferences.getOcrMode();
-            CaptionOcrMode next = CaptionOcrMode.of(on, old.v6Recognition);
-            if (old != next) { preferences.setOcrMode(next); onChanged.run(); }
-        });
-        heading("文字の読み取り");
-        Switch recognitionV6 = toggle("PP-OCRv6 Small（OFF: PP-OCRv5 Mobile）", preferences.getOcrMode().v6Recognition);
-        recognitionV6.setTag("ocr_recognizer_v6");
-        recognitionV6.setOnCheckedChangeListener((b, on) -> {
-            CaptionOcrMode old = preferences.getOcrMode();
-            CaptionOcrMode next = CaptionOcrMode.of(old.v6Detection, on);
-            if (old != next) { preferences.setOcrMode(next); onChanged.run(); }
-        });
-        note("初期設定はON/ONのD方式です。2つのスイッチで4パターンを比較できます。OFF/OFFは従来のA方式です。"
-                + "検出をv6にした場合、ML Kitによる粗い文字認識は実行しません。");
-        note(inPlayer ? "処理中の画像が終わってから切替。動画の再生は継続します。"
-                : "選択は保存され、次に開いた動画で使用されます。");
+        note("字幕の検出・文字認識にはPP-OCRv6 Smallを使用します。");
 
         heading("字幕が続いたとき");
         Spinner mode = spinner(new String[]{

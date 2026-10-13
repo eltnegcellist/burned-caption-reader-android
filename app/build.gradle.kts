@@ -10,8 +10,8 @@ android {
         applicationId = "jp.hidemaru.burnedcaptionreader"
         minSdk = 26
         targetSdk = 36
-        versionCode = 35
-        versionName = "1.0.4-ocr-compare"
+        versionCode = 36
+        versionName = "1.0.5-v6-fixed"
 
         testInstrumentationRunner = "jp.hidemaru.burnedcaptionreader.evaluation.ImageEvaluationInstrumentation"
     }

@@ -1,0 +1,1508 @@
+[
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806939890",
+    "frame_sha256": "c5fc925462c616fb70effa3e5c75506eaa4edc2e03d848cb99cbf38bdda935cb",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-00",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806939920",
+    "frame_sha256": "6bd89eebaddf0ef7777344a5465ee74461d884b8a6f8a12556afc4eccbb05fdb",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-00",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806939935",
+    "frame_sha256": "4aa8c2377d3c38d418d5960c7bff06e14ce4822455b653b445288407a10d76b5",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-00",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806939962",
+    "frame_sha256": "28c99c3bd48f1c15af0713757b7df27c481f19d748841a70bd3db6078f3c4de1",
+    "gt_caption_row_count": 2,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-01",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806939964",
+    "frame_sha256": "1607c5806b871e5a8cc0b7621d39a7157c0c80d9cc8dc6e7084464dd48b3ccd0",
+    "gt_caption_row_count": 2,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-01",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806939981",
+    "frame_sha256": "493eee736740905a87871b6077e35a4c6445174e0f61cd4591827b27434f1443",
+    "gt_caption_row_count": 2,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-01",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940005",
+    "frame_sha256": "1ce4004c5f0c39546346fe9e13339269fd679ecf2baeaad9e2f9b6771dc8f06c",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-02",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940012",
+    "frame_sha256": "4d3a6540448943c62eee166cdcb6b5348dc04bc81da98c688d787f1fba75ecac",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-02",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940024",
+    "frame_sha256": "7d5599a36c77056fe6dee2abf698845da759b591afc04146ce364ad4017c9cde",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-02",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940044",
+    "frame_sha256": "6015561dd5fbff4ddfe4297c492caf8a4271511b431c0a3d6ae55e166713cf67",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-03",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940084",
+    "frame_sha256": "da1f61c79d6a7cf3fac5a77fb95ac206ed932cbf9c74724268c54cd5aea182a0",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-04",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940101",
+    "frame_sha256": "e4c563a27c6d2f98818fd9dd1d171f01fa0680b4724822468799fa5494d353f0",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-04",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940115",
+    "frame_sha256": "221560be96f2051c6f5181441a7ba3494b01112784c070ff65b8a2be4099c735",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-04",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940125",
+    "frame_sha256": "dce587fb5d26eef95258f6183bfa4c13e30ecfb954a0468283519c20cb9e47cf",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-05",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940142",
+    "frame_sha256": "83e4eeec5706b795205ee77e42064502fbf6d1c729bb42d059a9d3a4d369dfd9",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-05",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940159",
+    "frame_sha256": "77a69fb0eaeeb9fdae9eed33cb84f42b8b2bf3c5d9fe051758264d91d4847003",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-06",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940169",
+    "frame_sha256": "ed08a8fac7d4284c3a269ee2222ec819c2050627cff25f76ce6ca7b46f86f882",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-06",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940187",
+    "frame_sha256": "c45e5f56536bfd960d3bc0de14c44d1750b84fa2b7c858ff053f99bd68b49540",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-06",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940209",
+    "frame_sha256": "10bbd73ac272493e4c7c92d77a866c2407b99fedfcf46ccebc056e3220625ebc",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-07",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940231",
+    "frame_sha256": "a84c139711b2c1d189f17d5418c3803a50b087681d5ea183c84e00d6925a259e",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-07",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940255",
+    "frame_sha256": "7f416138949933b3f46bbc96b531a5168eb2ef30883e160f9dbde62ca7806093",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-07",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940267",
+    "frame_sha256": "21208096cb5cc1ddce38ae93e7497ce1b878b3b710bcfeb7a32ee11392169700",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-08",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940302",
+    "frame_sha256": "64710f214480475ab06e17adff826fbeaf9e4ef7264ac439db024572e36b311b",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-08",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940344",
+    "frame_sha256": "3b7c4bd6c3502e5efd19e2cda66518c81c1f581715eaf98959b10f3cd2931149",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-09",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940363",
+    "frame_sha256": "1c58be368d74b1536cac7b38b1b3c44db086a71a1e388d9455fcf01c1f70db9d",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-09",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940387",
+    "frame_sha256": "4377954287c419b1b769b4880abcae42e573cde7a7ac80c9334fb8ae97bfbca3",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-09",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940415",
+    "frame_sha256": "982ebf8f2dbc9925f33e893e2d12c96a06d44de6d473410d166c9811c8ad5ba2",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-09",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-cat",
+    "id": "00000001791806940445",
+    "frame_sha256": "f5db972a5c786269e608c5f114c7b855b22152cb698ed3df7973fbaa5230bbb5",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "nameplate"
+    ],
+    "nameplate_visible": true,
+    "caption_position": "top",
+    "event_id": "dev-cat-event-10",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269272",
+    "frame_sha256": "2b42afcc0cbffc56727aacf1d41d51f016882a5290fc51a05b1eb14603fe1504",
+    "gt_caption_row_count": 0,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "none",
+    "event_id": "dev-watch-event-00",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269286",
+    "frame_sha256": "5b701caa6b45896359ab7e12f54668601e78eb3805e9ac839f8bb6631a2622e4",
+    "gt_caption_row_count": 0,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "none",
+    "event_id": "dev-watch-event-00",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269336",
+    "frame_sha256": "5f50348fe51fad00b7c3cc9ba8f87320dd300a49c9030724bae2715de4672809",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-01",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269372",
+    "frame_sha256": "7fc55d8ea688337ec5f7c51e86232713ea69d91440db3584f0ae7ec5fe3bd1e6",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": "unknown",
+    "noncaption_types": [
+      "blur_uncertain"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-01",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269385",
+    "frame_sha256": "5a2e5e7789f8adc17ca909658e75b9eb7a64cde34abd8875d4a70089b50d432e",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": "unknown",
+    "noncaption_types": [
+      "blur_uncertain"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-01",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269447",
+    "frame_sha256": "95cf76c1be1f588d5b157de7dc7e630fdca14b8e01d26f30a1056d600e37269b",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-01",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269476",
+    "frame_sha256": "3e7717272799dc9e11c2e272b9423569ca7cf0b93f9753fb1133e536621d6b78",
+    "gt_caption_row_count": 0,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "none",
+    "event_id": "dev-watch-event-02",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269494",
+    "frame_sha256": "08891dd37f402ffbedc731c9c2fe3f4aa6083a4d607ab0fcaf45f9f5a785346a",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-03",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269561",
+    "frame_sha256": "b43f42d8be8d6dee9a86ea40d85f2f030fe55de7052fd0d8431425517c191d3f",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-03",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269599",
+    "frame_sha256": "93458e9a6a3fe3da40e4f443767de4d76744c5086ad43c1adc0955c59686938d",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-03",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269659",
+    "frame_sha256": "748132e361ae022bd42e6bf46d12cfb53facdba189f4162ae0c9ec2aa6941662",
+    "gt_caption_row_count": 0,
+    "noncaption_text_visible": "unknown",
+    "noncaption_types": [
+      "blur_uncertain"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "none",
+    "event_id": "dev-watch-event-04",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269671",
+    "frame_sha256": "09f59cc85fd4f632b0a999234ccd34666457bada7f340642945d9f9d68407c4c",
+    "gt_caption_row_count": 0,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "none",
+    "event_id": "dev-watch-event-04",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269713",
+    "frame_sha256": "8f7010d7b47731e06a7d628db33d558ba8f863382fd7630ffddfa6a7b7b4a2ff",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-05",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269784",
+    "frame_sha256": "d45453d7acecca369c2226abb44f2c1d150a3193735d5a2f5e5b762e21a808e5",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-05",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269810",
+    "frame_sha256": "a1684a662d8ee9cb59e9dd2fd3e5b308da7d6c73c098e7219bac7c3a69aa722a",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-05",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269857",
+    "frame_sha256": "462e49fbbe5620b49086e0e43e9456e1bb06826887bf180f8ae60976db9cc3c4",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-05",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269916",
+    "frame_sha256": "ab9ba27b959a812c23c02ce81b5867213b14aeae699e712468075649db042d86",
+    "gt_caption_row_count": 0,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "none",
+    "event_id": "dev-watch-event-06",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269928",
+    "frame_sha256": "6d71f975a5b39383807ff7a55852e5daabd22f8a1c1af28429b4d352d3f753f7",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-07",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807269984",
+    "frame_sha256": "2946c188b535076554b27cbf823def35368f5e66d2837b193b67b098f15fdd70",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-07",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807270020",
+    "frame_sha256": "df7ab6ced8716dc0d52c5375b806398cffa76025e5c9f62804843392075ac598",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-07",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807270046",
+    "frame_sha256": "51d31b6c7a302ee4ebeddf29f8314a30ef9b0cda3266f03fbda503b58acd5669",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-07",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807270117",
+    "frame_sha256": "9150f471f12a304ed74c8a7d0f7903c7d497353b60a774bd5874a79f6b3c4e6d",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-07",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807270140",
+    "frame_sha256": "1b86e7189da88dca302f8db5ee237b762881693b65065d4fa22b1157c812a0a7",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-08",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807270171",
+    "frame_sha256": "217a3c0cba5c2c515289e00b7d7789df02c1c900cca853838d3f2e2e15b7eb85",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-08",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807270231",
+    "frame_sha256": "db5762943d164da2e567791e146ba07ad26e669254854b3fd94decfeb49fdc54",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-08",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807270280",
+    "frame_sha256": "e2bd509736cac8368cf8eb50ae295bd4e600dd57395482fadef1ccbed3d2158f",
+    "gt_caption_row_count": 1,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "bottom",
+    "event_id": "dev-watch-event-08",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807270340",
+    "frame_sha256": "94c167905b269a01e9760bf3cf8e891c9643f5b2b2c449c66359236fb4135919",
+    "gt_caption_row_count": 0,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "none",
+    "event_id": "dev-watch-event-09",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "dev-watch",
+    "id": "00000001791807270352",
+    "frame_sha256": "add3611036226b9a148e98422c69387aa190829884d855e6ab5e2cea4180dd5f",
+    "gt_caption_row_count": 0,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "watch_dial_or_engraving"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "none",
+    "event_id": "dev-watch-event-09",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506103",
+    "frame_sha256": "bf3da10aa4f3d6f8e47045ee435b6734dd0ba6cdb6a42f571d518ce667ebddd1",
+    "gt_caption_row_count": 0,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "chapter_card"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "none",
+    "event_id": "heldout-event-00",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506125",
+    "frame_sha256": "66602e027ac2a9ade47620b383c96c26800ed2d6bc05c06054808fad9c1531e4",
+    "gt_caption_row_count": 0,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "chapter_card"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "none",
+    "event_id": "heldout-event-00",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506140",
+    "frame_sha256": "c5a4ae80bc44a4b74c61838c504395d4d5a6d50360246bacbb5488ae49ac3c3e",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-01",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506157",
+    "frame_sha256": "ef09ea39fbfb91816c70abe6dcddaaad8d440f685b6934abe5477a1bf8cfd47e",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-01",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506171",
+    "frame_sha256": "dc3a116c3b64c9457ea28dcc7dd43ca35d147ba96702fb793c3d6fa949a7561c",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-02",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506186",
+    "frame_sha256": "0ca88510593d64b83ada567fd34c4aed8607b02a19ec88b78a695e456856d8f1",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-02",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506204",
+    "frame_sha256": "4a4b4d613f058056a768f2e365615c0632b3647c684f19e3d480b2a422ec35cb",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-03",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506228",
+    "frame_sha256": "123c942ca57da1d1737ce2c89673123b5cc9bbb81e575b9ed43ad787c851e1e1",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-03",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506238",
+    "frame_sha256": "cbc148a54360a9c04a14e8efc130e2a30fb06079e62fd37578e34a0b03e366f8",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-03",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506252",
+    "frame_sha256": "e86e15b11b4cbe64fc1d0199bea417af43edbd90a1edc3731af5daa53ab66ea4",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-04",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506266",
+    "frame_sha256": "031f6d6eaa50b47e69ac51b31cd688ab56c94795e7abc971aa78113b027e2ca7",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-04",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506275",
+    "frame_sha256": "573395dd5f198d74b18a584a5cfb019b885a1aa3a49f2b2d719f974c416a4aae",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-04",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506287",
+    "frame_sha256": "02ad2482068e6b2b257412156cfa541bc6f37367470343a05bf655589b7faf71",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-05",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506309",
+    "frame_sha256": "3b81f9ce769e2c95cf0dabadf2a0d908bea58b1678d802d67a68373f8da5f6af",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-05",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506321",
+    "frame_sha256": "5a52d4ebf82b58eb7a35f37c6143d2ed7bd75ade1f106742550b94e125d84eea",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-06",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506338",
+    "frame_sha256": "b8b50ac6396e0b25f7f101716018ab11581c465febf1a701627fbada21594eda",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-06",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506340",
+    "frame_sha256": "aa4dff9458f95b221f9875ee2350d4b8b201db4571685caa52eff61fb879074c",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-06",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506355",
+    "frame_sha256": "d5761ca177e114bf490c722a8b14184baaadcac244e993c39a7ff79a79a48191",
+    "gt_caption_row_count": 0,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "punctuation_card"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "none",
+    "event_id": "heldout-event-07",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506373",
+    "frame_sha256": "c26d861bf7cb88675e3f8233d581b6160d0bd9ff504ecb7d79be3de42306003d",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-08",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506386",
+    "frame_sha256": "787d294917e09f7fce3844b736017a50e9837cd54d0615483f8c07d98142428a",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-08",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506403",
+    "frame_sha256": "dace01fa27c90018a7c06444a9890335ee06859fb5c1dc2e237369c72a15e018",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-08",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506425",
+    "frame_sha256": "4dec825d4783372310497f41696f758488c87e5d929b96e124a8692f712b81e9",
+    "gt_caption_row_count": 0,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "chapter_card"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "none",
+    "event_id": "heldout-event-09",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506427",
+    "frame_sha256": "3a1a075e401d02d1034d6a090dad8b98bb944e6e376a945c72c14ee2a6c95bd9",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-10",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506444",
+    "frame_sha256": "139881bfbc0bade9b902c70b4e4b6cddbf66cbf46af4bca6ae2ff8f0f3a0ed90",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-10",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506459",
+    "frame_sha256": "701defde0b52e10ec4b7ca1ef078862337997c2080db198879b5a2e6d67b3b0c",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-11",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506481",
+    "frame_sha256": "dd2655345f0eb27cd8430798d5a02dae81eb86944dcc37910ed8e9b2041190ea",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-11",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506496",
+    "frame_sha256": "873b22baa853e3a5383c14acc27be109c0a347ef86fde2265d39a942e8460d9b",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-11",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506520",
+    "frame_sha256": "ec90bc8480dc0fd2f16dac6af125f7a68e619ea87da05f6c2f4bb396f27849d7",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "diagram"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-12",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506522",
+    "frame_sha256": "9e76a6ccb76e670a705f70bab0214f69e8419053c909dd6035265d5b7e79484e",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "diagram"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-12",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506539",
+    "frame_sha256": "b8013ad5aaef6808a927f8b69b82a77bb91eb32a2013b49e55efc9bf750d9486",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "diagram"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-12",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506561",
+    "frame_sha256": "998ef8a13031631d405d0e119632082f05c3d4847433c755646e15d63db68dd0",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-13",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506572",
+    "frame_sha256": "0fb6cdcf4f2fefaf68be59b20085ce8025b80853b765e228beca493f0f12c981",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-13",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506592",
+    "frame_sha256": "4c2160371f4717bc101a530a8e765042e152453929bd8f76fc70ca2c9e6aa979",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-14",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506604",
+    "frame_sha256": "cf8f68c7bd20b5bcd1f5bf85427a6cc52267beffb0e8b693b85c1669143f186c",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-14",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506613",
+    "frame_sha256": "62f3970e97ba69657cdaacaccf0ee67ceb5e75918c459e8832a649a519f0158c",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-14",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506635",
+    "frame_sha256": "0f42f28aaa9d044be2409dea48a07856a617d255bde2606421a324ebee140e2c",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": false,
+    "noncaption_types": [],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-15",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506650",
+    "frame_sha256": "9e2ecc1c7bd789f6b568967142effe69ec5493d1f2524968ce2906a497724f74",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "diagram"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-16",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506665",
+    "frame_sha256": "99446bb8f263da04400151389da1f00ee290e47b2da65e7da3cfdc6d8d6b4398",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "diagram"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-16",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506687",
+    "frame_sha256": "39d7201155fa66ea826fd6f6278a1a6ef7c493c8e00b6a245100d264331fdbb3",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "diagram"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-16",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506699",
+    "frame_sha256": "991f757c8e87dbd0bb6de8e02d7f96d7d5c6bbe6a5d73e3227d27327e54696e8",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "diagram"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-17",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506712",
+    "frame_sha256": "03b5f0bc4e8d54a1927b7e8004f56d6233f4c9fa2e2aaa164541919ad7465ded",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "diagram"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-17",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506733",
+    "frame_sha256": "cdcc3d4df90916428c1f0284184c1f7a2644a36faf6c84c762b856f0cfd5d63c",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "diagram"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-18",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  },
+  {
+    "dataset": "heldout",
+    "id": "00000001791807506746",
+    "frame_sha256": "21b5d54dc963350e9d78048385fd9dae1199e53102cd52e2a81f0cf571516142",
+    "gt_caption_row_count": 3,
+    "noncaption_text_visible": true,
+    "noncaption_types": [
+      "diagram"
+    ],
+    "nameplate_visible": false,
+    "caption_position": "top",
+    "event_id": "heldout-event-18",
+    "caption_duration_ms": null,
+    "three_row_visibility": "unknown",
+    "label_source": "frozen GT lines plus independent pixel review before new B/D outputs; human audit pending"
+  }
+]

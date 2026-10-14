@@ -234,7 +234,7 @@ public final class AutoSubtitleRegionTracker {
             boolean japaneseLine = JAPANESE_TEXT.matcher(text).find();
             double minimumConfidence = japaneseLine ? 20.0 : 30.0;
             if (line.getConfidence() < minimumConfidence) continue;
-            // Kept for the manual portrait hint. CaptureService currently passes false
+            // Optional portrait hint; the current in-app player does not enable it,
             // because burned-in captions may legitimately occupy the top of the video.
             if (portraitVideoViewport && line.getCenterY() < 0.18f) continue;
             eligibleLines.add(line);

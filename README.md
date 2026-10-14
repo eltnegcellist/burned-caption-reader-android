@@ -25,7 +25,7 @@ YouTubeのURLを入力するか、ブラウザからURLを共有すると、ア�
 - 全画面再生および字幕表示（CC）を隠す機能は機種とWebViewの挙動に依存します。
 - 端末の画面を手動でロックすると動画とOCRは継続できません。
 
-以前の画面共有方式は [`legacy-screen-capture-v0.3.3`](https://github.com/eltnegcellist/burned-caption-reader-android/tree/legacy-screen-capture-v0.3.3) ブランチに保存しています。アプリの識別子は更新可能性を維持するため変えていません。
+以前の画面共有方式は [`legacy-screen-capture-v0.3.3`](https://github.com/eltnegcellist/burned-caption-reader-android/tree/legacy-screen-capture-v0.3.3) ブランチに保存し、現行mainから旧サービス・手動範囲指定UI・通知連携を削除しました。アプリの識別子は更新可能性を維持するため変えていません。
 
 ## ビルド
 

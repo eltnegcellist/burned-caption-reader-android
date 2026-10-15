@@ -91,6 +91,6 @@ public final class AdaptiveSpeechRateTest {
 
     @Test public void excludesPunctuationFromCharacterDemand() {
         assertEquals(5, AdaptiveSpeechRate.characterCount("今日も晴れ！…"));
-        assertEquals(11, AdaptiveSpeechRate.characterCount("Hello, world!"));
+        assertEquals(10, AdaptiveSpeechRate.characterCount("Hello, world!"));
     }
 }

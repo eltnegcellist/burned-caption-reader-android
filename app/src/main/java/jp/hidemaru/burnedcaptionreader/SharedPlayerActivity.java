@@ -225,13 +225,16 @@ public final class SharedPlayerActivity extends Activity {
         status = new TextView(this);
         status.setTextSize(14);
         status.setTextColor(ReaderUi.MUTED);
-        status.setMaxLines(2);
+        // The heading consumes one line; OCR may report up to four bands,
+        // with additional visual lines when a band wraps on narrow screens.
+        status.setMaxLines(8);
         status.setText("アプリ内で動画を読み込み中…");
         controls.addView(status);
         lastRead = new TextView(this);
         lastRead.setTextColor(ReaderUi.INK);
         lastRead.setTextSize(15);
-        lastRead.setMaxLines(2);
+        // A single spoken passage may span several subtitle rows.
+        lastRead.setMaxLines(8);
         controls.addView(lastRead, ReaderUi.block(this, 6));
         LinearLayout actions = new LinearLayout(this);
         actions.setOrientation(LinearLayout.HORIZONTAL);

@@ -12,6 +12,7 @@ public final class AppPreferences {
     public static final String SPEECH_BOOST = "speech_boost";
     private static final String SPEECH_LEVEL = "speech_level_percent";
 
+    public static final float DEFAULT_SPEECH_RATE = 1.60f;
     private static final String SPEECH_RATE = "speech_rate";
     private static final String SPEECH_MODE = "speech_mode";
     private static final String STABLE_MS = "stable_ms";
@@ -52,7 +53,7 @@ public final class AppPreferences {
     }
 
     public float getSpeechRate() {
-        return preferences.getFloat(SPEECH_RATE, 1.40f);
+        return preferences.getFloat(SPEECH_RATE, DEFAULT_SPEECH_RATE);
     }
 
     public void setSpeechRate(float rate) {

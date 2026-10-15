@@ -64,6 +64,17 @@ final class SettingsPanel extends ScrollView {
         });
 
         heading("読み上げ速度");
+        Switch adaptiveRate = toggle("動画に合わせて速度を自動調整する",
+                preferences.isAutoSpeechRateEnabled());
+        adaptiveRate.setContentDescription("動画に合わせて読み上げ速度を自動調整");
+        adaptiveRate.setOnCheckedChangeListener((button, checked) -> {
+            if (checked == preferences.isAutoSpeechRateEnabled()) return;
+            preferences.setAutoSpeechRateEnabled(checked);
+            onChanged.run();
+        });
+        note("ON: 字幕の文字数と切り替わる間隔から、動画ごとに約1.15〜2.00倍の範囲で徐々に調整します。" +
+                "OFF: 下の設定速度を使います（従来の読み上げ遅延時の補正は残ります）。");
+        note("下の速度は自動調整の基準値です。自動調整をOFFにすると、その速度で読みます。");
         TextView rateValue = value(String.format(Locale.JAPAN, "%.2f倍", preferences.getSpeechRate()));
         SeekBar rate = new SeekBar(context);
         rate.setMax(150);

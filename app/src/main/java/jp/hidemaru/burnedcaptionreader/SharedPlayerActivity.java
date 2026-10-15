@@ -225,13 +225,16 @@ public final class SharedPlayerActivity extends Activity {
         status = new TextView(this);
         status.setTextSize(14);
         status.setTextColor(ReaderUi.MUTED);
-        status.setMaxLines(2);
+        // The heading consumes one line; OCR may report up to four bands,
+        // with additional visual lines when a band wraps on narrow screens.
+        status.setMaxLines(8);
         status.setText("アプリ内で動画を読み込み中…");
         controls.addView(status);
         lastRead = new TextView(this);
         lastRead.setTextColor(ReaderUi.INK);
         lastRead.setTextSize(15);
-        lastRead.setMaxLines(2);
+        // A single spoken passage may span several subtitle rows.
+        lastRead.setMaxLines(8);
         controls.addView(lastRead, ReaderUi.block(this, 6));
         LinearLayout actions = new LinearLayout(this);
         actions.setOrientation(LinearLayout.HORIZONTAL);
@@ -793,7 +796,7 @@ public final class SharedPlayerActivity extends Activity {
                 if (current.length() > 0) current.append('\n');
                 current.append(band.text);
             }
-            status.setText("動画内で検出した文字:\n" + current);
+            status.setText("動画内で検出した文字: " + SubtitleNormalizer.toDisplayText(current.toString()));
         } else {
             status.setText("動画内の字幕を探索中");
         }
@@ -836,7 +839,7 @@ public final class SharedPlayerActivity extends Activity {
         if (reservation == null) return;
         String text = SubtitleNormalizer.toSpeechText(reservation.getText());
         if (text.isEmpty()) { ledger.release(reservation.getId()); return; }
-        lastRead.setText("読み上げ: " + reservation.getText());
+        lastRead.setText("読み上げ: " + SubtitleNormalizer.toDisplayText(reservation.getText()));
         speaker.speak(text, mode, preferences.getSpeechRate(), new SpeechEngine.Completion() {
             @Override public void onStart() {
                 ledger.markInFlight(reservation.getId());

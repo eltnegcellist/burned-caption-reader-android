@@ -51,6 +51,41 @@ public final class SubtitleNormalizer {
                 .toLowerCase(Locale.JAPANESE);
     }
 
+    /**
+     * Formats recognized subtitle rows as a compact paragraph for the player UI.
+     * Japanese lines are joined without an artificial gap; Latin-script lines
+     * retain a separating space so that words do not run together.
+     * This is intentionally display-only: row boundaries used for speech and
+     * duplicate detection must remain untouched.
+     */
+    public static String toDisplayText(String input) {
+        if (input == null || input.isEmpty()) return "";
+        StringBuilder result = new StringBuilder();
+        String[] lines = input.replace("\r\n", "\n").replace('\r', '\n').split("\n");
+        for (String line : lines) {
+            String part = line.trim();
+            if (part.isEmpty()) continue;
+            if (result.length() > 0) {
+                int before = Character.codePointBefore(result, result.length());
+                int after = part.codePointAt(0);
+                if (!isJapaneseBoundary(before) && !isJapaneseBoundary(after)) {
+                    result.append(' ');
+                }
+            }
+            result.append(part);
+        }
+        return result.toString();
+    }
+
+    private static boolean isJapaneseBoundary(int codePoint) {
+        Character.UnicodeScript script = Character.UnicodeScript.of(codePoint);
+        return script == Character.UnicodeScript.HAN
+                || script == Character.UnicodeScript.HIRAGANA
+                || script == Character.UnicodeScript.KATAKANA
+                || (codePoint >= 0x3000 && codePoint <= 0x303F)
+                || (codePoint >= 0xFF01 && codePoint <= 0xFF65);
+    }
+
     public static String toSpeechText(String input) {
         // Treat ellipsis as a pause. Some TTS engines otherwise verbalize dot-like
         // OCR artifacts, which sounds like a recognition error to the listener.

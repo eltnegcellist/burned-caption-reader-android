@@ -796,7 +796,7 @@ public final class SharedPlayerActivity extends Activity {
                 if (current.length() > 0) current.append('\n');
                 current.append(band.text);
             }
-            status.setText("動画内で検出した文字:\n" + current);
+            status.setText("動画内で検出した文字: " + SubtitleNormalizer.toDisplayText(current.toString()));
         } else {
             status.setText("動画内の字幕を探索中");
         }
@@ -839,7 +839,7 @@ public final class SharedPlayerActivity extends Activity {
         if (reservation == null) return;
         String text = SubtitleNormalizer.toSpeechText(reservation.getText());
         if (text.isEmpty()) { ledger.release(reservation.getId()); return; }
-        lastRead.setText("読み上げ: " + reservation.getText());
+        lastRead.setText("読み上げ: " + SubtitleNormalizer.toDisplayText(reservation.getText()));
         speaker.speak(text, mode, preferences.getSpeechRate(), new SpeechEngine.Completion() {
             @Override public void onStart() {
                 ledger.markInFlight(reservation.getId());

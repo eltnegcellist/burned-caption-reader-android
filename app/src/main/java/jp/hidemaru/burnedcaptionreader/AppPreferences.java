@@ -14,7 +14,6 @@ public final class AppPreferences {
 
     public static final float DEFAULT_SPEECH_RATE = 1.60f;
     private static final String SPEECH_RATE = "speech_rate";
-    private static final String AUTO_SPEECH_RATE = "auto_speech_rate";
     private static final String SPEECH_MODE = "speech_mode";
     private static final String STABLE_MS = "stable_ms";
     private static final String SUBTITLE_RECHECK_ENABLED = "subtitle_recheck_enabled";
@@ -55,15 +54,6 @@ public final class AppPreferences {
 
     public float getSpeechRate() {
         return preferences.getFloat(SPEECH_RATE, DEFAULT_SPEECH_RATE);
-    }
-
-    /** Existing custom base speeds remain unchanged; adaptive pacing is opt-out. */
-    public boolean isAutoSpeechRateEnabled() {
-        return preferences.getBoolean(AUTO_SPEECH_RATE, true);
-    }
-
-    public void setAutoSpeechRateEnabled(boolean enabled) {
-        preferences.edit().putBoolean(AUTO_SPEECH_RATE, enabled).apply();
     }
 
     public void setSpeechRate(float rate) {

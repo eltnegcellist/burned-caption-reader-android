@@ -28,6 +28,12 @@ public final class ImageEvaluationInstrumentation extends Instrumentation {
     @Override public void onStart() {
         Bundle report = new Bundle();
         try {
+            if ("manual-speech-rate-smoke".equals(arguments.getString("mode"))) {
+                JSONObject result = ManualSpeechRateNativeSmoke.run(this);
+                Files.write(new File(getTargetContext().getFilesDir(), "manual-speech-rate-smoke.json").toPath(),
+                        result.toString(2).getBytes(StandardCharsets.UTF_8));
+                report.putString("stream", "Manual speech rate native integration PASS\n"); finish(-1, report); return;
+            }
             if ("bd-components".equals(arguments.getString("mode"))) {
                 BdComponents.run(this);
                 report.putString("stream", "B/D components PASS\n"); finish(-1, report); return;

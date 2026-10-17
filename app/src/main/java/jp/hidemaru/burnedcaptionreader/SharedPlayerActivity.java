@@ -52,7 +52,6 @@ import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleEvent;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleNormalizer;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleSpeechOrderBuffer;
 import jp.hidemaru.burnedcaptionreader.subtitle.SubtitleStabilizer;
-import jp.hidemaru.burnedcaptionreader.tts.AdaptiveSpeechRate;
 import jp.hidemaru.burnedcaptionreader.tts.AndroidTtsSpeaker;
 import jp.hidemaru.burnedcaptionreader.tts.SpeechEngine;
 
@@ -73,7 +72,6 @@ public final class SharedPlayerActivity extends Activity {
     private final Handler main = new Handler(Looper.getMainLooper());
     private final AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
     private final RowSpeechLedger ledger = new RowSpeechLedger(60_000L);
-    private final AdaptiveSpeechRate adaptiveSpeechRate = new AdaptiveSpeechRate();
     private final SubtitleSpeechOrderBuffer order = new SubtitleSpeechOrderBuffer();
     private final SubtitleStabilizer.Config stableConfig = new SubtitleStabilizer.Config();
     private final Map<Integer, SubtitleStabilizer> stabilizers = new HashMap<>();
@@ -105,7 +103,6 @@ public final class SharedPlayerActivity extends Activity {
                             captureGeneration++;
                             if (speaker != null) speaker.stop();
                             ledger.reset(); resetTracks();
-                            adaptiveSpeechRate.suspend();
                         }
                         evaluationMediaMs = state.optLong("media_ms", -1);
                         evaluationStarted = state.optBoolean("evaluation_started");
@@ -151,9 +148,6 @@ public final class SharedPlayerActivity extends Activity {
     private boolean subtitleRecheckEnabled;
     private SpeechEngine speaker;
     private AppPreferences preferences;
-    private boolean autoSpeechRateEnabled;
-    private float lastBaseSpeechRate;
-    private int speechRateGeneration;
     private String videoId;
     private boolean sampling;
     private boolean busy;
@@ -168,8 +162,6 @@ public final class SharedPlayerActivity extends Activity {
             return;
         }
         preferences = new AppPreferences(this);
-        autoSpeechRateEnabled = preferences.isAutoSpeechRateEnabled();
-        lastBaseSpeechRate = preferences.getSpeechRate();
         diagnostics = DiagnosticRecorder.get(this);
         stableConfig.stableMs = preferences.getStableMs();
         subtitleRecheckEnabled = preferences.isSubtitleRecheckEnabled();
@@ -283,7 +275,6 @@ public final class SharedPlayerActivity extends Activity {
         // must also forget the commit, or the visible unfinished caption can
         // never be retried after returning. Completed ledger rows are retained.
         resetTracks();
-        adaptiveSpeechRate.suspend();
         super.onPause();
     }
 
@@ -368,7 +359,6 @@ public final class SharedPlayerActivity extends Activity {
     private void setReadingPaused(boolean paused) {
         if (readingPaused == paused) return;
         readingPaused = paused;
-        adaptiveSpeechRate.suspend();
         captureGeneration++;
         speechToggle.setText(paused ? "読み上げを再開" : "読み上げを一時停止");
         if (paused) {
@@ -422,17 +412,6 @@ public final class SharedPlayerActivity extends Activity {
 
     private void applyLiveSettings() {
         applyOcrModeIfIdle();
-        boolean nextAutoRate = preferences.isAutoSpeechRateEnabled();
-        float nextBaseRate = preferences.getSpeechRate();
-        if (autoSpeechRateEnabled != nextAutoRate ||
-                Math.abs(lastBaseSpeechRate - nextBaseRate) > 0.001f) {
-            autoSpeechRateEnabled = nextAutoRate;
-            lastBaseSpeechRate = nextBaseRate;
-            speechRateGeneration++;
-            adaptiveSpeechRate.reset();
-            diagnostics.event("auto_speech_rate_setting_changed", "enabled", nextAutoRate,
-                    "base_rate", nextBaseRate);
-        }
         boolean nextRecheck = preferences.isSubtitleRecheckEnabled();
         if (subtitleRecheckEnabled != nextRecheck) {
             captureGeneration++;
@@ -861,22 +840,11 @@ public final class SharedPlayerActivity extends Activity {
         String text = SubtitleNormalizer.toSpeechText(reservation.getText());
         if (text.isEmpty()) { ledger.release(reservation.getId()); return; }
         lastRead.setText("読み上げ: " + SubtitleNormalizer.toDisplayText(reservation.getText()));
-        final boolean adaptive = autoSpeechRateEnabled;
-        final int generation = speechRateGeneration;
-        final long enqueuedAt = SystemClock.elapsedRealtime();
-        final float baseRate = preferences.getSpeechRate();
-        final float requestedRate = adaptive
-                ? adaptiveSpeechRate.onCaption(enqueuedAt, text, baseRate)
-                : baseRate;
-        diagnostics.event("speech_rate_selection", "adaptive", adaptive,
-                "base_rate", baseRate, "requested_rate", requestedRate,
-                "pace_samples", adaptiveSpeechRate.getValidIntervals());
+        final float requestedRate = preferences.getSpeechRate();
+        diagnostics.event("speech_rate_selection",
+                "base_rate", requestedRate, "requested_rate", requestedRate);
         speaker.speak(text, mode, requestedRate, new SpeechEngine.Completion() {
             @Override public void onStart() {
-                if (adaptive && generation == speechRateGeneration) {
-                    adaptiveSpeechRate.onSpeechStartDelay(
-                            Math.max(0L, SystemClock.elapsedRealtime() - enqueuedAt));
-                }
                 ledger.markInFlight(reservation.getId());
                 diagnostics.event("speech_ledger", "reservation_id", reservation.getId(), "state", "in_flight");
             }
@@ -897,8 +865,6 @@ public final class SharedPlayerActivity extends Activity {
         if (speaker != null) speaker.stop();
         // Identical dialogue in two different videos is new content.
         ledger.reset();
-        speechRateGeneration++;
-        adaptiveSpeechRate.reset();
         videoId = nextVideoId;
         captureGeneration++;
         resetTracks();

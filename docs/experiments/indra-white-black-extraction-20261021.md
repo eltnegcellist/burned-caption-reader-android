@@ -4,6 +4,8 @@
 
 [前の原因分離試験](indra-detection-vs-recognition-20261020.md)と同じ非公開実99画像・2,545正解文字・保存済みEの位置を使った。元画像、正解、OCR全文、画像別IDは公開せず、[集計JSON](indra-white-black-extraction-20261021/summary-only.json)と分析だけを追加する。通常アプリ・E方式は変更していない。
 
+速度は[別の対比較計測と各工程の内訳](indra-white-black-latency-20261021.md)を参照。Macでの後段処理のみでは白抽出16.76ms→両抽出24.71ms（中央値）だった。Eの検出を含むAndroid全体の速度ではない。
+
 ## 固定した処理と、両抽出の組合せ
 
 - 位置はE保存JSONの`recognition_rows`から、Eの選択band内に行中心がある矩形を使用。99画像・214行。位置選択にGTは使わず、Eの認識文へのfallbackも行わない。矩形がない11画像も空として採点する。

@@ -1,0 +1,1286 @@
+{
+  "native_mac": {
+    "config": {
+      "repeats": 3,
+      "threads": 4,
+      "modes": [
+        "white_only",
+        "dual_confidence"
+      ],
+      "clock": "perf_counter_ns, from already decoded RGB + frozen E row boxes to final joined text",
+      "included": [
+        "full-frame RGB min/max and neutral-mask calculation",
+        "binary extraction array construction",
+        "CJK recognizer crops and inference",
+        "dual confidence selection and final text join"
+      ],
+      "excluded": [
+        "image decode",
+        "input SHA validation",
+        "E/ML Kit detection and subtitle-band selection",
+        "model load",
+        "warm-up",
+        "GT scoring",
+        "capture/polling",
+        "TTS",
+        "Android app glue"
+      ],
+      "pairing": "three full 99-frame passes, per-frame mode order alternates with (pass+frame) parity; no OCR-output caching between modes",
+      "shared_work": "dual mode shares RGB min/max/neutral calculations between white and black; both recognizer calls actually execute",
+      "no_box": "11 frames have no selected E rows; both methods immediately return empty without extraction/inference; also report the other 88 frames separately",
+      "summary": "primary median/p95 pool all actual measured calls (297 including empty-box frames, 264 with boxes); p95 nearest rank",
+      "note": "This is the recognition suffix on native Mac, NOT the complete E-detector+Indra Android pipeline."
+    },
+    "start_utc": "2026-10-20T21:51:11.200894+00:00",
+    "end_utc": "2026-10-20T21:51:22.103445+00:00",
+    "model_load_ms": 366.033709,
+    "input_decode_preload_once": {
+      "overall": {
+        "n": 99,
+        "median_ms": 7.48375,
+        "p95_ms": 8.618709,
+        "mean_ms": 7.4433009292929295,
+        "min_ms": 5.114833,
+        "max_ms": 16.928125
+      },
+      "dev-cat": {
+        "n": 28,
+        "median_ms": 8.1858125,
+        "p95_ms": 8.81075,
+        "mean_ms": 8.491031321428572,
+        "min_ms": 7.688709,
+        "max_ms": 16.928125
+      },
+      "dev-watch": {
+        "n": 28,
+        "median_ms": 6.5154375,
+        "p95_ms": 7.277459,
+        "mean_ms": 6.458980642857143,
+        "min_ms": 5.114833,
+        "max_ms": 7.334417
+      },
+      "heldout": {
+        "n": 43,
+        "median_ms": 7.48375,
+        "p95_ms": 7.9515,
+        "mean_ms": 7.402010627906977,
+        "min_ms": 6.506,
+        "max_ms": 8.047875
+      }
+    },
+    "environment": {
+      "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+      "machine": "arm64",
+      "python": "3.14.4",
+      "versions": {
+        "indra-ocr": "1.1.2",
+        "onnxruntime": "1.31.0",
+        "numpy": "2.5.4",
+        "pillow": "12.3.0"
+      }
+    },
+    "model_commit": "bd02167fdf2005a19962cc15188f8496a2c87d3b",
+    "source_script_sha256": "2777e24e811916958e5b5df346683c3e6ba4bbb104e04c8b3db0413bd01a9816",
+    "alternating_order_counts": {
+      "white_first": 149,
+      "dual_first": 148
+    },
+    "all_predictions_match_previous_accuracy_experiment": true,
+    "groups": {
+      "overall": {
+        "white_only": {
+          "pooled_actual_calls": {
+            "n": 297,
+            "median_ms": 16.763541,
+            "p95_ms": 19.103417,
+            "mean_ms": 14.93274368013468,
+            "min_ms": 4.1e-05,
+            "max_ms": 23.412666
+          },
+          "nonempty_box_calls": {
+            "n": 264,
+            "median_ms": 17.05475,
+            "p95_ms": 19.107625,
+            "mean_ms": 16.799320375,
+            "min_ms": 11.31725,
+            "max_ms": 23.412666
+          },
+          "stages_nonempty_box_calls": {
+            "extract_ms": {
+              "n": 264,
+              "median_ms": 9.162333,
+              "p95_ms": 9.808958,
+              "mean_ms": 9.212163943181817,
+              "min_ms": 8.623875,
+              "max_ms": 10.765709
+            },
+            "common_pixel_stats_ms": {
+              "n": 264,
+              "median_ms": 8.8425415,
+              "p95_ms": 9.501416,
+              "mean_ms": 8.895825299242425,
+              "min_ms": 8.325125,
+              "max_ms": 10.46575
+            },
+            "white_mask_ms": {
+              "n": 264,
+              "median_ms": 0.31443750000000004,
+              "p95_ms": 0.345875,
+              "mean_ms": 0.3163386439393939,
+              "min_ms": 0.273584,
+              "max_ms": 0.462542
+            },
+            "black_mask_ms": {
+              "n": 264,
+              "median_ms": 0.0,
+              "p95_ms": 0.0,
+              "mean_ms": 0.0,
+              "min_ms": 0.0,
+              "max_ms": 0.0
+            },
+            "white_recognition_ms": {
+              "n": 264,
+              "median_ms": 7.8786249999999995,
+              "p95_ms": 9.765792,
+              "mean_ms": 7.586149488636363,
+              "min_ms": 2.338709,
+              "max_ms": 13.795667
+            },
+            "black_recognition_ms": {
+              "n": 264,
+              "median_ms": 0.0,
+              "p95_ms": 0.0,
+              "mean_ms": 0.0,
+              "min_ms": 0.0,
+              "max_ms": 0.0
+            },
+            "selection_join_ms": {
+              "n": 264,
+              "median_ms": 0.001,
+              "p95_ms": 0.001333,
+              "mean_ms": 0.0010069431818181818,
+              "min_ms": 0.000625,
+              "max_ms": 0.00225
+            }
+          },
+          "per_pass": [
+            {
+              "n": 99,
+              "median_ms": 16.833458,
+              "p95_ms": 19.29325,
+              "mean_ms": 15.043773161616162,
+              "min_ms": 4.1e-05,
+              "max_ms": 23.412666
+            },
+            {
+              "n": 99,
+              "median_ms": 16.593083,
+              "p95_ms": 18.684542,
+              "mean_ms": 14.790767262626263,
+              "min_ms": 4.1e-05,
+              "max_ms": 22.406875
+            },
+            {
+              "n": 99,
+              "median_ms": 16.826,
+              "p95_ms": 19.074958,
+              "mean_ms": 14.963690616161616,
+              "min_ms": 4.2e-05,
+              "max_ms": 22.564625
+            }
+          ]
+        },
+        "dual_confidence": {
+          "pooled_actual_calls": {
+            "n": 297,
+            "median_ms": 24.713333,
+            "p95_ms": 29.1695,
+            "mean_ms": 21.759581501683503,
+            "min_ms": 4.1e-05,
+            "max_ms": 37.559042
+          },
+          "nonempty_box_calls": {
+            "n": 264,
+            "median_ms": 24.919458,
+            "p95_ms": 29.231916,
+            "mean_ms": 24.47951577272727,
+            "min_ms": 13.709916,
+            "max_ms": 37.559042
+          },
+          "stages_nonempty_box_calls": {
+            "extract_ms": {
+              "n": 264,
+              "median_ms": 9.4559165,
+              "p95_ms": 10.187291,
+              "mean_ms": 9.508041640151514,
+              "min_ms": 8.876334,
+              "max_ms": 10.82725
+            },
+            "common_pixel_stats_ms": {
+              "n": 264,
+              "median_ms": 8.8720835,
+              "p95_ms": 9.577292,
+              "mean_ms": 8.914861268939394,
+              "min_ms": 8.29175,
+              "max_ms": 10.246542
+            },
+            "white_mask_ms": {
+              "n": 264,
+              "median_ms": 0.314438,
+              "p95_ms": 0.3345,
+              "mean_ms": 0.31515623863636366,
+              "min_ms": 0.269958,
+              "max_ms": 0.522625
+            },
+            "black_mask_ms": {
+              "n": 264,
+              "median_ms": 0.2774795,
+              "p95_ms": 0.292083,
+              "mean_ms": 0.2780241325757576,
+              "min_ms": 0.2565,
+              "max_ms": 0.414375
+            },
+            "white_recognition_ms": {
+              "n": 264,
+              "median_ms": 7.878833500000001,
+              "p95_ms": 9.851709,
+              "mean_ms": 7.616692863636364,
+              "min_ms": 2.305875,
+              "max_ms": 13.685542
+            },
+            "black_recognition_ms": {
+              "n": 264,
+              "median_ms": 7.648229,
+              "p95_ms": 9.856375,
+              "mean_ms": 7.326239147727272,
+              "min_ms": 2.188041,
+              "max_ms": 14.2395
+            },
+            "selection_join_ms": {
+              "n": 264,
+              "median_ms": 0.028437,
+              "p95_ms": 0.039208,
+              "mean_ms": 0.028542121212121213,
+              "min_ms": 0.003625,
+              "max_ms": 0.083541
+            }
+          },
+          "per_pass": [
+            {
+              "n": 99,
+              "median_ms": 24.789541,
+              "p95_ms": 29.516625,
+              "mean_ms": 21.825081666666666,
+              "min_ms": 4.1e-05,
+              "max_ms": 37.559042
+            },
+            {
+              "n": 99,
+              "median_ms": 24.654625,
+              "p95_ms": 28.567167,
+              "mean_ms": 21.59881226262626,
+              "min_ms": 4.1e-05,
+              "max_ms": 36.407875
+            },
+            {
+              "n": 99,
+              "median_ms": 24.647042,
+              "p95_ms": 28.865583,
+              "mean_ms": 21.854850575757578,
+              "min_ms": 4.1e-05,
+              "max_ms": 37.0545
+            }
+          ]
+        },
+        "paired_dual_minus_white_ms": {
+          "n": 297,
+          "median_ms": 7.578333999999998,
+          "p95_ms": 10.740874999999999,
+          "mean_ms": 6.826837821548821,
+          "min_ms": -0.000333,
+          "max_ms": 14.553791999999998
+        }
+      },
+      "dev-cat": {
+        "white_only": {
+          "pooled_actual_calls": {
+            "n": 84,
+            "median_ms": 17.506396000000002,
+            "p95_ms": 22.406875,
+            "mean_ms": 17.846829869047617,
+            "min_ms": 15.051416,
+            "max_ms": 23.412666
+          },
+          "nonempty_box_calls": {
+            "n": 84,
+            "median_ms": 17.506396000000002,
+            "p95_ms": 22.406875,
+            "mean_ms": 17.846829869047617,
+            "min_ms": 15.051416,
+            "max_ms": 23.412666
+          },
+          "stages_nonempty_box_calls": {
+            "extract_ms": {
+              "n": 84,
+              "median_ms": 9.180771,
+              "p95_ms": 9.705583,
+              "mean_ms": 9.201266821428572,
+              "min_ms": 8.623875,
+              "max_ms": 10.243084
+            },
+            "common_pixel_stats_ms": {
+              "n": 84,
+              "median_ms": 8.87275,
+              "p95_ms": 9.391292,
+              "mean_ms": 8.888240595238095,
+              "min_ms": 8.325125,
+              "max_ms": 9.934209
+            },
+            "white_mask_ms": {
+              "n": 84,
+              "median_ms": 0.30981250000000005,
+              "p95_ms": 0.345875,
+              "mean_ms": 0.3130262261904762,
+              "min_ms": 0.290291,
+              "max_ms": 0.393166
+            },
+            "black_mask_ms": {
+              "n": 84,
+              "median_ms": 0.0,
+              "p95_ms": 0.0,
+              "mean_ms": 0.0,
+              "min_ms": 0.0,
+              "max_ms": 0.0
+            },
+            "white_recognition_ms": {
+              "n": 84,
+              "median_ms": 8.315125,
+              "p95_ms": 13.056625,
+              "mean_ms": 8.644492095238094,
+              "min_ms": 6.177916,
+              "max_ms": 13.795667
+            },
+            "black_recognition_ms": {
+              "n": 84,
+              "median_ms": 0.0,
+              "p95_ms": 0.0,
+              "mean_ms": 0.0,
+              "min_ms": 0.0,
+              "max_ms": 0.0
+            },
+            "selection_join_ms": {
+              "n": 84,
+              "median_ms": 0.001,
+              "p95_ms": 0.001542,
+              "mean_ms": 0.001070952380952381,
+              "min_ms": 0.000708,
+              "max_ms": 0.001709
+            }
+          },
+          "per_pass": [
+            {
+              "n": 28,
+              "median_ms": 17.738208,
+              "p95_ms": 23.167333,
+              "mean_ms": 18.049067,
+              "min_ms": 15.615375,
+              "max_ms": 23.412666
+            },
+            {
+              "n": 28,
+              "median_ms": 17.382958000000002,
+              "p95_ms": 22.088542,
+              "mean_ms": 17.66920982142857,
+              "min_ms": 15.051416,
+              "max_ms": 22.406875
+            },
+            {
+              "n": 28,
+              "median_ms": 17.434207999999998,
+              "p95_ms": 22.500708,
+              "mean_ms": 17.822212785714285,
+              "min_ms": 15.582167,
+              "max_ms": 22.564625
+            }
+          ]
+        },
+        "dual_confidence": {
+          "pooled_actual_calls": {
+            "n": 84,
+            "median_ms": 26.601709,
+            "p95_ms": 36.206125,
+            "mean_ms": 27.131479654761904,
+            "min_ms": 22.165792,
+            "max_ms": 37.559042
+          },
+          "nonempty_box_calls": {
+            "n": 84,
+            "median_ms": 26.601709,
+            "p95_ms": 36.206125,
+            "mean_ms": 27.131479654761904,
+            "min_ms": 22.165792,
+            "max_ms": 37.559042
+          },
+          "stages_nonempty_box_calls": {
+            "extract_ms": {
+              "n": 84,
+              "median_ms": 9.603145999999999,
+              "p95_ms": 10.395958,
+              "mean_ms": 9.613881976190477,
+              "min_ms": 8.876334,
+              "max_ms": 10.82725
+            },
+            "common_pixel_stats_ms": {
+              "n": 84,
+              "median_ms": 9.017062,
+              "p95_ms": 9.813292,
+              "mean_ms": 9.026552071428572,
+              "min_ms": 8.3,
+              "max_ms": 10.246542
+            },
+            "white_mask_ms": {
+              "n": 84,
+              "median_ms": 0.31074999999999997,
+              "p95_ms": 0.334083,
+              "mean_ms": 0.31234080952380955,
+              "min_ms": 0.2935,
+              "max_ms": 0.35625
+            },
+            "black_mask_ms": {
+              "n": 84,
+              "median_ms": 0.275521,
+              "p95_ms": 0.288833,
+              "mean_ms": 0.2749890952380952,
+              "min_ms": 0.2565,
+              "max_ms": 0.344209
+            },
+            "white_recognition_ms": {
+              "n": 84,
+              "median_ms": 8.364791499999999,
+              "p95_ms": 13.054791,
+              "mean_ms": 8.754773238095238,
+              "min_ms": 6.239916,
+              "max_ms": 13.685542
+            },
+            "black_recognition_ms": {
+              "n": 84,
+              "median_ms": 8.237646000000002,
+              "p95_ms": 13.429125,
+              "mean_ms": 8.730744642857143,
+              "min_ms": 6.7305,
+              "max_ms": 14.2395
+            },
+            "selection_join_ms": {
+              "n": 84,
+              "median_ms": 0.0300205,
+              "p95_ms": 0.044959,
+              "mean_ms": 0.03207979761904762,
+              "min_ms": 0.003625,
+              "max_ms": 0.083541
+            }
+          },
+          "per_pass": [
+            {
+              "n": 28,
+              "median_ms": 27.005,
+              "p95_ms": 37.2105,
+              "mean_ms": 27.534020857142856,
+              "min_ms": 23.43125,
+              "max_ms": 37.559042
+            },
+            {
+              "n": 28,
+              "median_ms": 26.0720625,
+              "p95_ms": 36.206125,
+              "mean_ms": 26.87441367857143,
+              "min_ms": 22.885541,
+              "max_ms": 36.407875
+            },
+            {
+              "n": 28,
+              "median_ms": 26.5588335,
+              "p95_ms": 35.954459,
+              "mean_ms": 26.98600442857143,
+              "min_ms": 22.165792,
+              "max_ms": 37.0545
+            }
+          ]
+        },
+        "paired_dual_minus_white_ms": {
+          "n": 84,
+          "median_ms": 9.1474165,
+          "p95_ms": 13.797834000000002,
+          "mean_ms": 9.284649785714285,
+          "min_ms": 5.672791999999998,
+          "max_ms": 14.553791999999998
+        }
+      },
+      "dev-watch": {
+        "white_only": {
+          "pooled_actual_calls": {
+            "n": 84,
+            "median_ms": 14.5281875,
+            "p95_ms": 16.1535,
+            "mean_ms": 9.6735025,
+            "min_ms": 4.1e-05,
+            "max_ms": 19.103417
+          },
+          "nonempty_box_calls": {
+            "n": 54,
+            "median_ms": 15.046645999999999,
+            "p95_ms": 16.544292,
+            "mean_ms": 15.047598018518519,
+            "min_ms": 12.345084,
+            "max_ms": 19.103417
+          },
+          "stages_nonempty_box_calls": {
+            "extract_ms": {
+              "n": 54,
+              "median_ms": 9.174208,
+              "p95_ms": 9.691125,
+              "mean_ms": 9.217427425925926,
+              "min_ms": 8.666042,
+              "max_ms": 9.794291
+            },
+            "common_pixel_stats_ms": {
+              "n": 54,
+              "median_ms": 8.852812,
+              "p95_ms": 9.365083,
+              "mean_ms": 8.893496944444445,
+              "min_ms": 8.358792,
+              "max_ms": 9.468375
+            },
+            "white_mask_ms": {
+              "n": 54,
+              "median_ms": 0.323521,
+              "p95_ms": 0.342791,
+              "mean_ms": 0.32393048148148146,
+              "min_ms": 0.303208,
+              "max_ms": 0.34925
+            },
+            "black_mask_ms": {
+              "n": 54,
+              "median_ms": 0.0,
+              "p95_ms": 0.0,
+              "mean_ms": 0.0,
+              "min_ms": 0.0,
+              "max_ms": 0.0
+            },
+            "white_recognition_ms": {
+              "n": 54,
+              "median_ms": 5.886062000000001,
+              "p95_ms": 7.217708,
+              "mean_ms": 5.829223833333334,
+              "min_ms": 3.500208,
+              "max_ms": 9.551917
+            },
+            "black_recognition_ms": {
+              "n": 54,
+              "median_ms": 0.0,
+              "p95_ms": 0.0,
+              "mean_ms": 0.0,
+              "min_ms": 0.0,
+              "max_ms": 0.0
+            },
+            "selection_join_ms": {
+              "n": 54,
+              "median_ms": 0.000958,
+              "p95_ms": 0.001167,
+              "mean_ms": 0.0009467592592592593,
+              "min_ms": 0.000708,
+              "max_ms": 0.001334
+            }
+          },
+          "per_pass": [
+            {
+              "n": 28,
+              "median_ms": 14.5281875,
+              "p95_ms": 16.824,
+              "mean_ms": 9.812532785714286,
+              "min_ms": 4.1e-05,
+              "max_ms": 19.103417
+            },
+            {
+              "n": 28,
+              "median_ms": 14.2347085,
+              "p95_ms": 16.207292,
+              "mean_ms": 9.575247035714286,
+              "min_ms": 4.1e-05,
+              "max_ms": 16.544292
+            },
+            {
+              "n": 28,
+              "median_ms": 14.798521000000001,
+              "p95_ms": 16.152333,
+              "mean_ms": 9.63272767857143,
+              "min_ms": 4.2e-05,
+              "max_ms": 16.1535
+            }
+          ]
+        },
+        "dual_confidence": {
+          "pooled_actual_calls": {
+            "n": 84,
+            "median_ms": 19.359083,
+            "p95_ms": 21.877542,
+            "mean_ms": 12.975426107142857,
+            "min_ms": 4.1e-05,
+            "max_ms": 24.012666
+          },
+          "nonempty_box_calls": {
+            "n": 54,
+            "median_ms": 20.162021,
+            "p95_ms": 23.610458,
+            "mean_ms": 20.18393751851852,
+            "min_ms": 16.026334,
+            "max_ms": 24.012666
+          },
+          "stages_nonempty_box_calls": {
+            "extract_ms": {
+              "n": 54,
+              "median_ms": 9.3509165,
+              "p95_ms": 10.296125,
+              "mean_ms": 9.463187351851852,
+              "min_ms": 8.876792,
+              "max_ms": 10.771333
+            },
+            "common_pixel_stats_ms": {
+              "n": 54,
+              "median_ms": 8.753582999999999,
+              "p95_ms": 9.684084,
+              "mean_ms": 8.864422833333334,
+              "min_ms": 8.29175,
+              "max_ms": 10.16575
+            },
+            "white_mask_ms": {
+              "n": 54,
+              "median_ms": 0.323021,
+              "p95_ms": 0.334958,
+              "mean_ms": 0.3232807962962963,
+              "min_ms": 0.307125,
+              "max_ms": 0.353
+            },
+            "black_mask_ms": {
+              "n": 54,
+              "median_ms": 0.274458,
+              "p95_ms": 0.292834,
+              "mean_ms": 0.2754837222222222,
+              "min_ms": 0.263667,
+              "max_ms": 0.293375
+            },
+            "white_recognition_ms": {
+              "n": 54,
+              "median_ms": 5.944167,
+              "p95_ms": 7.270584,
+              "mean_ms": 5.804356555555556,
+              "min_ms": 3.413125,
+              "max_ms": 9.17225
+            },
+            "black_recognition_ms": {
+              "n": 54,
+              "median_ms": 4.9849785,
+              "p95_ms": 5.68675,
+              "mean_ms": 4.889807925925926,
+              "min_ms": 3.412334,
+              "max_ms": 5.924458
+            },
+            "selection_join_ms": {
+              "n": 54,
+              "median_ms": 0.0244795,
+              "p95_ms": 0.032292,
+              "mean_ms": 0.026585685185185184,
+              "min_ms": 0.019667,
+              "max_ms": 0.071917
+            }
+          },
+          "per_pass": [
+            {
+              "n": 28,
+              "median_ms": 19.295395499999998,
+              "p95_ms": 21.877542,
+              "mean_ms": 12.956245607142858,
+              "min_ms": 4.1e-05,
+              "max_ms": 24.012666
+            },
+            {
+              "n": 28,
+              "median_ms": 19.347375,
+              "p95_ms": 21.452167,
+              "mean_ms": 12.799550642857144,
+              "min_ms": 4.1e-05,
+              "max_ms": 21.863042
+            },
+            {
+              "n": 28,
+              "median_ms": 19.545291499999998,
+              "p95_ms": 23.610458,
+              "mean_ms": 13.170482071428571,
+              "min_ms": 4.1e-05,
+              "max_ms": 23.725833
+            }
+          ]
+        },
+        "paired_dual_minus_white_ms": {
+          "n": 84,
+          "median_ms": 4.311894999999999,
+          "p95_ms": 6.438041999999999,
+          "mean_ms": 3.3019236071428573,
+          "min_ms": -0.000333,
+          "max_ms": 7.572333
+        }
+      },
+      "heldout": {
+        "white_only": {
+          "pooled_actual_calls": {
+            "n": 129,
+            "median_ms": 17.235458,
+            "p95_ms": 18.761833,
+            "mean_ms": 16.45982134883721,
+            "min_ms": 8.4e-05,
+            "max_ms": 19.198209
+          },
+          "nonempty_box_calls": {
+            "n": 126,
+            "median_ms": 17.2823545,
+            "p95_ms": 18.761833,
+            "mean_ms": 16.851718865079366,
+            "min_ms": 11.31725,
+            "max_ms": 19.198209
+          },
+          "stages_nonempty_box_calls": {
+            "extract_ms": {
+              "n": 126,
+              "median_ms": 9.145062500000002,
+              "p95_ms": 9.920292,
+              "mean_ms": 9.217172912698413,
+              "min_ms": 8.690583,
+              "max_ms": 10.765709
+            },
+            "common_pixel_stats_ms": {
+              "n": 126,
+              "median_ms": 8.8371875,
+              "p95_ms": 9.630417,
+              "mean_ms": 8.901879634920634,
+              "min_ms": 8.371166,
+              "max_ms": 10.46575
+            },
+            "white_mask_ms": {
+              "n": 126,
+              "median_ms": 0.3137295,
+              "p95_ms": 0.349542,
+              "mean_ms": 0.31529327777777777,
+              "min_ms": 0.273584,
+              "max_ms": 0.462542
+            },
+            "black_mask_ms": {
+              "n": 126,
+              "median_ms": 0.0,
+              "p95_ms": 0.0,
+              "mean_ms": 0.0,
+              "min_ms": 0.0,
+              "max_ms": 0.0
+            },
+            "white_recognition_ms": {
+              "n": 126,
+              "median_ms": 7.9755,
+              "p95_ms": 9.336958,
+              "mean_ms": 7.633555888888889,
+              "min_ms": 2.338709,
+              "max_ms": 10.187916
+            },
+            "black_recognition_ms": {
+              "n": 126,
+              "median_ms": 0.0,
+              "p95_ms": 0.0,
+              "mean_ms": 0.0,
+              "min_ms": 0.0,
+              "max_ms": 0.0
+            },
+            "selection_join_ms": {
+              "n": 126,
+              "median_ms": 0.000959,
+              "p95_ms": 0.001292,
+              "mean_ms": 0.000990063492063492,
+              "min_ms": 0.000625,
+              "max_ms": 0.00225
+            }
+          },
+          "per_pass": [
+            {
+              "n": 43,
+              "median_ms": 17.235458,
+              "p95_ms": 19.0435,
+              "mean_ms": 16.49322672093023,
+              "min_ms": 8.4e-05,
+              "max_ms": 19.198209
+            },
+            {
+              "n": 43,
+              "median_ms": 17.046875,
+              "p95_ms": 18.292416,
+              "mean_ms": 16.31258527906977,
+              "min_ms": 0.000209,
+              "max_ms": 18.597792
+            },
+            {
+              "n": 43,
+              "median_ms": 17.380958,
+              "p95_ms": 18.761833,
+              "mean_ms": 16.57365204651163,
+              "min_ms": 8.4e-05,
+              "max_ms": 19.196083
+            }
+          ]
+        },
+        "dual_confidence": {
+          "pooled_actual_calls": {
+            "n": 129,
+            "median_ms": 24.983,
+            "p95_ms": 28.005916,
+            "mean_ms": 23.981516449612403,
+            "min_ms": 4.2e-05,
+            "max_ms": 29.516625
+          },
+          "nonempty_box_calls": {
+            "n": 126,
+            "median_ms": 25.096875,
+            "p95_ms": 28.005916,
+            "mean_ms": 24.55250196031746,
+            "min_ms": 13.709916,
+            "max_ms": 29.516625
+          },
+          "stages_nonempty_box_calls": {
+            "extract_ms": {
+              "n": 126,
+              "median_ms": 9.377104,
+              "p95_ms": 10.025833,
+              "mean_ms": 9.456704682539682,
+              "min_ms": 8.887834,
+              "max_ms": 10.502666
+            },
+            "common_pixel_stats_ms": {
+              "n": 126,
+              "median_ms": 8.782729,
+              "p95_ms": 9.426833,
+              "mean_ms": 8.862017206349206,
+              "min_ms": 8.31775,
+              "max_ms": 9.864291
+            },
+            "white_mask_ms": {
+              "n": 126,
+              "median_ms": 0.3141045,
+              "p95_ms": 0.332417,
+              "mean_ms": 0.3135512380952381,
+              "min_ms": 0.269958,
+              "max_ms": 0.522625
+            },
+            "black_mask_ms": {
+              "n": 126,
+              "median_ms": 0.27931249999999996,
+              "p95_ms": 0.295041,
+              "mean_ms": 0.2811362380952381,
+              "min_ms": 0.267333,
+              "max_ms": 0.414375
+            },
+            "white_recognition_ms": {
+              "n": 126,
+              "median_ms": 7.9843335,
+              "p95_ms": 9.240917,
+              "mean_ms": 7.634688174603174,
+              "min_ms": 2.305875,
+              "max_ms": 9.682291
+            },
+            "black_recognition_ms": {
+              "n": 126,
+              "median_ms": 7.712,
+              "p95_ms": 9.206334,
+              "mean_ms": 7.43408696031746,
+              "min_ms": 2.188041,
+              "max_ms": 9.988584
+            },
+            "selection_join_ms": {
+              "n": 126,
+              "median_ms": 0.027812,
+              "p95_ms": 0.032875,
+              "mean_ms": 0.027022142857142856,
+              "min_ms": 0.013125,
+              "max_ms": 0.04775
+            }
+          },
+          "per_pass": [
+            {
+              "n": 43,
+              "median_ms": 24.914083,
+              "p95_ms": 27.530209,
+              "mean_ms": 23.882688930232558,
+              "min_ms": 0.000208,
+              "max_ms": 29.516625
+            },
+            {
+              "n": 43,
+              "median_ms": 25.110208,
+              "p95_ms": 27.466042,
+              "mean_ms": 23.893288674418606,
+              "min_ms": 4.2e-05,
+              "max_ms": 28.005916
+            },
+            {
+              "n": 43,
+              "median_ms": 25.191291,
+              "p95_ms": 28.452625,
+              "mean_ms": 24.168571744186046,
+              "min_ms": 0.000125,
+              "max_ms": 29.077333
+            }
+          ]
+        },
+        "paired_dual_minus_white_ms": {
+          "n": 129,
+          "median_ms": 7.975624,
+          "p95_ms": 9.952206999999998,
+          "mean_ms": 7.521695100775194,
+          "min_ms": -0.00016700000000000002,
+          "max_ms": 11.961000000000002
+        }
+      }
+    },
+    "previous_accuracy": {
+      "white_only_cer_pct": 9.862475442043221,
+      "dual_confidence_cer_pct": 8.958742632612967
+    },
+    "e_saved_android_reference": {
+      "warm_samples": 285,
+      "median_ms": 237,
+      "p95_ms": 373,
+      "caveat": "E includes detection and selection on Android emulator; never divide or add this to native Mac suffix timings."
+    }
+  },
+  "e_saved_android": {
+    "scope": "saved Android emulator E; native Mac timings must not be divided into or added to these numbers",
+    "groups": {
+      "overall": {
+        "total_ms": {
+          "n": 285,
+          "mean_ms": 229.0456140350877,
+          "median_ms": 237,
+          "p95_ms": 373,
+          "min_ms": 6,
+          "max_ms": 776
+        },
+        "mlkit_ms": {
+          "n": 285,
+          "mean_ms": 50.77438616842105,
+          "median_ms": 45.646375,
+          "p95_ms": 113.135625,
+          "min_ms": 3.873208,
+          "max_ms": 413.354126
+        },
+        "pp_detector_ms": {
+          "n": 285,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.0,
+          "min_ms": 0.0,
+          "max_ms": 0.0
+        },
+        "pp_recognition_ms": {
+          "n": 285,
+          "mean_ms": 146.1699562350877,
+          "median_ms": 150.546417,
+          "p95_ms": 235.374292,
+          "min_ms": 0.0,
+          "max_ms": 385.313543
+        },
+        "crop_ms": {
+          "n": 285,
+          "mean_ms": 7.0690566140350874,
+          "median_ms": 8.252875,
+          "p95_ms": 11.673292,
+          "min_ms": 1.204667,
+          "max_ms": 22.458875
+        },
+        "selection_including_e_ms": {
+          "n": 285,
+          "mean_ms": 9.734841961403509,
+          "median_ms": 10.813082,
+          "p95_ms": 20.451583,
+          "min_ms": 0.029249,
+          "max_ms": 32.382376
+        },
+        "e_policy_ms": {
+          "n": 285,
+          "mean_ms": 2.3843637298245612,
+          "median_ms": 2.758667,
+          "p95_ms": 4.6625,
+          "min_ms": 0.00575,
+          "max_ms": 16.191667
+        },
+        "selection_excluding_e_ms": {
+          "n": 285,
+          "mean_ms": 7.350478231578948,
+          "median_ms": 7.991332999999999,
+          "p95_ms": 16.039166,
+          "min_ms": 0.023458,
+          "max_ms": 28.626792000000002
+        },
+        "other_ms": {
+          "n": 285,
+          "mean_ms": 15.297373056140351,
+          "median_ms": 11.129750000000001,
+          "p95_ms": 41.85287700000001,
+          "min_ms": 0.7655000000000012,
+          "max_ms": 67.60587400000003
+        }
+      },
+      "dev-cat": {
+        "total_ms": {
+          "n": 81,
+          "mean_ms": 329.3703703703704,
+          "median_ms": 311,
+          "p95_ms": 507,
+          "min_ms": 240,
+          "max_ms": 776
+        },
+        "mlkit_ms": {
+          "n": 81,
+          "mean_ms": 81.76616569135803,
+          "median_ms": 67.279417,
+          "p95_ms": 160.246875,
+          "min_ms": 45.646375,
+          "max_ms": 413.354126
+        },
+        "pp_detector_ms": {
+          "n": 81,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.0,
+          "min_ms": 0.0,
+          "max_ms": 0.0
+        },
+        "pp_recognition_ms": {
+          "n": 81,
+          "mean_ms": 202.78055416049384,
+          "median_ms": 193.852917,
+          "p95_ms": 289.140875,
+          "min_ms": 150.211459,
+          "max_ms": 311.289166
+        },
+        "crop_ms": {
+          "n": 81,
+          "mean_ms": 9.605010308641976,
+          "median_ms": 9.14575,
+          "p95_ms": 13.317417,
+          "min_ms": 5.627917,
+          "max_ms": 22.458875
+        },
+        "selection_including_e_ms": {
+          "n": 81,
+          "mean_ms": 15.187542222222222,
+          "median_ms": 14.279167,
+          "p95_ms": 25.67721,
+          "min_ms": 5.082876,
+          "max_ms": 32.382376
+        },
+        "e_policy_ms": {
+          "n": 81,
+          "mean_ms": 3.2788323333333333,
+          "median_ms": 3.04375,
+          "p95_ms": 4.853916,
+          "min_ms": 0.397792,
+          "max_ms": 16.191667
+        },
+        "selection_excluding_e_ms": {
+          "n": 81,
+          "mean_ms": 11.90870988888889,
+          "median_ms": 10.809875,
+          "p95_ms": 20.807543000000003,
+          "min_ms": 3.240792,
+          "max_ms": 28.626792000000002
+        },
+        "other_ms": {
+          "n": 81,
+          "mean_ms": 20.03109798765432,
+          "median_ms": 15.698042999999984,
+          "p95_ms": 41.22616799999997,
+          "min_ms": 8.206793000000005,
+          "max_ms": 62.508459000000016
+        }
+      },
+      "dev-watch": {
+        "total_ms": {
+          "n": 78,
+          "mean_ms": 109.62820512820512,
+          "median_ms": 149.0,
+          "p95_ms": 193,
+          "min_ms": 6,
+          "max_ms": 222
+        },
+        "mlkit_ms": {
+          "n": 78,
+          "mean_ms": 20.142423102564102,
+          "median_ms": 22.713145,
+          "p95_ms": 31.086666,
+          "min_ms": 3.873208,
+          "max_ms": 52.112874
+        },
+        "pp_detector_ms": {
+          "n": 78,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.0,
+          "min_ms": 0.0,
+          "max_ms": 0.0
+        },
+        "pp_recognition_ms": {
+          "n": 78,
+          "mean_ms": 81.13858980769231,
+          "median_ms": 110.32362499999999,
+          "p95_ms": 159.269292,
+          "min_ms": 0.0,
+          "max_ms": 185.150042
+        },
+        "crop_ms": {
+          "n": 78,
+          "mean_ms": 2.1540230128205127,
+          "median_ms": 2.271583,
+          "p95_ms": 3.127833,
+          "min_ms": 1.204667,
+          "max_ms": 8.375791
+        },
+        "selection_including_e_ms": {
+          "n": 78,
+          "mean_ms": 1.8434935256410256,
+          "median_ms": 2.337479,
+          "p95_ms": 3.505999,
+          "min_ms": 0.029249,
+          "max_ms": 4.698167
+        },
+        "e_policy_ms": {
+          "n": 78,
+          "mean_ms": 0.6527911410256411,
+          "median_ms": 0.869271,
+          "p95_ms": 1.250167,
+          "min_ms": 0.00575,
+          "max_ms": 2.145084
+        },
+        "selection_excluding_e_ms": {
+          "n": 78,
+          "mean_ms": 1.1907023846153846,
+          "median_ms": 1.4081875,
+          "p95_ms": 2.560916,
+          "min_ms": 0.023458,
+          "max_ms": 2.7502510000000004
+        },
+        "other_ms": {
+          "n": 78,
+          "mean_ms": 4.349675679487181,
+          "median_ms": 4.280354000000003,
+          "p95_ms": 8.431166999999988,
+          "min_ms": 0.7655000000000012,
+          "max_ms": 14.300418000000008
+        }
+      },
+      "heldout": {
+        "total_ms": {
+          "n": 126,
+          "mean_ms": 238.47619047619048,
+          "median_ms": 237.0,
+          "p95_ms": 367,
+          "min_ms": 13,
+          "max_ms": 522
+        },
+        "mlkit_ms": {
+          "n": 126,
+          "mean_ms": 49.813743134920635,
+          "median_ms": 45.425604500000006,
+          "p95_ms": 91.144082,
+          "min_ms": 9.711583,
+          "max_ms": 181.746584
+        },
+        "pp_detector_ms": {
+          "n": 126,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.0,
+          "min_ms": 0.0,
+          "max_ms": 0.0
+        },
+        "pp_recognition_ms": {
+          "n": 126,
+          "mean_ms": 150.03494154761904,
+          "median_ms": 149.577625,
+          "p95_ms": 199.312667,
+          "min_ms": 0.0,
+          "max_ms": 385.313543
+        },
+        "crop_ms": {
+          "n": 126,
+          "mean_ms": 8.481440515873016,
+          "median_ms": 8.493667,
+          "p95_ms": 11.127625,
+          "min_ms": 1.489958,
+          "max_ms": 14.182167
+        },
+        "selection_including_e_ms": {
+          "n": 126,
+          "mean_ms": 11.11465511111111,
+          "median_ms": 11.5104995,
+          "p95_ms": 17.150958,
+          "min_ms": 0.603876,
+          "max_ms": 25.930499
+        },
+        "e_policy_ms": {
+          "n": 126,
+          "mean_ms": 2.881274087301587,
+          "median_ms": 2.8450625,
+          "p95_ms": 4.798583,
+          "min_ms": 0.1155,
+          "max_ms": 11.241374
+        },
+        "selection_excluding_e_ms": {
+          "n": 126,
+          "mean_ms": 8.233381023809525,
+          "median_ms": 8.516063500000001,
+          "p95_ms": 13.104292000000001,
+          "min_ms": 0.488376,
+          "max_ms": 20.919999
+        },
+        "other_ms": {
+          "n": 126,
+          "mean_ms": 19.031410166666667,
+          "median_ms": 12.078124500000001,
+          "p95_ms": 45.773876,
+          "min_ms": 1.1945830000000015,
+          "max_ms": 67.60587400000003
+        }
+      }
+    },
+    "note": "ML Kit includes public detection, recognition, callbacks and repeated calls; cannot split its detector/recognizer. E policy is included in selection, so report selection_excluding_e when adding e_policy separately. Residual includes dispatch, line crops, sorting, consensus, diagnostics and elapsedRealtime rounding."
+  },
+  "comparison_between_native_methods_only": {
+    "pooled_actual_calls": {
+      "dual_over_white_median": 1.4742310708698119,
+      "difference_of_medians_ms": 7.949791999999999,
+      "difference_of_means_ms": 6.826837821548823
+    },
+    "nonempty_box_calls": {
+      "dual_over_white_median": 1.4611447250765917,
+      "difference_of_medians_ms": 7.864708,
+      "difference_of_means_ms": 7.680195397727271
+    }
+  },
+  "environment_observations": {
+    "cpu": "Apple M4",
+    "memory_bytes": 17179869184,
+    "ac_power_before_and_after": true,
+    "recorded_thermal_or_performance_warning_before_and_after": false,
+    "actual_cpu_temperature_measured": false
+  },
+  "notes": [
+    "Mean stage times add to mean total; medians/p95 must not be added.",
+    "The detailed breakdown uses the 88 frames with E-selected rectangles (264 samples per method). Main pooled totals also retain the 11 skipped frames (297 samples per method).",
+    "Do not compare the native recognition suffix to the saved Android full pipeline as a speedup; the full hybrid Android app was not built or timed.",
+    "PNG preload/decode and model load are recorded separately, not included in steady-state suffix time. Capture and TTS are unmeasured.",
+    "All timing-run output strings match the prior white-only 9.86% and dual-confidence 8.96% accuracy run."
+  ]
+}

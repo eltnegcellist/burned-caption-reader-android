@@ -1,0 +1,177 @@
+{
+  "provenance": "research-only, private 99 original video frames, captions and frame SHA verified",
+  "model": "indra-ocr==1.1.2",
+  "os": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "cpu": "arm",
+  "machine": "arm64",
+  "threads": 4,
+  "repeat": 3,
+  "model_load_ms": 1139.74,
+  "source_dataset_manifests": {
+    "dev-cat": "c927d62f79814a626c347c1ab74a07a3372f75e3591926bbb6b07d56856469d4",
+    "dev-watch": "15bcd55d7105a95ac14f97f324d810c4eb76242b821b64fd45af3e2b7b7e7d53",
+    "heldout": "b6d1a41f1b6f0f418314febd4db6d05cb0c2e41314fab23de28dfb748c771c17"
+  },
+  "e_verified_180_edits_2545_characters": true,
+  "caveat": "E saved Android emulator pipeline latency cannot be divided into native Mac Indra latency",
+  "caveat_accuracy": "E=caption selection + MLKit/v6 refine; Indra=entire image OCR. No equivalent subtitle selector on Indra.",
+  "mode_labels": {
+    "E_saved": "production E last replay",
+    "default": "Indra full frame auto orientation",
+    "known_upright": "Indra full frame turn=False"
+  },
+  "by_dataset": {
+    "dev-cat": {
+      "E_saved": {
+        "frames": 28,
+        "reference_characters": 849,
+        "edits": 29,
+        "cer_pct": 3.415783274440518,
+        "exact_frames": 23,
+        "false_positive_blanks": 0,
+        "complete_misses": 0,
+        "frame_median_latency_ms": null,
+        "frame_p95_latency_ms": null,
+        "latency_samples": 0
+      },
+      "default": {
+        "frames": 28,
+        "reference_characters": 849,
+        "edits": 795,
+        "cer_pct": 93.63957597173145,
+        "exact_frames": 0,
+        "false_positive_blanks": 0,
+        "complete_misses": 2,
+        "frame_median_latency_ms": 65.47,
+        "frame_p95_latency_ms": 82.14,
+        "latency_samples": 28
+      },
+      "known_upright": {
+        "frames": 28,
+        "reference_characters": 849,
+        "edits": 795,
+        "cer_pct": 93.63957597173145,
+        "exact_frames": 0,
+        "false_positive_blanks": 0,
+        "complete_misses": 2,
+        "frame_median_latency_ms": 57.36,
+        "frame_p95_latency_ms": 70.41,
+        "latency_samples": 28
+      }
+    },
+    "dev-watch": {
+      "E_saved": {
+        "frames": 28,
+        "reference_characters": 562,
+        "edits": 48,
+        "cer_pct": 8.540925266903914,
+        "exact_frames": 26,
+        "false_positive_blanks": 0,
+        "complete_misses": 2,
+        "frame_median_latency_ms": null,
+        "frame_p95_latency_ms": null,
+        "latency_samples": 0
+      },
+      "default": {
+        "frames": 28,
+        "reference_characters": 562,
+        "edits": 117,
+        "cer_pct": 20.818505338078293,
+        "exact_frames": 18,
+        "false_positive_blanks": 2,
+        "complete_misses": 2,
+        "frame_median_latency_ms": 47.9,
+        "frame_p95_latency_ms": 64.93,
+        "latency_samples": 28
+      },
+      "known_upright": {
+        "frames": 28,
+        "reference_characters": 562,
+        "edits": 38,
+        "cer_pct": 6.761565836298932,
+        "exact_frames": 21,
+        "false_positive_blanks": 2,
+        "complete_misses": 1,
+        "frame_median_latency_ms": 37.63,
+        "frame_p95_latency_ms": 63.99,
+        "latency_samples": 28
+      }
+    },
+    "heldout": {
+      "E_saved": {
+        "frames": 43,
+        "reference_characters": 1134,
+        "edits": 103,
+        "cer_pct": 9.08289241622575,
+        "exact_frames": 28,
+        "false_positive_blanks": 3,
+        "complete_misses": 0,
+        "frame_median_latency_ms": null,
+        "frame_p95_latency_ms": null,
+        "latency_samples": 0
+      },
+      "default": {
+        "frames": 43,
+        "reference_characters": 1134,
+        "edits": 1023,
+        "cer_pct": 90.21164021164022,
+        "exact_frames": 0,
+        "false_positive_blanks": 4,
+        "complete_misses": 7,
+        "frame_median_latency_ms": 65.88,
+        "frame_p95_latency_ms": 85.31,
+        "latency_samples": 43
+      },
+      "known_upright": {
+        "frames": 43,
+        "reference_characters": 1134,
+        "edits": 1023,
+        "cer_pct": 90.21164021164022,
+        "exact_frames": 0,
+        "false_positive_blanks": 4,
+        "complete_misses": 7,
+        "frame_median_latency_ms": 59.3,
+        "frame_p95_latency_ms": 76.03,
+        "latency_samples": 43
+      }
+    }
+  },
+  "overall": {
+    "E_saved": {
+      "frames": 99,
+      "reference_characters": 2545,
+      "edits": 180,
+      "cer_pct": 7.072691552062868,
+      "exact_frames": 77,
+      "false_positive_blanks": 3,
+      "complete_misses": 2,
+      "frame_median_latency_ms": null,
+      "frame_p95_latency_ms": null,
+      "latency_samples": 0
+    },
+    "default": {
+      "frames": 99,
+      "reference_characters": 2545,
+      "edits": 1935,
+      "cer_pct": 76.03143418467583,
+      "exact_frames": 18,
+      "false_positive_blanks": 6,
+      "complete_misses": 11,
+      "frame_median_latency_ms": 62.24,
+      "frame_p95_latency_ms": 85.22,
+      "latency_samples": 99
+    },
+    "known_upright": {
+      "frames": 99,
+      "reference_characters": 2545,
+      "edits": 1856,
+      "cer_pct": 72.92730844793714,
+      "exact_frames": 21,
+      "false_positive_blanks": 6,
+      "complete_misses": 10,
+      "frame_median_latency_ms": 51.83,
+      "frame_p95_latency_ms": 75.01,
+      "latency_samples": 99
+    }
+  }
+}

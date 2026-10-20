@@ -1,0 +1,715 @@
+{
+  "measured_date": "2026-10-20",
+  "runner_commit": "38fe5960a20cf24502f15884486c0ddb231d52ef",
+  "runner_sha256": "2818215f0867f32e0048c11a15644133f916d153de8cfd309dfb50c5fb51dad8",
+  "measurement_window_utc": [
+    "2026-10-20T08:52:40Z",
+    "2026-10-20T08:53:19Z"
+  ],
+  "model_load_ms": 1139.74,
+  "cpu": "Apple M4",
+  "memory_bytes": 17179869184,
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "python": "3.14.4",
+  "threads": 4,
+  "repeats_per_image_per_mode": 3,
+  "total_indra_ocr_calls": 594,
+  "e_saved_three_repeats_identical": true,
+  "model_revision": "v1.1.0",
+  "model_commit": "bd02167fdf2005a19962cc15188f8496a2c87d3b",
+  "model_file_sha256": {
+    "det.onnx": "f2bd4cba23e9c328cf7ec824634e423e191a2c6aacbbf35c62bd79dd70f62f59",
+    "lm.npz": "6c0fb618a363a0acdd05d4f5b0edd9e8146d2d990541b87f6130bbfe17cea58d",
+    "lm_cjk.npz": "6d64f13f4f90f4e529bd63340c6df76238d007feaef2abb903d8cd28d92bc2f3",
+    "lm_world.npz": "34df5e74a2fcbb9cf5e7f360a559375ffa2e04d2d2943a42308c177bcb444d5d",
+    "meta.json": "4ce4c94b46f5d644033c02e718322014ff4081270f385038c571912b56696339",
+    "order.onnx": "a42db2e8b536ad3d84045a4b7f9b0a72667cf8be4aa02d63f7b38004719fb180",
+    "orient.onnx": "20eaf670f55a7cf9facfe1bdd6c7b8e40be75bbf4d48a3df43f66aa3bbd874fd",
+    "rec.onnx": "475972a2710be4a3cbfeb2bc7f3624ffd563de07de42476fc7a290d4e1ece484",
+    "rec_cjk.onnx": "4a035516a17e62cdf33a4fe2d88077654cb8841cff024685cdef4e351694ef50",
+    "rec_rtl.onnx": "468796bd684486a8388c30c8b4ed2a26e3eeb1f8ff02831c24c2e12c79a2a834",
+    "rec_world.onnx": "c8d1e59f21b04966f179d2d2d8e22b230d22110b3f89855bbbf2624a58c40043",
+    "script.onnx": "b6ce4e926e19c243faaf37bd46880398bf2cb4ae56a29e1177a3b017c1280e36"
+  },
+  "package_versions": {
+    "indra-ocr": "1.1.2",
+    "onnxruntime": "1.31.0",
+    "numpy": "2.5.4",
+    "pillow": "12.3.0",
+    "opencv-python-headless": "5.0.0.93"
+  },
+  "e_result_sha256": {
+    "dev-cat-e_mlkit_v6-1.json": "48c3e2aab0290ba440a7f345f9653bebc5d03f6709b5578b17f2b5544163befd",
+    "dev-cat-e_mlkit_v6-2.json": "e69d65994e21bdfc35075f8805f49814601089e0c9c1c5c8c8a810012db84184",
+    "dev-cat-e_mlkit_v6-3.json": "9095f046f77dbd84c58b7ca9d878b822db9488526b3935f9fe46892a6865c892",
+    "dev-watch-e_mlkit_v6-1.json": "9fc89999c0a6bd9162acd8f20c149a0d1311886c1be1a35f2b59a914e41de9c4",
+    "dev-watch-e_mlkit_v6-2.json": "13e1f1f1c656999e6f13eadd2e9b62e3f0923572086b13006a12bc20bfa21439",
+    "dev-watch-e_mlkit_v6-3.json": "4af949985197b4eacb5650d040126ad91e301477d27b21c8d2e1e0bbbb8cf871",
+    "heldout-e_mlkit_v6-1.json": "180b13bd09e4525e3d39872b99dc14de7ddd632b2822c8462d4dc5c04f3e6d7e",
+    "heldout-e_mlkit_v6-2.json": "58207b98c4c00845da37b9dcdcab4a8ee6b258037e3cb981965a386a186e188b",
+    "heldout-e_mlkit_v6-3.json": "69eea68d7c49e3f9c193c4f6f0781d6630c4b635118d115c5e35dfa4a161af94"
+  },
+  "groups": {
+    "overall": {
+      "E_saved": {
+        "frames": 99,
+        "reference_characters": 2545,
+        "edits": 180,
+        "cer_pct": 7.072691552062868,
+        "exact_frames": 77,
+        "exact_pct": 77.77777777777777,
+        "subtitle_frames": 87,
+        "blank_frames": 12,
+        "complete_misses": 2,
+        "false_positive_blanks": 3,
+        "known_noncaption_contamination_frames": 3,
+        "contamination_audited_frames": 40,
+        "saved_android_warm_pipeline": {
+          "n": 285,
+          "mean_ms": 229.0456140350877,
+          "median_ms": 237,
+          "p95_ms": 373,
+          "p99_ms": 522
+        },
+        "per_repeat_saved_warm": [
+          {
+            "n": 95,
+            "mean_ms": 238.89473684210526,
+            "median_ms": 245,
+            "p95_ms": 397,
+            "p99_ms": 776
+          },
+          {
+            "n": 95,
+            "mean_ms": 224.73684210526315,
+            "median_ms": 233,
+            "p95_ms": 377,
+            "p99_ms": 568
+          },
+          {
+            "n": 95,
+            "mean_ms": 223.50526315789475,
+            "median_ms": 232,
+            "p95_ms": 367,
+            "p99_ms": 510
+          }
+        ]
+      },
+      "default": {
+        "frames": 99,
+        "reference_characters": 2545,
+        "edits": 1935,
+        "cer_pct": 76.03143418467583,
+        "exact_frames": 18,
+        "exact_pct": 18.181818181818183,
+        "subtitle_frames": 87,
+        "blank_frames": 12,
+        "complete_misses": 11,
+        "false_positive_blanks": 6,
+        "known_noncaption_contamination_frames": 8,
+        "contamination_audited_frames": 40,
+        "per_repeat_native_mac": [
+          {
+            "n": 99,
+            "mean_ms": 58.19508080808081,
+            "median_ms": 57.13,
+            "p95_ms": 79.072,
+            "p99_ms": 100.297
+          },
+          {
+            "n": 99,
+            "mean_ms": 62.20857575757576,
+            "median_ms": 61.018,
+            "p95_ms": 83.541,
+            "p99_ms": 92.353
+          },
+          {
+            "n": 99,
+            "mean_ms": 63.524262626262626,
+            "median_ms": 63.211,
+            "p95_ms": 86.779,
+            "p99_ms": 124.148
+          }
+        ],
+        "pooled_native_mac_all_calls": {
+          "n": 297,
+          "mean_ms": 61.3093063973064,
+          "median_ms": 60.622,
+          "p95_ms": 83.186,
+          "p99_ms": 92.353
+        },
+        "pooled_native_mac_repeats_2_3": {
+          "n": 198,
+          "mean_ms": 62.86641919191919,
+          "median_ms": 62.071,
+          "p95_ms": 85.819,
+          "p99_ms": 92.353
+        },
+        "orientation_rotation_degrees_frame_counts": {
+          "0": 96,
+          "180": 3
+        },
+        "nonzero_skew_frame_count": 0,
+        "repeat_orientation_changed_frames": 0
+      },
+      "known_upright": {
+        "frames": 99,
+        "reference_characters": 2545,
+        "edits": 1856,
+        "cer_pct": 72.92730844793714,
+        "exact_frames": 21,
+        "exact_pct": 21.21212121212121,
+        "subtitle_frames": 87,
+        "blank_frames": 12,
+        "complete_misses": 10,
+        "false_positive_blanks": 6,
+        "known_noncaption_contamination_frames": 8,
+        "contamination_audited_frames": 40,
+        "per_repeat_native_mac": [
+          {
+            "n": 99,
+            "mean_ms": 54.30588888888889,
+            "median_ms": 54.162,
+            "p95_ms": 76.435,
+            "p99_ms": 83.351
+          },
+          {
+            "n": 99,
+            "mean_ms": 55.58547474747475,
+            "median_ms": 52.571,
+            "p95_ms": 77.004,
+            "p99_ms": 230.272
+          },
+          {
+            "n": 99,
+            "mean_ms": 53.13842424242424,
+            "median_ms": 51.879,
+            "p95_ms": 75.046,
+            "p99_ms": 77.961
+          }
+        ],
+        "pooled_native_mac_all_calls": {
+          "n": 297,
+          "mean_ms": 54.34326262626263,
+          "median_ms": 52.8,
+          "p95_ms": 75.122,
+          "p99_ms": 83.351
+        },
+        "pooled_native_mac_repeats_2_3": {
+          "n": 198,
+          "mean_ms": 54.36194949494949,
+          "median_ms": 52.435,
+          "p95_ms": 75.046,
+          "p99_ms": 84.161
+        },
+        "orientation_rotation_degrees_frame_counts": {
+          "0": 99
+        },
+        "nonzero_skew_frame_count": 0,
+        "repeat_orientation_changed_frames": 0
+      }
+    },
+    "dev-cat": {
+      "E_saved": {
+        "frames": 28,
+        "reference_characters": 849,
+        "edits": 29,
+        "cer_pct": 3.415783274440518,
+        "exact_frames": 23,
+        "exact_pct": 82.14285714285714,
+        "subtitle_frames": 28,
+        "blank_frames": 0,
+        "complete_misses": 0,
+        "false_positive_blanks": 0,
+        "known_noncaption_contamination_frames": 1,
+        "contamination_audited_frames": 11,
+        "saved_android_warm_pipeline": {
+          "n": 81,
+          "mean_ms": 329.3703703703704,
+          "median_ms": 311,
+          "p95_ms": 507,
+          "p99_ms": 776
+        },
+        "per_repeat_saved_warm": [
+          {
+            "n": 27,
+            "mean_ms": 335.25925925925924,
+            "median_ms": 316,
+            "p95_ms": 485,
+            "p99_ms": 776
+          },
+          {
+            "n": 27,
+            "mean_ms": 328.55555555555554,
+            "median_ms": 303,
+            "p95_ms": 508,
+            "p99_ms": 568
+          },
+          {
+            "n": 27,
+            "mean_ms": 324.2962962962963,
+            "median_ms": 306,
+            "p95_ms": 455,
+            "p99_ms": 510
+          }
+        ]
+      },
+      "default": {
+        "frames": 28,
+        "reference_characters": 849,
+        "edits": 795,
+        "cer_pct": 93.63957597173145,
+        "exact_frames": 0,
+        "exact_pct": 0.0,
+        "subtitle_frames": 28,
+        "blank_frames": 0,
+        "complete_misses": 2,
+        "false_positive_blanks": 0,
+        "known_noncaption_contamination_frames": 7,
+        "contamination_audited_frames": 11,
+        "per_repeat_native_mac": [
+          {
+            "n": 28,
+            "mean_ms": 61.909,
+            "median_ms": 60.3095,
+            "p95_ms": 83.186,
+            "p99_ms": 100.297
+          },
+          {
+            "n": 28,
+            "mean_ms": 66.69228571428572,
+            "median_ms": 64.446,
+            "p95_ms": 86.021,
+            "p99_ms": 92.353
+          },
+          {
+            "n": 28,
+            "mean_ms": 66.7255,
+            "median_ms": 66.44149999999999,
+            "p95_ms": 81.648,
+            "p99_ms": 86.11
+          }
+        ],
+        "pooled_native_mac_all_calls": {
+          "n": 84,
+          "mean_ms": 65.10892857142858,
+          "median_ms": 63.2525,
+          "p95_ms": 83.541,
+          "p99_ms": 100.297
+        },
+        "pooled_native_mac_repeats_2_3": {
+          "n": 56,
+          "mean_ms": 66.70889285714286,
+          "median_ms": 65.78399999999999,
+          "p95_ms": 86.021,
+          "p99_ms": 92.353
+        },
+        "orientation_rotation_degrees_frame_counts": {
+          "0": 28
+        },
+        "nonzero_skew_frame_count": 0,
+        "repeat_orientation_changed_frames": 0
+      },
+      "known_upright": {
+        "frames": 28,
+        "reference_characters": 849,
+        "edits": 795,
+        "cer_pct": 93.63957597173145,
+        "exact_frames": 0,
+        "exact_pct": 0.0,
+        "subtitle_frames": 28,
+        "blank_frames": 0,
+        "complete_misses": 2,
+        "false_positive_blanks": 0,
+        "known_noncaption_contamination_frames": 7,
+        "contamination_audited_frames": 11,
+        "per_repeat_native_mac": [
+          {
+            "n": 28,
+            "mean_ms": 56.90792857142857,
+            "median_ms": 56.775999999999996,
+            "p95_ms": 72.493,
+            "p99_ms": 74.179
+          },
+          {
+            "n": 28,
+            "mean_ms": 63.65282142857143,
+            "median_ms": 57.7405,
+            "p95_ms": 79.134,
+            "p99_ms": 230.272
+          },
+          {
+            "n": 28,
+            "mean_ms": 56.22492857142857,
+            "median_ms": 55.2455,
+            "p95_ms": 68.409,
+            "p99_ms": 72.72
+          }
+        ],
+        "pooled_native_mac_all_calls": {
+          "n": 84,
+          "mean_ms": 58.928559523809525,
+          "median_ms": 56.775999999999996,
+          "p95_ms": 72.493,
+          "p99_ms": 230.272
+        },
+        "pooled_native_mac_repeats_2_3": {
+          "n": 56,
+          "mean_ms": 59.938874999999996,
+          "median_ms": 56.666,
+          "p95_ms": 72.72,
+          "p99_ms": 230.272
+        },
+        "orientation_rotation_degrees_frame_counts": {
+          "0": 28
+        },
+        "nonzero_skew_frame_count": 0,
+        "repeat_orientation_changed_frames": 0
+      }
+    },
+    "dev-watch": {
+      "E_saved": {
+        "frames": 28,
+        "reference_characters": 562,
+        "edits": 48,
+        "cer_pct": 8.540925266903914,
+        "exact_frames": 26,
+        "exact_pct": 92.85714285714286,
+        "subtitle_frames": 20,
+        "blank_frames": 8,
+        "complete_misses": 2,
+        "false_positive_blanks": 0,
+        "known_noncaption_contamination_frames": 0,
+        "contamination_audited_frames": 10,
+        "saved_android_warm_pipeline": {
+          "n": 78,
+          "mean_ms": 109.62820512820512,
+          "median_ms": 149.0,
+          "p95_ms": 193,
+          "p99_ms": 222
+        },
+        "per_repeat_saved_warm": [
+          {
+            "n": 26,
+            "mean_ms": 115.42307692307692,
+            "median_ms": 165.0,
+            "p95_ms": 206,
+            "p99_ms": 208
+          },
+          {
+            "n": 26,
+            "mean_ms": 107.8076923076923,
+            "median_ms": 146.5,
+            "p95_ms": 190,
+            "p99_ms": 222
+          },
+          {
+            "n": 26,
+            "mean_ms": 105.65384615384616,
+            "median_ms": 146.5,
+            "p95_ms": 184,
+            "p99_ms": 187
+          }
+        ]
+      },
+      "default": {
+        "frames": 28,
+        "reference_characters": 562,
+        "edits": 117,
+        "cer_pct": 20.818505338078293,
+        "exact_frames": 18,
+        "exact_pct": 64.28571428571429,
+        "subtitle_frames": 20,
+        "blank_frames": 8,
+        "complete_misses": 2,
+        "false_positive_blanks": 2,
+        "known_noncaption_contamination_frames": 0,
+        "contamination_audited_frames": 10,
+        "per_repeat_native_mac": [
+          {
+            "n": 28,
+            "mean_ms": 44.511678571428575,
+            "median_ms": 42.357,
+            "p95_ms": 67.119,
+            "p99_ms": 71.44
+          },
+          {
+            "n": 28,
+            "mean_ms": 47.854,
+            "median_ms": 47.7085,
+            "p95_ms": 63.966,
+            "p99_ms": 66.21
+          },
+          {
+            "n": 28,
+            "mean_ms": 48.430285714285716,
+            "median_ms": 48.498999999999995,
+            "p95_ms": 65.896,
+            "p99_ms": 70.694
+          }
+        ],
+        "pooled_native_mac_all_calls": {
+          "n": 84,
+          "mean_ms": 46.9319880952381,
+          "median_ms": 46.2175,
+          "p95_ms": 65.896,
+          "p99_ms": 71.44
+        },
+        "pooled_native_mac_repeats_2_3": {
+          "n": 56,
+          "mean_ms": 48.14214285714286,
+          "median_ms": 47.7085,
+          "p95_ms": 65.896,
+          "p99_ms": 70.694
+        },
+        "orientation_rotation_degrees_frame_counts": {
+          "0": 25,
+          "180": 3
+        },
+        "nonzero_skew_frame_count": 0,
+        "repeat_orientation_changed_frames": 0
+      },
+      "known_upright": {
+        "frames": 28,
+        "reference_characters": 562,
+        "edits": 38,
+        "cer_pct": 6.761565836298932,
+        "exact_frames": 21,
+        "exact_pct": 75.0,
+        "subtitle_frames": 20,
+        "blank_frames": 8,
+        "complete_misses": 1,
+        "false_positive_blanks": 2,
+        "known_noncaption_contamination_frames": 0,
+        "contamination_audited_frames": 10,
+        "per_repeat_native_mac": [
+          {
+            "n": 28,
+            "mean_ms": 40.13014285714286,
+            "median_ms": 39.3075,
+            "p95_ms": 53.898,
+            "p99_ms": 78.551
+          },
+          {
+            "n": 28,
+            "mean_ms": 40.249892857142854,
+            "median_ms": 39.788,
+            "p95_ms": 63.665,
+            "p99_ms": 77.803
+          },
+          {
+            "n": 28,
+            "mean_ms": 39.82857142857143,
+            "median_ms": 37.436,
+            "p95_ms": 56.589,
+            "p99_ms": 75.418
+          }
+        ],
+        "pooled_native_mac_all_calls": {
+          "n": 84,
+          "mean_ms": 40.06953571428571,
+          "median_ms": 38.405,
+          "p95_ms": 62.331,
+          "p99_ms": 78.551
+        },
+        "pooled_native_mac_repeats_2_3": {
+          "n": 56,
+          "mean_ms": 40.039232142857145,
+          "median_ms": 37.833,
+          "p95_ms": 63.665,
+          "p99_ms": 77.803
+        },
+        "orientation_rotation_degrees_frame_counts": {
+          "0": 28
+        },
+        "nonzero_skew_frame_count": 0,
+        "repeat_orientation_changed_frames": 0
+      }
+    },
+    "heldout": {
+      "E_saved": {
+        "frames": 43,
+        "reference_characters": 1134,
+        "edits": 103,
+        "cer_pct": 9.08289241622575,
+        "exact_frames": 28,
+        "exact_pct": 65.11627906976744,
+        "subtitle_frames": 39,
+        "blank_frames": 4,
+        "complete_misses": 0,
+        "false_positive_blanks": 3,
+        "known_noncaption_contamination_frames": 2,
+        "contamination_audited_frames": 19,
+        "saved_android_warm_pipeline": {
+          "n": 126,
+          "mean_ms": 238.47619047619048,
+          "median_ms": 237.0,
+          "p95_ms": 367,
+          "p99_ms": 513
+        },
+        "per_repeat_saved_warm": [
+          {
+            "n": 42,
+            "mean_ms": 253.38095238095238,
+            "median_ms": 247.5,
+            "p95_ms": 370,
+            "p99_ms": 513
+          },
+          {
+            "n": 42,
+            "mean_ms": 230.38095238095238,
+            "median_ms": 232.5,
+            "p95_ms": 299,
+            "p99_ms": 522
+          },
+          {
+            "n": 42,
+            "mean_ms": 231.66666666666666,
+            "median_ms": 231.0,
+            "p95_ms": 313,
+            "p99_ms": 498
+          }
+        ]
+      },
+      "default": {
+        "frames": 43,
+        "reference_characters": 1134,
+        "edits": 1023,
+        "cer_pct": 90.21164021164022,
+        "exact_frames": 0,
+        "exact_pct": 0.0,
+        "subtitle_frames": 39,
+        "blank_frames": 4,
+        "complete_misses": 7,
+        "false_positive_blanks": 4,
+        "known_noncaption_contamination_frames": 1,
+        "contamination_audited_frames": 19,
+        "per_repeat_native_mac": [
+          {
+            "n": 43,
+            "mean_ms": 64.68683720930233,
+            "median_ms": 64.941,
+            "p95_ms": 79.072,
+            "p99_ms": 79.992
+          },
+          {
+            "n": 43,
+            "mean_ms": 68.63611627906977,
+            "median_ms": 65.852,
+            "p95_ms": 83.063,
+            "p99_ms": 85.819
+          },
+          {
+            "n": 43,
+            "mean_ms": 71.26837209302326,
+            "median_ms": 66.421,
+            "p95_ms": 87.367,
+            "p99_ms": 124.148
+          }
+        ],
+        "pooled_native_mac_all_calls": {
+          "n": 129,
+          "mean_ms": 68.19710852713179,
+          "median_ms": 65.441,
+          "p95_ms": 85.819,
+          "p99_ms": 88.802
+        },
+        "pooled_native_mac_repeats_2_3": {
+          "n": 86,
+          "mean_ms": 69.95224418604651,
+          "median_ms": 65.98349999999999,
+          "p95_ms": 86.779,
+          "p99_ms": 124.148
+        },
+        "orientation_rotation_degrees_frame_counts": {
+          "0": 43
+        },
+        "nonzero_skew_frame_count": 0,
+        "repeat_orientation_changed_frames": 0
+      },
+      "known_upright": {
+        "frames": 43,
+        "reference_characters": 1134,
+        "edits": 1023,
+        "cer_pct": 90.21164021164022,
+        "exact_frames": 0,
+        "exact_pct": 0.0,
+        "subtitle_frames": 39,
+        "blank_frames": 4,
+        "complete_misses": 7,
+        "false_positive_blanks": 4,
+        "known_noncaption_contamination_frames": 1,
+        "contamination_audited_frames": 19,
+        "per_repeat_native_mac": [
+          {
+            "n": 43,
+            "mean_ms": 61.842255813953486,
+            "median_ms": 61.689,
+            "p95_ms": 77.068,
+            "p99_ms": 83.351
+          },
+          {
+            "n": 43,
+            "mean_ms": 60.31827906976744,
+            "median_ms": 62.977,
+            "p95_ms": 74.924,
+            "p99_ms": 84.161
+          },
+          {
+            "n": 43,
+            "mean_ms": 59.795488372093025,
+            "median_ms": 57.85,
+            "p95_ms": 75.122,
+            "p99_ms": 77.961
+          }
+        ],
+        "pooled_native_mac_all_calls": {
+          "n": 129,
+          "mean_ms": 60.65200775193799,
+          "median_ms": 61.286,
+          "p95_ms": 77.004,
+          "p99_ms": 83.351
+        },
+        "pooled_native_mac_repeats_2_3": {
+          "n": 86,
+          "mean_ms": 60.05688372093023,
+          "median_ms": 60.7565,
+          "p95_ms": 75.122,
+          "p99_ms": 84.161
+        },
+        "orientation_rotation_degrees_frame_counts": {
+          "0": 43
+        },
+        "nonzero_skew_frame_count": 0,
+        "repeat_orientation_changed_frames": 0
+      }
+    }
+  },
+  "paired_accuracy": {
+    "default": {
+      "better_than_E": 2,
+      "equal_to_E": 20,
+      "worse_than_E": 77,
+      "prediction_differs_from_other_indra": 3
+    },
+    "known_upright": {
+      "better_than_E": 2,
+      "equal_to_E": 23,
+      "worse_than_E": 74,
+      "prediction_differs_from_other_indra": 3
+    }
+  },
+  "notes": [
+    "Raw images and all transcripts stay outside the Git checkout; inference used local model files with HF_HUB_OFFLINE=1.",
+    "Accuracy uses the frozen 2545-character GT and existing comparisonKey; no per-image oracle, ROI selection or text filtering.",
+    "Exact match and empty prediction use comparisonKey normalization, not byte equality.",
+    "Complete miss means nonempty subtitle GT with an entirely empty normalized OCR output; this does not measure all partial subtitle omissions or live video events.",
+    "Background contamination is a known-label string-match diagnostic on 40 annotated frames, not a complete visual audit.",
+    "Indra runner latency is median across 99 per-frame medians of calls 2 and 3; p95 is nearest rank across those 99 medians.",
+    "Supplementary native timings also show each iteration, pooled calls, and pooled calls 2 and 3; these are consecutive per-image repeats within one loaded process, not 3 fresh process runs.",
+    "E latency reuses saved Android pipeline calls across 3 previous repeats, excluding each process frame 0 and lazy initialization changes.",
+    "Do not interpret Mac native vs Android emulator timings as a speed ratio or Galaxy performance.",
+    "turn=False disables quarter/half-turn orientation inference; deskew remains enabled in Indra 1.1.2.",
+    "GT was transcribed from pixels in the previous experiment; human audit remains pending. These are 3 already-seen videos."
+  ]
+}

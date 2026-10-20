@@ -64,10 +64,7 @@ jobs:
           disable-animations: true
           script: |
             adb devices -l
-            python tools/image-evaluator/run.py "$RUNNER_TEMP/same-image/dataset" "$RUNNER_TEMP/same-image/e.json" \
-              --adb "$(command -v adb)" --device emulator-5554 \
-              --label "indra-e-same-image-20261020" --mode player-replay \
-              --ocr-mode e_mlkit_v6 --subtitle-recheck off
+            python tools/image-evaluator/run.py "$RUNNER_TEMP/same-image/dataset" "$RUNNER_TEMP/same-image/e.json" --adb "$(command -v adb)" --device emulator-5554 --label indra-e-same-image-20261020 --mode player-replay --ocr-mode e_mlkit_v6 --subtitle-recheck off
       - name: Same-pixel CER report and checksum gates
         run: |
           python tools/indra-ocr-research/compare_e_indra_same_pixel.py \

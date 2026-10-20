@@ -110,10 +110,11 @@ def main():
                 ms = (time.perf_counter() - start) * 1000
                 lines = [str(getattr(line, "text", "")) for line in page.lines]
                 outputs.append(lines)
+                orientation = {"rotation": getattr(page, "rotation", None), "skew": getattr(page, "skew", None), "vertical": getattr(page, "vertical", None), "boxes": [getattr(line, "box", None) for line in page.lines]}
                 times.append(ms)
                 stage_timings.append(dict(getattr(page, "timings", {}) or {}))
                 print(json.dumps({"case": case_id, "iteration": n+1, "ms": round(ms, 1),
-                      "detected": lines, "stages": stage_timings[-1]}, ensure_ascii=False),
+                      "detected": lines, "orientation": orientation, "stages": stage_timings[-1]}, ensure_ascii=False),
                       flush=True)
             text = "".join(outputs[-1])
             edits, chars = distance(caption_gt, text)

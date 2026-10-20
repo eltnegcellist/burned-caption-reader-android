@@ -1,0 +1,25 @@
+name: Validate Indra private-99 research runner
+
+on:
+  pull_request:
+    paths:
+      - "tools/indra-ocr-research/private99_compare.py"
+      - "tools/indra-ocr-research/test_private99_compare.py"
+      - ".github/workflows/indra-private99-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests-no-private-data:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate Python syntax and normalizer against fixtures
+        run: |
+          python -m py_compile tools/indra-ocr-research/private99_compare.py
+          python tools/indra-ocr-research/test_private99_compare.py -v

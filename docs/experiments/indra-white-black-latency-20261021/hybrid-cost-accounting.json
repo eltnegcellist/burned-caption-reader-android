@@ -1,0 +1,64 @@
+{
+  "scope": "COST ACCOUNTING ONLY: saved Android E timing combined with native Mac recognition timing, not measured end-to-end latency or a valid speedup benchmark",
+  "matched_warm_observations": 285,
+  "groups": {
+    "overall": {
+      "e_ms": 229.0456140350877,
+      "mlkit_ms": 50.77438616842105,
+      "pp_recognition_ms": 146.1699562350877,
+      "retained_e_except_pp_ms": 82.8756578,
+      "other_than_mlkit_pp_ms": 32.101271631578946,
+      "native_white_ms": 15.035184501754387,
+      "native_dual_ms": 21.94844941403509,
+      "mlkit_plus_native_white_ms": 65.80957067017543,
+      "mlkit_plus_native_dual_ms": 72.72283558245614,
+      "replace_pp_with_native_white_budget_ms": 97.91084230175439,
+      "replace_pp_with_native_dual_budget_ms": 104.8241072140351
+    },
+    "dev-cat": {
+      "e_ms": 329.3703703703704,
+      "mlkit_ms": 81.76616569135803,
+      "pp_recognition_ms": 202.78055416049384,
+      "retained_e_except_pp_ms": 126.58981620987655,
+      "other_than_mlkit_pp_ms": 44.82365051851852,
+      "native_white_ms": 17.80324538271605,
+      "native_dual_ms": 27.070733024691357,
+      "mlkit_plus_native_white_ms": 99.56941107407408,
+      "mlkit_plus_native_dual_ms": 108.83689871604938,
+      "replace_pp_with_native_white_budget_ms": 144.3930615925926,
+      "replace_pp_with_native_dual_budget_ms": 153.6605492345679
+    },
+    "dev-watch": {
+      "e_ms": 109.62820512820512,
+      "mlkit_ms": 20.142423102564102,
+      "pp_recognition_ms": 81.13858980769231,
+      "retained_e_except_pp_ms": 28.489615320512822,
+      "other_than_mlkit_pp_ms": 8.34719221794872,
+      "native_white_ms": 9.75350591025641,
+      "native_dual_ms": 13.111021384615384,
+      "mlkit_plus_native_white_ms": 29.895929012820513,
+      "mlkit_plus_native_dual_ms": 33.253444487179486,
+      "replace_pp_with_native_white_budget_ms": 38.24312123076923,
+      "replace_pp_with_native_dual_budget_ms": 41.6006367051282
+    },
+    "heldout": {
+      "e_ms": 238.47619047619048,
+      "mlkit_ms": 49.813743134920635,
+      "pp_recognition_ms": 150.03494154761904,
+      "retained_e_except_pp_ms": 88.44124892857143,
+      "other_than_mlkit_pp_ms": 38.62750579365079,
+      "native_white_ms": 16.52532734920635,
+      "native_dual_ms": 24.12634158730159,
+      "mlkit_plus_native_white_ms": 66.33907048412698,
+      "mlkit_plus_native_dual_ms": 73.94008472222222,
+      "replace_pp_with_native_white_budget_ms": 104.96657627777778,
+      "replace_pp_with_native_dual_budget_ms": 112.56759051587302
+    }
+  },
+  "caveats": [
+    "Native samples are matched to the same dataset/frame/repeat and warm subset of saved E (285 observations).",
+    "All ML Kit calls are retained, including refinement re-detection; logs do not separate initial detection from refinement detection.",
+    "Replacing only PP-recognition retains all old E crop/selection/other costs and adds native extraction/recognition/selection. This is an assumption; actual control flow and overhead differ.",
+    "No combined median, p95, speed ratio or phone latency is claimed."
+  ]
+}

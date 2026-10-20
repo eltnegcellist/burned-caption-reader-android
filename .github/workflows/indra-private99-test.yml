@@ -1,0 +1,24 @@
+name: Validate Indra 99 private Mac evaluator
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/indra-private99-test.yml"
+      - "tools/indra-ocr-99-private/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  self-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile private evaluator and run independent scoring tests (no models, no private data)
+        run: |
+          python -m py_compile tools/indra-ocr-99-private/run_private_mac.py
+          python -m unittest discover -s tools/indra-ocr-99-private -p 'test_*.py' -v

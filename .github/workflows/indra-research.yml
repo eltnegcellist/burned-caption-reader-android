@@ -1,0 +1,46 @@
+name: Research Indra OCR 1.1 Japanese subtitle smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/indra-research.yml"
+      - "tools/indra-ocr-research/**"
+
+permissions:
+  contents: read
+
+jobs:
+  indra-research-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Japanese test font
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          find /usr/share/fonts -iname '*CJK*' | head -12
+      - name: Install pinned CPU Indra OCR 1.1.2
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "indra-ocr==1.1.2" "pillow>=11,<13"
+          python -m pip freeze | grep -E "indra-ocr|numpy|onnxruntime|opencv|Pillow"
+      - name: Run Japanese 1-line, 3-line, nameplate, small and blank synthetic inputs
+        run: |
+          FONT=$(find /usr/share/fonts -type f \( -iname '*noto*CJK*regular*.ttc' -o -iname '*noto*CJK*.ttc' \) | head -1)
+          test -n "$FONT"
+          python tools/indra-ocr-research/synthetic_japanese_smoke.py \
+            --font "$FONT" --out "$RUNNER_TEMP/indra-research/summary.json" \
+            --repeat 3 --threads 4
+      - name: Attach raw synthetic test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: indra-ocr-1-1-synthetic-japanese-results
+          path: ${{ runner.temp }}/indra-research/summary.json
+          if-no-files-found: warn
+          retention-days: 7

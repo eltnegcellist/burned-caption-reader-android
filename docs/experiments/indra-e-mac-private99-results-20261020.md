@@ -4,6 +4,8 @@
 
 数値のみの出力：[元スクリプトの集計](indra-e-mac-private99-20261020/summary-only.json)、[E保存時間・反復・背景混入の追加集計](indra-e-mac-private99-20261020/analysis-only.json)。元画像、正解文、OCR全文、画像別ID・時刻、モデルは追加公開していない。
 
+**原因の追試：** [字幕位置と文字認識を分離した診断](indra-detection-vs-recognition-20261020.md)では、Eの位置だけへ置換してもCER 58.00%が残り、背景・縁取りへの認識側の弱さを確認した。白文字抽出＋CJK固定を加えると実99画像で9.86%まで改善したが、主試験とは別の探索条件であり、通常アプリは変更していない。
+
 ## 入力と比較条件の確認
 
 - 実行コードはPR #64のcommit `38fe5960a20cf24502f15884486c0ddb231d52ef`にある[`private99_compare.py`](../../tools/indra-ocr-research/private99_compare.py)。変更せず、`--threads 4 --repeat 3`で使用した。元データを使わない同PRのユニットテスト4件も成功した。

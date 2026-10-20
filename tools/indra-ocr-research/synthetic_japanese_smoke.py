@@ -116,6 +116,18 @@ def main():
                 print(json.dumps({"case": case_id, "iteration": n+1, "ms": round(ms, 1),
                       "detected": lines, "orientation": orientation, "stages": stage_timings[-1]}, ensure_ascii=False),
                       flush=True)
+            upright_outputs, upright_times = [], []
+            for n in range(a.repeat):
+                start = time.perf_counter()
+                upright_page = conv.ocr(gray, turn=False)
+                upright_ms = (time.perf_counter() - start) * 1000
+                upright_lines = [str(getattr(line, "text", "")) for line in upright_page.lines]
+                upright_outputs.append(upright_lines)
+                upright_times.append(upright_ms)
+                print(json.dumps({"case": case_id, "mode": "known_upright_no_orientation_model",
+                      "iteration": n+1, "ms": round(upright_ms, 1),
+                      "rotation": getattr(upright_page, "rotation", None),
+                      "detected": upright_lines}, ensure_ascii=False), flush=True)
             text = "".join(outputs[-1])
             edits, chars = distance(caption_gt, text)
             edits_all, chars_all = distance(all_visible_gt, text)
@@ -123,6 +135,9 @@ def main():
                    "all_visible_ground_truth": all_visible_gt,
                    "image_sha256": image_hash,
                    "detected_lines": outputs[-1],
+                   "known_upright_detected_lines": upright_outputs[-1],
+                   "known_upright_caption_cer": (distance(caption_gt, "".join(upright_outputs[-1]))[0] / len(normalize(caption_gt)) if caption_gt else None),
+                   "known_upright_warm_median_ms": round(statistics.median(upright_times[1:]), 2),
                    "times_ms": [round(t, 2) for t in times],
                    "warm_median_ms": round(statistics.median(times[1:]), 2),
                    "caption_cer": (edits / chars if chars else None),
@@ -134,7 +149,7 @@ def main():
     a.out.write_text(json.dumps(results, ensure_ascii=False, indent=2) + "\n")
     print("RESULT_FILE", str(a.out), flush=True)
     print("SUMMARY", json.dumps([{"case": x["case"], "caption_cer": x["caption_cer"],
-          "all_visible_cer": x["all_visible_cer"], "warm_median_ms": x["warm_median_ms"]}
+          "all_visible_cer": x["all_visible_cer"], "warm_median_ms": x["warm_median_ms"], "upright_cer": x["known_upright_caption_cer"], "upright_ms": x["known_upright_warm_median_ms"]}
           for x in results["cases"]], ensure_ascii=False), flush=True)
 
 

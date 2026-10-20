@@ -1,0 +1,1439 @@
+{
+  "config": {
+    "date": "2026-10-21",
+    "model": "indra-ocr==1.1.2",
+    "threads": 4,
+    "repeats": 3,
+    "modes": [
+      "indra_original_detect_white",
+      "indra_original_detect_dual",
+      "indra_white_detect_white",
+      "indra_white_detect_dual",
+      "indra_white_black_detect_dual",
+      "no_detector_whole_frame_white",
+      "no_detector_whole_frame_dual"
+    ],
+    "input": "all 99 original frames; no E/ML Kit rectangles or E subtitle bands are passed to the pipeline",
+    "recognition": "bundled CJK recognizer direct recognize(vertical=True); no actual rotation and no orientation model",
+    "white_rule": "min RGB>=210 and max RGB-min RGB<=45 -> black, else white",
+    "black_rule": "max RGB<=45 and max RGB-min RGB<=45 -> black, else white",
+    "dual_selector": "per line: prefer nonempty normalized text, then higher CTC confidence; tie white; no GT used",
+    "own_detector": "fixed bundled Indra detect(), full original grayscale or extracted masks according to mode",
+    "merged_detector": "white-mask boxes first; append black-mask boxes only if IoU<0.5 against every retained box; no GT used",
+    "order": "sort rectangles by top then left, same geometry-only joining rule as previous E-box tests; no layout model",
+    "no_detector": "one rectangle [0,0,width,height] for the whole frame, not an estimate of subtitle position",
+    "subtitle_selector": "none; all detected lines are read, including background text; not a port of E caption selection",
+    "timing": "RGB ready -> extraction + optional own detection + recognition + selection + join; image decode/model load/scoring excluded",
+    "caution": "Exploratory already-seen frames. Report every fixed condition; no best-per-image oracle selection."
+  },
+  "model_commit": "bd02167fdf2005a19962cc15188f8496a2c87d3b",
+  "source_script_sha256": "427d09183130e3a2bbeecb25f9dd53a0848338948328baa6ca225a7b59f84eb8",
+  "three_repeat_predictions_identical": true,
+  "groups": {
+    "overall": {
+      "indra_original_detect_white": {
+        "frames": 99,
+        "reference_characters": 2545,
+        "edits": 453,
+        "cer_pct": 17.79960707269155,
+        "exact_frames": 17,
+        "exact_pct": 17.171717171717173,
+        "complete_misses": 1,
+        "false_positive_blanks": 3,
+        "detected_or_whole_frame_boxes": 937,
+        "latency": {
+          "n": 297,
+          "mean_ms": 36.90902245117845,
+          "median_ms": 37.119333,
+          "p95_ms": 50.562459
+        },
+        "stages": {
+          "extract": {
+            "n": 297,
+            "mean_ms": 9.661451168350169,
+            "median_ms": 9.56825,
+            "p95_ms": 10.896042
+          },
+          "localize_and_sort": {
+            "n": 297,
+            "mean_ms": 12.913934356902358,
+            "median_ms": 12.844416,
+            "p95_ms": 13.946458
+          },
+          "white_recognize": {
+            "n": 297,
+            "mean_ms": 14.33160005050505,
+            "median_ms": 14.858459,
+            "p95_ms": 27.113166
+          },
+          "black_recognize": {
+            "n": 297,
+            "mean_ms": 0.0,
+            "median_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "selection_join": {
+            "n": 297,
+            "mean_ms": 0.002036875420875421,
+            "median_ms": 0.001958,
+            "p95_ms": 0.003334
+          }
+        }
+      },
+      "indra_original_detect_dual": {
+        "frames": 99,
+        "reference_characters": 2545,
+        "edits": 489,
+        "cer_pct": 19.214145383104125,
+        "exact_frames": 21,
+        "exact_pct": 21.21212121212121,
+        "complete_misses": 1,
+        "false_positive_blanks": 4,
+        "detected_or_whole_frame_boxes": 937,
+        "latency": {
+          "n": 297,
+          "mean_ms": 50.921835875420875,
+          "median_ms": 50.7155,
+          "p95_ms": 80.662209
+        },
+        "stages": {
+          "extract": {
+            "n": 297,
+            "mean_ms": 10.518920474747475,
+            "median_ms": 10.27925,
+            "p95_ms": 12.857916
+          },
+          "localize_and_sort": {
+            "n": 297,
+            "mean_ms": 13.103418518518518,
+            "median_ms": 13.014625,
+            "p95_ms": 14.396
+          },
+          "white_recognize": {
+            "n": 297,
+            "mean_ms": 14.584842693602694,
+            "median_ms": 14.907625,
+            "p95_ms": 28.223958
+          },
+          "black_recognize": {
+            "n": 297,
+            "mean_ms": 12.669358888888889,
+            "median_ms": 12.638709,
+            "p95_ms": 26.753666
+          },
+          "selection_join": {
+            "n": 297,
+            "mean_ms": 0.04529529966329966,
+            "median_ms": 0.04625,
+            "p95_ms": 0.077458
+          }
+        }
+      },
+      "indra_white_detect_white": {
+        "frames": 99,
+        "reference_characters": 2545,
+        "edits": 273,
+        "cer_pct": 10.726915520628683,
+        "exact_frames": 41,
+        "exact_pct": 41.41414141414141,
+        "complete_misses": 1,
+        "false_positive_blanks": 4,
+        "detected_or_whole_frame_boxes": 404,
+        "latency": {
+          "n": 297,
+          "mean_ms": 34.381804956228954,
+          "median_ms": 34.643959,
+          "p95_ms": 41.752375
+        },
+        "stages": {
+          "extract": {
+            "n": 297,
+            "mean_ms": 10.196603915824916,
+            "median_ms": 9.960292,
+            "p95_ms": 12.004625
+          },
+          "localize_and_sort": {
+            "n": 297,
+            "mean_ms": 12.635616602693602,
+            "median_ms": 12.547209,
+            "p95_ms": 13.749833
+          },
+          "white_recognize": {
+            "n": 297,
+            "mean_ms": 11.547751003367003,
+            "median_ms": 11.942917,
+            "p95_ms": 17.928791
+          },
+          "black_recognize": {
+            "n": 297,
+            "mean_ms": 0.0,
+            "median_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "selection_join": {
+            "n": 297,
+            "mean_ms": 0.0018334343434343434,
+            "median_ms": 0.001625,
+            "p95_ms": 0.003417
+          }
+        }
+      },
+      "indra_white_detect_dual": {
+        "frames": 99,
+        "reference_characters": 2545,
+        "edits": 262,
+        "cer_pct": 10.294695481335953,
+        "exact_frames": 46,
+        "exact_pct": 46.464646464646464,
+        "complete_misses": 1,
+        "false_positive_blanks": 4,
+        "detected_or_whole_frame_boxes": 404,
+        "latency": {
+          "n": 297,
+          "mean_ms": 44.24906808080808,
+          "median_ms": 45.590458,
+          "p95_ms": 56.853959
+        },
+        "stages": {
+          "extract": {
+            "n": 297,
+            "mean_ms": 10.681386353535354,
+            "median_ms": 10.634,
+            "p95_ms": 12.497958
+          },
+          "localize_and_sort": {
+            "n": 297,
+            "mean_ms": 12.651125572390573,
+            "median_ms": 12.572709,
+            "p95_ms": 13.871458
+          },
+          "white_recognize": {
+            "n": 297,
+            "mean_ms": 11.51268056902357,
+            "median_ms": 12.004791,
+            "p95_ms": 18.35425
+          },
+          "black_recognize": {
+            "n": 297,
+            "mean_ms": 9.367161191919191,
+            "median_ms": 9.951458,
+            "p95_ms": 15.646333
+          },
+          "selection_join": {
+            "n": 297,
+            "mean_ms": 0.03671439393939394,
+            "median_ms": 0.036292,
+            "p95_ms": 0.057542
+          }
+        }
+      },
+      "indra_white_black_detect_dual": {
+        "frames": 99,
+        "reference_characters": 2545,
+        "edits": 637,
+        "cer_pct": 25.029469548133594,
+        "exact_frames": 24,
+        "exact_pct": 24.242424242424242,
+        "complete_misses": 1,
+        "false_positive_blanks": 4,
+        "detected_or_whole_frame_boxes": 1016,
+        "latency": {
+          "n": 297,
+          "mean_ms": 67.34006540740741,
+          "median_ms": 68.379792,
+          "p95_ms": 93.112917
+        },
+        "stages": {
+          "extract": {
+            "n": 297,
+            "mean_ms": 10.665771592592593,
+            "median_ms": 10.599542,
+            "p95_ms": 12.0745
+          },
+          "localize_and_sort": {
+            "n": 297,
+            "mean_ms": 25.713884023569022,
+            "median_ms": 25.765584,
+            "p95_ms": 27.673
+          },
+          "white_recognize": {
+            "n": 297,
+            "mean_ms": 16.43815652861953,
+            "median_ms": 17.184791,
+            "p95_ms": 28.936334
+          },
+          "black_recognize": {
+            "n": 297,
+            "mean_ms": 14.46913596969697,
+            "median_ms": 14.559792,
+            "p95_ms": 27.712917
+          },
+          "selection_join": {
+            "n": 297,
+            "mean_ms": 0.05311729292929293,
+            "median_ms": 0.053709,
+            "p95_ms": 0.089334
+          }
+        }
+      },
+      "no_detector_whole_frame_white": {
+        "frames": 99,
+        "reference_characters": 2545,
+        "edits": 2552,
+        "cer_pct": 100.27504911591356,
+        "exact_frames": 9,
+        "exact_pct": 9.090909090909092,
+        "complete_misses": 71,
+        "false_positive_blanks": 3,
+        "detected_or_whole_frame_boxes": 99,
+        "latency": {
+          "n": 297,
+          "mean_ms": 33.4772176026936,
+          "median_ms": 33.436,
+          "p95_ms": 36.492042
+        },
+        "stages": {
+          "extract": {
+            "n": 297,
+            "mean_ms": 10.490114750841752,
+            "median_ms": 10.382292,
+            "p95_ms": 12.195166
+          },
+          "localize_and_sort": {
+            "n": 297,
+            "mean_ms": 0.011378087542087542,
+            "median_ms": 0.011083,
+            "p95_ms": 0.014541
+          },
+          "white_recognize": {
+            "n": 297,
+            "mean_ms": 22.974203313131312,
+            "median_ms": 22.879292,
+            "p95_ms": 25.064042
+          },
+          "black_recognize": {
+            "n": 297,
+            "mean_ms": 0.0,
+            "median_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "selection_join": {
+            "n": 297,
+            "mean_ms": 0.0015214511784511784,
+            "median_ms": 0.001459,
+            "p95_ms": 0.002
+          }
+        }
+      },
+      "no_detector_whole_frame_dual": {
+        "frames": 99,
+        "reference_characters": 2545,
+        "edits": 2553,
+        "cer_pct": 100.31434184675835,
+        "exact_frames": 8,
+        "exact_pct": 8.080808080808081,
+        "complete_misses": 63,
+        "false_positive_blanks": 4,
+        "detected_or_whole_frame_boxes": 99,
+        "latency": {
+          "n": 297,
+          "mean_ms": 54.99735604713805,
+          "median_ms": 54.555709,
+          "p95_ms": 61.400875
+        },
+        "stages": {
+          "extract": {
+            "n": 297,
+            "mean_ms": 10.167160616161617,
+            "median_ms": 9.985792,
+            "p95_ms": 11.608208
+          },
+          "localize_and_sort": {
+            "n": 297,
+            "mean_ms": 0.009955969696969698,
+            "median_ms": 0.009667,
+            "p95_ms": 0.013541
+          },
+          "white_recognize": {
+            "n": 297,
+            "mean_ms": 22.7558488989899,
+            "median_ms": 22.440084,
+            "p95_ms": 25.18025
+          },
+          "black_recognize": {
+            "n": 297,
+            "mean_ms": 22.056177905723906,
+            "median_ms": 22.332042,
+            "p95_ms": 24.655833
+          },
+          "selection_join": {
+            "n": 297,
+            "mean_ms": 0.008212656565656565,
+            "median_ms": 0.00425,
+            "p95_ms": 0.020208
+          }
+        }
+      }
+    },
+    "dev-cat": {
+      "indra_original_detect_white": {
+        "frames": 28,
+        "reference_characters": 849,
+        "edits": 185,
+        "cer_pct": 21.790341578327443,
+        "exact_frames": 0,
+        "exact_pct": 0.0,
+        "complete_misses": 0,
+        "false_positive_blanks": 0,
+        "detected_or_whole_frame_boxes": 342,
+        "latency": {
+          "n": 84,
+          "mean_ms": 39.21321328571428,
+          "median_ms": 38.5531875,
+          "p95_ms": 45.88275
+        },
+        "stages": {
+          "extract": {
+            "n": 84,
+            "mean_ms": 9.50862944047619,
+            "median_ms": 9.4598125,
+            "p95_ms": 10.1725
+          },
+          "localize_and_sort": {
+            "n": 84,
+            "mean_ms": 12.971836297619047,
+            "median_ms": 12.870479,
+            "p95_ms": 13.752709
+          },
+          "white_recognize": {
+            "n": 84,
+            "mean_ms": 16.73076742857143,
+            "median_ms": 15.8618755,
+            "p95_ms": 23.024084
+          },
+          "black_recognize": {
+            "n": 84,
+            "mean_ms": 0.0,
+            "median_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "selection_join": {
+            "n": 84,
+            "mean_ms": 0.001980119047619048,
+            "median_ms": 0.001959,
+            "p95_ms": 0.002458
+          }
+        }
+      },
+      "indra_original_detect_dual": {
+        "frames": 28,
+        "reference_characters": 849,
+        "edits": 210,
+        "cer_pct": 24.73498233215548,
+        "exact_frames": 0,
+        "exact_pct": 0.0,
+        "complete_misses": 0,
+        "false_positive_blanks": 0,
+        "detected_or_whole_frame_boxes": 342,
+        "latency": {
+          "n": 84,
+          "mean_ms": 54.32016413095238,
+          "median_ms": 52.0296045,
+          "p95_ms": 67.788459
+        },
+        "stages": {
+          "extract": {
+            "n": 84,
+            "mean_ms": 9.732024273809524,
+            "median_ms": 9.5938535,
+            "p95_ms": 11.494291
+          },
+          "localize_and_sort": {
+            "n": 84,
+            "mean_ms": 12.935098238095238,
+            "median_ms": 12.8592295,
+            "p95_ms": 13.817209
+          },
+          "white_recognize": {
+            "n": 84,
+            "mean_ms": 16.929872464285715,
+            "median_ms": 15.735437000000001,
+            "p95_ms": 23.023583
+          },
+          "black_recognize": {
+            "n": 84,
+            "mean_ms": 14.667757011904762,
+            "median_ms": 13.9884165,
+            "p95_ms": 21.7925
+          },
+          "selection_join": {
+            "n": 84,
+            "mean_ms": 0.055412142857142854,
+            "median_ms": 0.050687499999999996,
+            "p95_ms": 0.082541
+          }
+        }
+      },
+      "indra_white_detect_white": {
+        "frames": 28,
+        "reference_characters": 849,
+        "edits": 149,
+        "cer_pct": 17.550058892815077,
+        "exact_frames": 10,
+        "exact_pct": 35.714285714285715,
+        "complete_misses": 0,
+        "false_positive_blanks": 0,
+        "detected_or_whole_frame_boxes": 172,
+        "latency": {
+          "n": 84,
+          "mean_ms": 36.11543351190476,
+          "median_ms": 35.7547085,
+          "p95_ms": 42.02375
+        },
+        "stages": {
+          "extract": {
+            "n": 84,
+            "mean_ms": 9.529715238095237,
+            "median_ms": 9.373353999999999,
+            "p95_ms": 10.803208
+          },
+          "localize_and_sort": {
+            "n": 84,
+            "mean_ms": 12.343707416666666,
+            "median_ms": 12.316167,
+            "p95_ms": 13.200917
+          },
+          "white_recognize": {
+            "n": 84,
+            "mean_ms": 14.240252452380952,
+            "median_ms": 14.2304375,
+            "p95_ms": 19.599792
+          },
+          "black_recognize": {
+            "n": 84,
+            "mean_ms": 0.0,
+            "median_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "selection_join": {
+            "n": 84,
+            "mean_ms": 0.0017584047619047618,
+            "median_ms": 0.0015834999999999998,
+            "p95_ms": 0.002167
+          }
+        }
+      },
+      "indra_white_detect_dual": {
+        "frames": 28,
+        "reference_characters": 849,
+        "edits": 143,
+        "cer_pct": 16.843345111896348,
+        "exact_frames": 8,
+        "exact_pct": 28.571428571428573,
+        "complete_misses": 0,
+        "false_positive_blanks": 0,
+        "detected_or_whole_frame_boxes": 172,
+        "latency": {
+          "n": 84,
+          "mean_ms": 48.27905407142857,
+          "median_ms": 47.3227915,
+          "p95_ms": 60.369917
+        },
+        "stages": {
+          "extract": {
+            "n": 84,
+            "mean_ms": 9.807137380952382,
+            "median_ms": 9.6605415,
+            "p95_ms": 11.223375
+          },
+          "localize_and_sort": {
+            "n": 84,
+            "mean_ms": 12.417276357142857,
+            "median_ms": 12.4094585,
+            "p95_ms": 13.23725
+          },
+          "white_recognize": {
+            "n": 84,
+            "mean_ms": 14.247381952380952,
+            "median_ms": 14.0628545,
+            "p95_ms": 19.270167
+          },
+          "black_recognize": {
+            "n": 84,
+            "mean_ms": 11.762269785714286,
+            "median_ms": 11.3234795,
+            "p95_ms": 17.554209
+          },
+          "selection_join": {
+            "n": 84,
+            "mean_ms": 0.04498859523809524,
+            "median_ms": 0.044104,
+            "p95_ms": 0.061542
+          }
+        }
+      },
+      "indra_white_black_detect_dual": {
+        "frames": 28,
+        "reference_characters": 849,
+        "edits": 271,
+        "cer_pct": 31.919905771495877,
+        "exact_frames": 1,
+        "exact_pct": 3.5714285714285716,
+        "complete_misses": 0,
+        "false_positive_blanks": 0,
+        "detected_or_whole_frame_boxes": 420,
+        "latency": {
+          "n": 84,
+          "mean_ms": 74.99837357142857,
+          "median_ms": 71.72702100000001,
+          "p95_ms": 95.166916
+        },
+        "stages": {
+          "extract": {
+            "n": 84,
+            "mean_ms": 9.93293055952381,
+            "median_ms": 9.760042,
+            "p95_ms": 11.164458
+          },
+          "localize_and_sort": {
+            "n": 84,
+            "mean_ms": 25.61096286904762,
+            "median_ms": 25.488896,
+            "p95_ms": 27.34025
+          },
+          "white_recognize": {
+            "n": 84,
+            "mean_ms": 20.648057488095237,
+            "median_ms": 18.8670415,
+            "p95_ms": 29.762166
+          },
+          "black_recognize": {
+            "n": 84,
+            "mean_ms": 18.74327973809524,
+            "median_ms": 17.031458,
+            "p95_ms": 29.670458
+          },
+          "selection_join": {
+            "n": 84,
+            "mean_ms": 0.06314291666666666,
+            "median_ms": 0.0611665,
+            "p95_ms": 0.093709
+          }
+        }
+      },
+      "no_detector_whole_frame_white": {
+        "frames": 28,
+        "reference_characters": 849,
+        "edits": 849,
+        "cer_pct": 100.0,
+        "exact_frames": 0,
+        "exact_pct": 0.0,
+        "complete_misses": 25,
+        "false_positive_blanks": 0,
+        "detected_or_whole_frame_boxes": 28,
+        "latency": {
+          "n": 84,
+          "mean_ms": 31.651210369047618,
+          "median_ms": 31.634145500000002,
+          "p95_ms": 33.660083
+        },
+        "stages": {
+          "extract": {
+            "n": 84,
+            "mean_ms": 9.718658285714286,
+            "median_ms": 9.504312500000001,
+            "p95_ms": 11.103959
+          },
+          "localize_and_sort": {
+            "n": 84,
+            "mean_ms": 0.010981083333333334,
+            "median_ms": 0.010728999999999999,
+            "p95_ms": 0.013333
+          },
+          "white_recognize": {
+            "n": 84,
+            "mean_ms": 21.919980142857142,
+            "median_ms": 21.7205,
+            "p95_ms": 23.508042
+          },
+          "black_recognize": {
+            "n": 84,
+            "mean_ms": 0.0,
+            "median_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "selection_join": {
+            "n": 84,
+            "mean_ms": 0.0015908571428571428,
+            "median_ms": 0.0015,
+            "p95_ms": 0.002042
+          }
+        }
+      },
+      "no_detector_whole_frame_dual": {
+        "frames": 28,
+        "reference_characters": 849,
+        "edits": 849,
+        "cer_pct": 100.0,
+        "exact_frames": 0,
+        "exact_pct": 0.0,
+        "complete_misses": 25,
+        "false_positive_blanks": 0,
+        "detected_or_whole_frame_boxes": 28,
+        "latency": {
+          "n": 84,
+          "mean_ms": 52.993570404761904,
+          "median_ms": 52.419833499999996,
+          "p95_ms": 57.254916
+        },
+        "stages": {
+          "extract": {
+            "n": 84,
+            "mean_ms": 9.713684464285715,
+            "median_ms": 9.6131875,
+            "p95_ms": 10.6155
+          },
+          "localize_and_sort": {
+            "n": 84,
+            "mean_ms": 0.009852738095238095,
+            "median_ms": 0.009625,
+            "p95_ms": 0.012625
+          },
+          "white_recognize": {
+            "n": 84,
+            "mean_ms": 21.744955833333332,
+            "median_ms": 21.5435835,
+            "p95_ms": 23.5845
+          },
+          "black_recognize": {
+            "n": 84,
+            "mean_ms": 21.51920736904762,
+            "median_ms": 21.3958955,
+            "p95_ms": 23.411084
+          },
+          "selection_join": {
+            "n": 84,
+            "mean_ms": 0.00587,
+            "median_ms": 0.004041,
+            "p95_ms": 0.018042
+          }
+        }
+      }
+    },
+    "dev-watch": {
+      "indra_original_detect_white": {
+        "frames": 28,
+        "reference_characters": 562,
+        "edits": 54,
+        "cer_pct": 9.608540925266905,
+        "exact_frames": 13,
+        "exact_pct": 46.42857142857143,
+        "complete_misses": 1,
+        "false_positive_blanks": 0,
+        "detected_or_whole_frame_boxes": 39,
+        "latency": {
+          "n": 84,
+          "mean_ms": 27.91973313095238,
+          "median_ms": 28.993562,
+          "p95_ms": 33.214042
+        },
+        "stages": {
+          "extract": {
+            "n": 84,
+            "mean_ms": 9.557252916666666,
+            "median_ms": 9.524083000000001,
+            "p95_ms": 10.226083
+          },
+          "localize_and_sort": {
+            "n": 84,
+            "mean_ms": 12.43844005952381,
+            "median_ms": 12.410521,
+            "p95_ms": 13.176334
+          },
+          "white_recognize": {
+            "n": 84,
+            "mean_ms": 5.921940464285714,
+            "median_ms": 7.315125,
+            "p95_ms": 11.296583
+          },
+          "black_recognize": {
+            "n": 84,
+            "mean_ms": 0.0,
+            "median_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "selection_join": {
+            "n": 84,
+            "mean_ms": 0.0020996904761904764,
+            "median_ms": 0.0016875000000000002,
+            "p95_ms": 0.004
+          }
+        }
+      },
+      "indra_original_detect_dual": {
+        "frames": 28,
+        "reference_characters": 562,
+        "edits": 37,
+        "cer_pct": 6.5836298932384345,
+        "exact_frames": 19,
+        "exact_pct": 67.85714285714286,
+        "complete_misses": 1,
+        "false_positive_blanks": 1,
+        "detected_or_whole_frame_boxes": 39,
+        "latency": {
+          "n": 84,
+          "mean_ms": 32.80608038095238,
+          "median_ms": 34.9470005,
+          "p95_ms": 41.528416
+        },
+        "stages": {
+          "extract": {
+            "n": 84,
+            "mean_ms": 10.426278297619048,
+            "median_ms": 10.1723125,
+            "p95_ms": 11.880458
+          },
+          "localize_and_sort": {
+            "n": 84,
+            "mean_ms": 12.483216297619048,
+            "median_ms": 12.413395999999999,
+            "p95_ms": 13.403334
+          },
+          "white_recognize": {
+            "n": 84,
+            "mean_ms": 5.7173129523809525,
+            "median_ms": 6.602958,
+            "p95_ms": 10.787292
+          },
+          "black_recognize": {
+            "n": 84,
+            "mean_ms": 4.155647833333333,
+            "median_ms": 4.8982915,
+            "p95_ms": 7.760666
+          },
+          "selection_join": {
+            "n": 84,
+            "mean_ms": 0.023625,
+            "median_ms": 0.0270415,
+            "p95_ms": 0.03675
+          }
+        }
+      },
+      "indra_white_detect_white": {
+        "frames": 28,
+        "reference_characters": 562,
+        "edits": 50,
+        "cer_pct": 8.896797153024911,
+        "exact_frames": 14,
+        "exact_pct": 50.0,
+        "complete_misses": 1,
+        "false_positive_blanks": 1,
+        "detected_or_whole_frame_boxes": 47,
+        "latency": {
+          "n": 84,
+          "mean_ms": 28.813075892857142,
+          "median_ms": 30.3003545,
+          "p95_ms": 33.506834
+        },
+        "stages": {
+          "extract": {
+            "n": 84,
+            "mean_ms": 9.970073369047618,
+            "median_ms": 9.7041455,
+            "p95_ms": 11.745166
+          },
+          "localize_and_sort": {
+            "n": 84,
+            "mean_ms": 12.13321425,
+            "median_ms": 12.1195,
+            "p95_ms": 12.993
+          },
+          "white_recognize": {
+            "n": 84,
+            "mean_ms": 6.707681142857143,
+            "median_ms": 7.951499999999999,
+            "p95_ms": 11.402292
+          },
+          "black_recognize": {
+            "n": 84,
+            "mean_ms": 0.0,
+            "median_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "selection_join": {
+            "n": 84,
+            "mean_ms": 0.0021071309523809523,
+            "median_ms": 0.001583,
+            "p95_ms": 0.00425
+          }
+        }
+      },
+      "indra_white_detect_dual": {
+        "frames": 28,
+        "reference_characters": 562,
+        "edits": 38,
+        "cer_pct": 6.761565836298932,
+        "exact_frames": 23,
+        "exact_pct": 82.14285714285714,
+        "complete_misses": 1,
+        "false_positive_blanks": 1,
+        "detected_or_whole_frame_boxes": 47,
+        "latency": {
+          "n": 84,
+          "mean_ms": 34.41915038095238,
+          "median_ms": 36.3977085,
+          "p95_ms": 42.567167
+        },
+        "stages": {
+          "extract": {
+            "n": 84,
+            "mean_ms": 10.644346714285714,
+            "median_ms": 10.4463335,
+            "p95_ms": 12.508625
+          },
+          "localize_and_sort": {
+            "n": 84,
+            "mean_ms": 12.179705404761904,
+            "median_ms": 12.119208,
+            "p95_ms": 12.914084
+          },
+          "white_recognize": {
+            "n": 84,
+            "mean_ms": 6.694785190476191,
+            "median_ms": 7.990104,
+            "p95_ms": 11.841666
+          },
+          "black_recognize": {
+            "n": 84,
+            "mean_ms": 4.877346273809524,
+            "median_ms": 5.7353545,
+            "p95_ms": 7.929709
+          },
+          "selection_join": {
+            "n": 84,
+            "mean_ms": 0.02296679761904762,
+            "median_ms": 0.0269165,
+            "p95_ms": 0.039833
+          }
+        }
+      },
+      "indra_white_black_detect_dual": {
+        "frames": 28,
+        "reference_characters": 562,
+        "edits": 47,
+        "cer_pct": 8.362989323843417,
+        "exact_frames": 20,
+        "exact_pct": 71.42857142857143,
+        "complete_misses": 1,
+        "false_positive_blanks": 1,
+        "detected_or_whole_frame_boxes": 96,
+        "latency": {
+          "n": 84,
+          "mean_ms": 49.94519691666667,
+          "median_ms": 52.156687500000004,
+          "p95_ms": 65.403042
+        },
+        "stages": {
+          "extract": {
+            "n": 84,
+            "mean_ms": 10.455083285714286,
+            "median_ms": 10.3822285,
+            "p95_ms": 11.897416
+          },
+          "localize_and_sort": {
+            "n": 84,
+            "mean_ms": 24.670389404761906,
+            "median_ms": 24.5785415,
+            "p95_ms": 26.101042
+          },
+          "white_recognize": {
+            "n": 84,
+            "mean_ms": 8.494466738095237,
+            "median_ms": 9.71075,
+            "p95_ms": 16.994625
+          },
+          "black_recognize": {
+            "n": 84,
+            "mean_ms": 6.3008835238095235,
+            "median_ms": 7.074792,
+            "p95_ms": 13.661459
+          },
+          "selection_join": {
+            "n": 84,
+            "mean_ms": 0.024373964285714287,
+            "median_ms": 0.0276455,
+            "p95_ms": 0.041167
+          }
+        }
+      },
+      "no_detector_whole_frame_white": {
+        "frames": 28,
+        "reference_characters": 562,
+        "edits": 563,
+        "cer_pct": 100.1779359430605,
+        "exact_frames": 7,
+        "exact_pct": 25.0,
+        "complete_misses": 17,
+        "false_positive_blanks": 1,
+        "detected_or_whole_frame_boxes": 28,
+        "latency": {
+          "n": 84,
+          "mean_ms": 33.66002132142857,
+          "median_ms": 33.3095,
+          "p95_ms": 36.959833
+        },
+        "stages": {
+          "extract": {
+            "n": 84,
+            "mean_ms": 10.27358632142857,
+            "median_ms": 10.0555625,
+            "p95_ms": 11.664083
+          },
+          "localize_and_sort": {
+            "n": 84,
+            "mean_ms": 0.011187,
+            "median_ms": 0.0110625,
+            "p95_ms": 0.014208
+          },
+          "white_recognize": {
+            "n": 84,
+            "mean_ms": 23.373730238095238,
+            "median_ms": 23.321792,
+            "p95_ms": 25.023375
+          },
+          "black_recognize": {
+            "n": 84,
+            "mean_ms": 0.0,
+            "median_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "selection_join": {
+            "n": 84,
+            "mean_ms": 0.0015177619047619048,
+            "median_ms": 0.001458,
+            "p95_ms": 0.002
+          }
+        }
+      },
+      "no_detector_whole_frame_dual": {
+        "frames": 28,
+        "reference_characters": 562,
+        "edits": 564,
+        "cer_pct": 100.355871886121,
+        "exact_frames": 6,
+        "exact_pct": 21.428571428571427,
+        "complete_misses": 14,
+        "false_positive_blanks": 2,
+        "detected_or_whole_frame_boxes": 28,
+        "latency": {
+          "n": 84,
+          "mean_ms": 54.37804072619048,
+          "median_ms": 54.5516875,
+          "p95_ms": 58.028542
+        },
+        "stages": {
+          "extract": {
+            "n": 84,
+            "mean_ms": 10.14317561904762,
+            "median_ms": 9.9696875,
+            "p95_ms": 11.169208
+          },
+          "localize_and_sort": {
+            "n": 84,
+            "mean_ms": 0.010020369047619047,
+            "median_ms": 0.009646,
+            "p95_ms": 0.014042
+          },
+          "white_recognize": {
+            "n": 84,
+            "mean_ms": 23.018309988095236,
+            "median_ms": 22.8980205,
+            "p95_ms": 24.473667
+          },
+          "black_recognize": {
+            "n": 84,
+            "mean_ms": 21.198280261904763,
+            "median_ms": 22.3226875,
+            "p95_ms": 23.534917
+          },
+          "selection_join": {
+            "n": 84,
+            "mean_ms": 0.008254488095238096,
+            "median_ms": 0.00425,
+            "p95_ms": 0.020375
+          }
+        }
+      }
+    },
+    "heldout": {
+      "indra_original_detect_white": {
+        "frames": 43,
+        "reference_characters": 1134,
+        "edits": 214,
+        "cer_pct": 18.871252204585538,
+        "exact_frames": 4,
+        "exact_pct": 9.30232558139535,
+        "complete_misses": 0,
+        "false_positive_blanks": 3,
+        "detected_or_whole_frame_boxes": 556,
+        "latency": {
+          "n": 129,
+          "mean_ms": 41.2621098372093,
+          "median_ms": 39.375667,
+          "p95_ms": 51.648916
+        },
+        "stages": {
+          "extract": {
+            "n": 129,
+            "mean_ms": 9.828813015503876,
+            "median_ms": 9.623875,
+            "p95_ms": 11.370333
+          },
+          "localize_and_sort": {
+            "n": 129,
+            "mean_ms": 13.18585496124031,
+            "median_ms": 13.094708,
+            "p95_ms": 14.452333
+          },
+          "white_recognize": {
+            "n": 129,
+            "mean_ms": 18.245408930232557,
+            "median_ms": 16.16575,
+            "p95_ms": 28.372042
+          },
+          "black_recognize": {
+            "n": 129,
+            "mean_ms": 0.0,
+            "median_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "selection_join": {
+            "n": 129,
+            "mean_ms": 0.0020329302325581395,
+            "median_ms": 0.002,
+            "p95_ms": 0.002584
+          }
+        }
+      },
+      "indra_original_detect_dual": {
+        "frames": 43,
+        "reference_characters": 1134,
+        "edits": 242,
+        "cer_pct": 21.340388007054674,
+        "exact_frames": 2,
+        "exact_pct": 4.651162790697675,
+        "complete_misses": 0,
+        "false_positive_blanks": 3,
+        "detected_or_whole_frame_boxes": 556,
+        "latency": {
+          "n": 129,
+          "mean_ms": 60.50527686821705,
+          "median_ms": 55.612625,
+          "p95_ms": 83.198
+        },
+        "stages": {
+          "extract": {
+            "n": 129,
+            "mean_ms": 11.091643139534884,
+            "median_ms": 10.800917,
+            "p95_ms": 13.176917
+          },
+          "localize_and_sort": {
+            "n": 129,
+            "mean_ms": 13.616875031007751,
+            "median_ms": 13.555125,
+            "p95_ms": 14.611875
+          },
+          "white_recognize": {
+            "n": 129,
+            "mean_ms": 18.832051976744186,
+            "median_ms": 16.838375,
+            "p95_ms": 29.7645
+          },
+          "black_recognize": {
+            "n": 129,
+            "mean_ms": 16.911888240310077,
+            "median_ms": 14.338,
+            "p95_ms": 27.9015
+          },
+          "selection_join": {
+            "n": 129,
+            "mean_ms": 0.05281848062015504,
+            "median_ms": 0.051625,
+            "p95_ms": 0.074792
+          }
+        }
+      },
+      "indra_white_detect_white": {
+        "frames": 43,
+        "reference_characters": 1134,
+        "edits": 74,
+        "cer_pct": 6.525573192239859,
+        "exact_frames": 17,
+        "exact_pct": 39.53488372093023,
+        "complete_misses": 0,
+        "false_positive_blanks": 3,
+        "detected_or_whole_frame_boxes": 185,
+        "latency": {
+          "n": 129,
+          "mean_ms": 36.879079705426356,
+          "median_ms": 37.115292,
+          "p95_ms": 42.12825
+        },
+        "stages": {
+          "extract": {
+            "n": 129,
+            "mean_ms": 10.77836527131783,
+            "median_ms": 10.645292,
+            "p95_ms": 12.200083
+          },
+          "localize_and_sort": {
+            "n": 129,
+            "mean_ms": 13.152842720930233,
+            "median_ms": 13.175291,
+            "p95_ms": 13.998625
+          },
+          "white_recognize": {
+            "n": 129,
+            "mean_ms": 12.946167643410853,
+            "median_ms": 13.241583,
+            "p95_ms": 16.610292
+          },
+          "black_recognize": {
+            "n": 129,
+            "mean_ms": 0.0,
+            "median_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "selection_join": {
+            "n": 129,
+            "mean_ms": 0.0017040697674418604,
+            "median_ms": 0.001625,
+            "p95_ms": 0.002292
+          }
+        }
+      },
+      "indra_white_detect_dual": {
+        "frames": 43,
+        "reference_characters": 1134,
+        "edits": 81,
+        "cer_pct": 7.142857142857143,
+        "exact_frames": 15,
+        "exact_pct": 34.883720930232556,
+        "complete_misses": 0,
+        "false_positive_blanks": 3,
+        "detected_or_whole_frame_boxes": 185,
+        "latency": {
+          "n": 129,
+          "mean_ms": 48.025767798449614,
+          "median_ms": 48.01925,
+          "p95_ms": 55.023584
+        },
+        "stages": {
+          "extract": {
+            "n": 129,
+            "mean_ms": 11.274783589147287,
+            "median_ms": 11.200167,
+            "p95_ms": 12.646584
+          },
+          "localize_and_sort": {
+            "n": 129,
+            "mean_ms": 13.110370751937985,
+            "median_ms": 13.034125,
+            "p95_ms": 14.256083
+          },
+          "white_recognize": {
+            "n": 129,
+            "mean_ms": 12.869178984496124,
+            "median_ms": 12.686,
+            "p95_ms": 16.543792
+          },
+          "black_recognize": {
+            "n": 129,
+            "mean_ms": 10.731156007751938,
+            "median_ms": 10.670666,
+            "p95_ms": 13.729625
+          },
+          "selection_join": {
+            "n": 129,
+            "mean_ms": 0.04027846511627907,
+            "median_ms": 0.038,
+            "p95_ms": 0.055458
+          }
+        }
+      },
+      "indra_white_black_detect_dual": {
+        "frames": 43,
+        "reference_characters": 1134,
+        "edits": 319,
+        "cer_pct": 28.130511463844798,
+        "exact_frames": 3,
+        "exact_pct": 6.976744186046512,
+        "complete_misses": 0,
+        "false_positive_blanks": 3,
+        "detected_or_whole_frame_boxes": 500,
+        "latency": {
+          "n": 129,
+          "mean_ms": 73.68015120155039,
+          "median_ms": 74.328209,
+          "p95_ms": 92.131417
+        },
+        "stages": {
+          "extract": {
+            "n": 129,
+            "mean_ms": 11.280162790697675,
+            "median_ms": 11.367042,
+            "p95_ms": 12.260583
+          },
+          "localize_and_sort": {
+            "n": 129,
+            "mean_ms": 26.460387317829458,
+            "median_ms": 26.458166,
+            "p95_ms": 27.917375
+          },
+          "white_recognize": {
+            "n": 129,
+            "mean_ms": 18.86946088372093,
+            "median_ms": 19.492917,
+            "p95_ms": 27.180792
+          },
+          "black_recognize": {
+            "n": 129,
+            "mean_ms": 17.004834643410852,
+            "median_ms": 17.400708,
+            "p95_ms": 26.704916
+          },
+          "selection_join": {
+            "n": 129,
+            "mean_ms": 0.06530556589147286,
+            "median_ms": 0.067291,
+            "p95_ms": 0.093541
+          }
+        }
+      },
+      "no_detector_whole_frame_white": {
+        "frames": 43,
+        "reference_characters": 1134,
+        "edits": 1140,
+        "cer_pct": 100.52910052910053,
+        "exact_frames": 2,
+        "exact_pct": 4.651162790697675,
+        "complete_misses": 29,
+        "false_positive_blanks": 2,
+        "detected_or_whole_frame_boxes": 43,
+        "latency": {
+          "n": 129,
+          "mean_ms": 34.547210589147284,
+          "median_ms": 34.361,
+          "p95_ms": 37.511333
+        },
+        "stages": {
+          "extract": {
+            "n": 129,
+            "mean_ms": 11.133453751937985,
+            "median_ms": 11.050292,
+            "p95_ms": 12.518708
+          },
+          "localize_and_sort": {
+            "n": 129,
+            "mean_ms": 0.011761031007751938,
+            "median_ms": 0.011417,
+            "p95_ms": 0.015125
+          },
+          "white_recognize": {
+            "n": 129,
+            "mean_ms": 23.400517147286823,
+            "median_ms": 23.230708,
+            "p95_ms": 26.175459
+          },
+          "black_recognize": {
+            "n": 129,
+            "mean_ms": 0.0,
+            "median_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "selection_join": {
+            "n": 129,
+            "mean_ms": 0.0014786589147286822,
+            "median_ms": 0.001458,
+            "p95_ms": 0.002
+          }
+        }
+      },
+      "no_detector_whole_frame_dual": {
+        "frames": 43,
+        "reference_characters": 1134,
+        "edits": 1140,
+        "cer_pct": 100.52910052910053,
+        "exact_frames": 2,
+        "exact_pct": 4.651162790697675,
+        "complete_misses": 24,
+        "false_positive_blanks": 2,
+        "detected_or_whole_frame_boxes": 43,
+        "latency": {
+          "n": 129,
+          "mean_ms": 56.70542179069768,
+          "median_ms": 55.881958,
+          "p95_ms": 63.315417
+        },
+        "stages": {
+          "extract": {
+            "n": 129,
+            "mean_ms": 10.478065550387598,
+            "median_ms": 10.279417,
+            "p95_ms": 12.336083
+          },
+          "localize_and_sort": {
+            "n": 129,
+            "mean_ms": 0.009981255813953488,
+            "median_ms": 0.009667,
+            "p95_ms": 0.01375
+          },
+          "white_recognize": {
+            "n": 129,
+            "mean_ms": 23.24319995348837,
+            "median_ms": 22.947458,
+            "p95_ms": 26.05625
+          },
+          "black_recognize": {
+            "n": 129,
+            "mean_ms": 22.964464162790698,
+            "median_ms": 22.51375,
+            "p95_ms": 25.888709
+          },
+          "selection_join": {
+            "n": 129,
+            "mean_ms": 0.009710868217054264,
+            "median_ms": 0.004458,
+            "p95_ms": 0.020208
+          }
+        }
+      }
+    }
+  },
+  "baselines": {
+    "E_saved_cer_pct": 7.072691552062868,
+    "E_saved_exact_frames": 77,
+    "E_boxes_white_only_cer_pct": 9.862475442043223,
+    "E_boxes_white_only_exact_frames": 39,
+    "E_boxes_dual_cer_pct": 8.958742632612966,
+    "E_boxes_dual_exact_frames": 53,
+    "unmodified_indra_full_frame_turn_false_cer_pct": 72.92730844793714
+  },
+  "caveats": [
+    "No E subtitle-band selector or filtering is ported here, so differences include unwanted background text as well as box quality.",
+    "All localization variants still use Indra detection. The last two conditions truly bypass every detector and are single-line-recognizer mismatch controls.",
+    "Native Mac timing includes own detector when used; it is not an Android E-vs-Indra speed comparison."
+  ],
+  "paired_vs_E_boxes_dual": {
+    "improved_frames": 19,
+    "worse_frames": 29,
+    "equal_frames": 51,
+    "edits_delta": 34
+  },
+  "known_background_label_diagnostic": {
+    "audited_frames": 40,
+    "no_mlkit_contaminated_frames": 8,
+    "E_boxes_dual_contaminated_frames": 3
+  }
+}

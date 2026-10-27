@@ -6,8 +6,8 @@
 
 - YouTubeの動画ファイル、ストリームURL、字幕トラック、未来フレームには一切アクセスしない。再生中の画面に既に表示されている映像に対するPixelCopyのみ。
 - 動画のseekによる先読み、別の非表示YouTubeプレーヤー、コンテンツ保存をしない。
-- モデル／E方式／字幕選別／TTS設定／読み順待ち最大700msは固定する。実験するのは画面サンプリング起動方法。
-- 追加の機能は**デバッグAPKかつ明示的な起動extra**だけで利用可能。extraなし・releaseでは既定の480ms方式。
+- モデル／E方式／字幕選別／TTS設定は固定する。実験するのは画面サンプリング起動方法と、**上段字幕待機（700/300/0ms）**。既定値は従来の700ms。
+- 追加の機能は**デバッグAPKかつ明示的な起動extra**だけで利用可能。extraなし・releaseでは既定の480ms周期／700ms待機。
 - 外部権利の動画のダウンロード・再配布は不要。
 - requestVideoFrameCallbackはフレームがcompositorへ送られる際の通知で、表示前の字幕や未来動画へのアクセスではない。WebView版・YouTube DOMによっては機能しないので480msへのfallbackがある。
 
@@ -19,7 +19,23 @@
 |短周期240ms|poll240|240ms周期・処理中ならbusy skip。OCRを並列化しない|
 |フレーム連動|frame|requestVideoFrameCallbackからJS→Android WebMessageListenerへ**フレーム時刻等の数値のみ**送信。180ms以上の間隔に制限し、busy時はskip。フレーム通知が1000ms届かないと480ms周期へfallback|
 
-WebMessageListenerはYouTubeの3つのHTTPS originかつmain frameに限定、受信データは固定形式の数値のみ。任意のJS→Androidコマンド実行口は作らない。ブラウザ側は未来フレームを取得せず、JavaScript画面キャプチャもしない。
+WebMessageListenerはYouTubeの3つのHTTPS originかつmain frameに限定、受信データは固定形式の数値のみ。任意のJS→Androidコマンド実行口は作らない。
+
+## 追加：上段字幕待機を700ms／300ms／0msで比較
+
+| 起動extra `caption_order_wait_ms` | 動作 | 主な検証 |
+|---:|---|---|
+|700（既定）|従来どおり。上に未確定の行がある場合だけ最大700ms待つ|3行の読み順・完全一致|
+|300|同じ規則のまま300msで期限解除|短縮できた待ち時間と上段欠落|
+|0|上段未確定でも即時解除（比較用極端条件）|速さの理論上限と下→上・重複の危険|
+
+**通常字幕は待機しない。** 「最大700ms」は字幕すべてへ毎回加算される固定遅延ではない。
+新規orderイベント:
+- `sampling_order_pending` 上段待ち等によりバッファに残った行数
+- `sampling_order_release` 解除理由（`no_upper` / `upper_cleared` / `deadline`）と`held_ms`（**実際にバッファへ入ってから解放されるまでの経過時間**）、上段ブロック歴
+- `sampling_experiment.order_wait_ms` 起動時の実際に選択された上限。未指定／不正値は700ms。
+
+**互換性:** 既存の締切計算（元フレームのタイムスタンプ＋最大待機）は変えない。OCR終了後にバッファへ登録した実時刻を別に持ち、解放までの実経過を記録する。従って`held_ms`と最大上限の差を単純に「未使用時間」として解釈しない。ブラウザ側は未来フレームを取得せず、JavaScript画面キャプチャもしない。
 
 ## MacとGalaxy S25で手動比較する方法
 
@@ -33,13 +49,16 @@ ADB="${ANDROID_HOME:-$HOME/Library/Android/sdk}/platform-tools/adb"
 SERIAL="YOUR_AUTHORIZED_DEVICE_SERIAL"
 VIDEO_URL="https://www.youtube.com/watch?v=YOUR_PUBLIC_VIDEO_ID"
 PACKAGE="jp.hidemaru.burnedcaptionreader.samplingresearch"
-# それぞれ poll480, poll240, frame に置換して3種類を測定。
+# モードは poll480, poll240, frame、待機は700, 300, 0 に変更可能。
+# まずpoll480を固定して3つの待機を比較し、次に勝者を240/frameで追試する。
 MODE="poll480"
+ORDER_WAIT_MS=700
 "$ADB" -s "$SERIAL" shell am force-stop "$PACKAGE"
 "$ADB" -s "$SERIAL" shell am start -W -n "$PACKAGE/jp.hidemaru.burnedcaptionreader.MainActivity" \
   -a android.intent.action.SEND -t text/plain \
   --es android.intent.extra.TEXT "$VIDEO_URL" \
-  --es caption_sampling_mode "$MODE"
+  --es caption_sampling_mode "$MODE" \
+  --ei caption_order_wait_ms "$ORDER_WAIT_MS"
 ```
 
 5. 記録したい同じ動画区間の直前で設定の「**動画画像と読み上げログを記録**」をオンにし、各方式の再生区間が終わったら「診断ZIPを書き出す」で端末内に保存する。**開始すると以前のログは消える**ので、方式ごとにZIPを別名保存。記録は直近約2分・最大64MB・2,000件までで、負荷時は欠落することがある。長い実験は短区間に分ける。
@@ -54,7 +73,7 @@ python3 tools/youtube-sampling/summarize_diagnostics.py "/private/path/frame.zip
   --out "/private/path/frame-numeric.json"
 ```
 
-再生順による機器負荷の交絡を抑えるため、最低3周、順序は `480→240→frame`、`240→frame→480`、`frame→480→240` と循環。各周のウォームアップ・再生区間・pause/seekの有無を固定し、イベントごとと周ごとの集計を混同しない。
+**段階的比較：** まず`poll480`のまま順序を700→300→0、300→0→700、0→700→300と3周循環し、字幕読み順・欠落・TTSの重複を観察する。問題がない待機時間だけを候補として`poll240`／`frame`でも試す。画像取得方式の比較は480→240→frame、240→frame→480、frame→480→240と最低3周。各周のウォームアップ・再生区間・pause/seekの有無を固定し、イベントごとと周ごとの集計を混同しない。0msで上段の読み順が壊れた場合は即時候補外。
 
 ## 出力項目と解釈
 
@@ -64,6 +83,8 @@ python3 tools/youtube-sampling/summarize_diagnostics.py "/private/path/frame.zip
 - `sampling_tts_requested`: OCR開始からTTSへ渡すまで（並び待ちは `frame_id=-1` の場合あり）
 - `sampling_tts_onstart`, `tts_start`: Android TTSエンジンのonStart、実際の**可聴開始ではない**
 - `sampling_stats`, `capture_poll`: 処理中スキップ・frame callbackの過剰通知・fallback
+- `sampling_order_release`: 上段による追加待機の中央値／p95、上段解除数、締切解除数（`order_buffer_blocked_held_ms`）
+- `sampling_order_pending`: 待機中の字幕断片の記録数
 - 各モードの画像処理数、忙しいときの見逃し、音声の重複／キャンセル・3行の順番を**併記**する。
 
 **重要:** 現状のログだけでは、実際の字幕が初めて画面に映った瞬間と、スピーカーから最初の音が出た瞬間は確定しない。TTS onStartは音の発生の代用にしない。実機測定でユーザー自身の観察により字幕イベント・実音声を比較するか、適切な権限の範囲で端末／外部マイク測定を追加し、「観測できなかった場合は未測定」とする。

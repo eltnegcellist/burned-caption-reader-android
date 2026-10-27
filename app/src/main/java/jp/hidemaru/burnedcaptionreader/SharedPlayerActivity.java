@@ -214,18 +214,24 @@ public final class SharedPlayerActivity extends Activity {
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
         videoId = getIntent().getStringExtra(EXTRA_VIDEO_ID);
-        final boolean debugBuild = (getApplicationInfo().flags
-                & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-        samplingExperiment = SubtitleSamplingExperiment.select(
-                getIntent().getStringExtra(EXTRA_SAMPLING_EXPERIMENT), debugBuild);
-        order = new SubtitleSpeechOrderBuffer(SubtitleSpeechOrderBuffer.experimentWaitMs(
-                getIntent().getIntExtra(EXTRA_ORDER_WAIT_MS, (int) SubtitleSpeechOrderBuffer.MAX_WAIT_MS),
-                debugBuild));
         if (videoId == null || !videoId.matches("[A-Za-z0-9_-]{11}")) {
             finish();
             return;
         }
+        final boolean debugBuild = (getApplicationInfo().flags
+                & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         preferences = new AppPreferences(this);
+        // ADB override is retained for reproducible research; otherwise use
+        // persisted in-app settings (always ignored in non-debug builds).
+        String samplingValue = getIntent().hasExtra(EXTRA_SAMPLING_EXPERIMENT)
+                ? getIntent().getStringExtra(EXTRA_SAMPLING_EXPERIMENT)
+                : preferences.getExperimentSamplingMode().value;
+        samplingExperiment = SubtitleSamplingExperiment.select(samplingValue, debugBuild);
+        int orderWaitMs = getIntent().hasExtra(EXTRA_ORDER_WAIT_MS)
+                ? getIntent().getIntExtra(EXTRA_ORDER_WAIT_MS, (int) SubtitleSpeechOrderBuffer.MAX_WAIT_MS)
+                : (int) preferences.getExperimentOrderWaitMs();
+        order = new SubtitleSpeechOrderBuffer(
+                SubtitleSpeechOrderBuffer.experimentWaitMs(orderWaitMs, debugBuild));
         diagnostics = DiagnosticRecorder.get(this);
         stableConfig.stableMs = preferences.getStableMs();
         subtitleRecheckEnabled = preferences.isSubtitleRecheckEnabled();
@@ -483,6 +489,35 @@ public final class SharedPlayerActivity extends Activity {
 
     private void applyLiveSettings() {
         applyOcrModeIfIdle();
+        // Changes made in the research settings screen take effect immediately.
+        // Already pending order-buffer entries keep their original deadline.
+        if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            SubtitleSamplingExperiment nextSampling = preferences.getExperimentSamplingMode();
+            if (samplingExperiment != nextSampling) {
+                if (samplingExperiment == SubtitleSamplingExperiment.VIDEO_FRAME && player != null) {
+                    // Stop the old JS loop when leaving frame mode.
+                    player.evaluateJavascript("(() => {window.__captionRvfToken="
+                            + "(window.__captionRvfToken||0)+1;window.__captionRvfVideo=null;})()", null);
+                }
+                samplingExperiment = nextSampling;
+                lastVideoFrameSignalMs = -1L;
+                lastCaptureRequestMs = -1L;
+                samplingModeRecorded = false;
+                if (nextSampling == SubtitleSamplingExperiment.VIDEO_FRAME) armFrameCallback();
+                if (sampling) {
+                    main.removeCallbacks(sampler);
+                    main.post(sampler);
+                }
+                diagnostics.event("sampling_mode_changed", "mode", nextSampling.value);
+            }
+            long nextOrderWait = preferences.getExperimentOrderWaitMs();
+            if (order.getMaxWaitMs() != nextOrderWait) {
+                order.setMaxWaitMs(nextOrderWait);
+                diagnostics.event("sampling_order_wait_changed", "order_wait_ms", nextOrderWait,
+                        "pending_retained", order.pendingCount());
+                scheduleOrderFlush();
+            }
+        }
         boolean nextRecheck = preferences.isSubtitleRecheckEnabled();
         if (subtitleRecheckEnabled != nextRecheck) {
             captureGeneration++;
@@ -529,7 +564,9 @@ public final class SharedPlayerActivity extends Activity {
      * only; it cannot send image pixels or request arbitrary Android actions.
      */
     private void configureFrameBridge() {
-        if (samplingExperiment != SubtitleSamplingExperiment.VIDEO_FRAME
+        // Must install before WebView.loadUrl so the user can select frame mode
+        // later from the in-app settings without reloading the YouTube page.
+        if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) == 0
                 || !WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) return;
         WebViewCompat.addWebMessageListener(player, "captionReaderFrame",
                 new HashSet<>(java.util.Arrays.asList(
@@ -543,7 +580,8 @@ public final class SharedPlayerActivity extends Activity {
                     try {
                         JSONObject value = new JSONObject(message.getData());
                         if (!"frame".equals(value.optString("t"))) return;
-                        if (!sampling || readingPaused || isDestroyed()) return;
+                        if (!sampling || readingPaused || isDestroyed()
+                                || samplingExperiment != SubtitleSamplingExperiment.VIDEO_FRAME) return;
                         long now = SystemClock.elapsedRealtime();
                         lastVideoFrameSignalMs = now;
                         if (!samplingExperiment.acceptsFrameSignal(now, lastCaptureRequestMs, busy)) {

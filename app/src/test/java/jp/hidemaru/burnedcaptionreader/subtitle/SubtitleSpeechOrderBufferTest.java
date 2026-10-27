@@ -22,6 +22,85 @@ public class SubtitleSpeechOrderBufferTest {
         assertEquals(1, buffer.drain(700).size());
     }
 
+    @Test public void productionWaitIsAlways700WithoutExplicitDebugSelection() {
+        assertEquals(700L, SubtitleSpeechOrderBuffer.experimentWaitMs(0, false));
+        assertEquals(700L, SubtitleSpeechOrderBuffer.experimentWaitMs(300, false));
+        assertEquals(700L, SubtitleSpeechOrderBuffer.experimentWaitMs(-1, true));
+        assertEquals(700L, SubtitleSpeechOrderBuffer.experimentWaitMs(500, true));
+        assertEquals(0L, SubtitleSpeechOrderBuffer.experimentWaitMs(0, true));
+        assertEquals(300L, SubtitleSpeechOrderBuffer.experimentWaitMs(300, true));
+        assertEquals(700L, new SubtitleSpeechOrderBuffer().getMaxWaitMs());
+    }
+
+    @Test public void threeChoicesReleaseAtTheirOwnDeadlinesWithoutNewOcrFrames() {
+        for (long delay : new long[]{700L, 300L, 0L}) {
+            var buffer = new SubtitleSpeechOrderBuffer(delay);
+            long start = 1000L;
+            var immediate = buffer.offer(start, List.of(entry("下段", .30f, .36f)),
+                    List.of(new SubtitleSpeechOrderBuffer.Band(.20f, .26f)), 1200L);
+            if (delay == 0L) {
+                assertEquals(1, immediate.size());
+                var records = buffer.takeReleases();
+                assertEquals("deadline", records.get(0).reason);
+                assertEquals(0L, records.get(0).heldMs);
+                assertTrue(records.get(0).wasBlockedByUpper);
+            } else {
+                assertTrue(immediate.isEmpty());
+                assertTrue(buffer.takeReleases().isEmpty());
+                assertEquals(start + delay, buffer.nextDeadline());
+                // On shorter timeouts, the logical deadline may already have passed
+                // at OCR completion; a scheduled flush still must release it.
+                assertTrue(buffer.drain(start + delay - 1).isEmpty());
+                assertEquals(1, buffer.drain(start + delay).size());
+                var releases = buffer.takeReleases();
+                assertEquals(1, releases.size());
+                assertEquals("deadline", releases.get(0).reason);
+                assertTrue(releases.get(0).wasBlockedByUpper);
+                assertEquals(Math.max(0L, start + delay - 1200L), releases.get(0).heldMs);
+            }
+            assertEquals(Long.MAX_VALUE, buffer.nextDeadline());
+        }
+    }
+
+    @Test public void upperArrivalUnblocksAndSortsWithin300ms() {
+        var buffer = new SubtitleSpeechOrderBuffer(300L);
+        var waiting = List.of(new SubtitleSpeechOrderBuffer.Band(.20f, .26f));
+        assertTrue(buffer.offer(1000, List.of(entry("下段", .30f, .36f)),
+                waiting, 1200).isEmpty());
+        var ready = buffer.offer(1250, List.of(entry("上段", .20f, .26f)),
+                List.of(), 1280);
+        assertEquals(2, ready.size());
+        assertEquals("上段", ready.get(0).event.getText());
+        assertEquals("下段", ready.get(1).event.getText());
+        var events = buffer.takeReleases();
+        assertEquals(2, events.size());
+        assertEquals("no_upper", events.get(0).reason);
+        assertEquals("upper_cleared", events.get(1).reason);
+        assertEquals(80L, events.get(1).heldMs);
+    }
+
+    @Test public void longerThreeRowVersionCarriesOriginalDeadlineAndHoldTimestamp() {
+        var buffer = new SubtitleSpeechOrderBuffer(300L);
+        buffer.offer(1000, List.of(entry("中段の字幕\\n下段の字幕", .30f, .46f)),
+                List.of(new SubtitleSpeechOrderBuffer.Band(.20f, .26f)), 1100);
+        assertEquals(1300L, buffer.nextDeadline());
+        var complete = buffer.offer(1280, List.of(entry("上段の字幕\\n中段の字幕\\n下段の字幕", .20f, .46f)),
+                List.of(), 1280);
+        assertEquals(1, complete.size());
+        assertEquals("上段の字幕\\n中段の字幕\\n下段の字幕", complete.get(0).event.getText());
+        assertEquals(180L, buffer.takeReleases().get(0).heldMs);
+        assertEquals(Long.MAX_VALUE, buffer.nextDeadline());
+    }
+
+    @Test public void resetClearsPendingAndLastReleaseMetadata() {
+        var buffer = new SubtitleSpeechOrderBuffer(0);
+        buffer.offer(0, List.of(entry("下", .3f, .36f)),
+                List.of(new SubtitleSpeechOrderBuffer.Band(.2f, .26f)));
+        buffer.reset();
+        assertTrue(buffer.takeReleases().isEmpty());
+        assertTrue(buffer.drain(500).isEmpty());
+    }
+
     private SubtitleSpeechOrderBuffer.Entry entry(String text, float top, float bottom) {
         return new SubtitleSpeechOrderBuffer.Entry(new SubtitleEvent(text, text, 0, 0, 90), top, bottom);
     }

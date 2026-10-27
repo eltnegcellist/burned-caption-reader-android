@@ -38,6 +38,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Install side-by-side with the user's existing E app; no data deletion needed.
+            applicationIdSuffix = ".samplingresearch"
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -62,5 +66,6 @@ android {
 dependencies {
     implementation("com.google.mlkit:text-recognition-japanese:16.0.1")
     implementation("com.microsoft.onnxruntime:onnxruntime-android:1.30.0")
+    implementation("androidx.webkit:webkit:1.17.1")
     testImplementation("junit:junit:4.13.2")
 }

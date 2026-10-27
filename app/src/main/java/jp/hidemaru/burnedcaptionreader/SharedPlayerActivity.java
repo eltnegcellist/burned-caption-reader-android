@@ -34,6 +34,9 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+import androidx.webkit.WebViewCompat;
+import androidx.webkit.WebViewFeature;
 import jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrEngines;
 import jp.hidemaru.burnedcaptionreader.ocr.ECaptionOcrPolicy;
 import jp.hidemaru.burnedcaptionreader.ocr.CaptionOcrMode;
@@ -63,7 +66,42 @@ import jp.hidemaru.burnedcaptionreader.tts.SpeechEngine;
  */
 public final class SharedPlayerActivity extends Activity {
     public static final String EXTRA_VIDEO_ID = "video_id";
-    private static final long SAMPLE_MS = 480L;
+    public static final String EXTRA_SAMPLING_EXPERIMENT = "caption_sampling_mode";
+    public static final String EXTRA_ORDER_WAIT_MS = "caption_order_wait_ms";
+    // The experimental mode is accepted only in debuggable builds and via explicit intent extra.
+    // Production defaults to the original 480ms cadence.
+    private SubtitleSamplingExperiment samplingExperiment = SubtitleSamplingExperiment.POLL_480;
+    private long lastVideoFrameSignalMs = -1L;
+    private long lastCaptureRequestMs = -1L;
+    private long captureRequestAtMs = -1L;
+    private String captureRequestSource = "poll";
+    private boolean frameBridgeSupported;
+    private boolean samplingModeRecorded;
+    private long frameBusySkips;
+    private long frameThrottleSkips;
+    private long lastSamplingStatsMs;
+    private static final long STATS_PERIOD_MS = 2000L;
+    private static final String FRAME_CALLBACK_SCRIPT = "(() => {" +
+            "  const v=document.querySelector('video');" +
+            "  const bridge=window.captionReaderFrame;" +
+            "  if(!v || !bridge || typeof bridge.postMessage!=='function')return 'not_ready';" +
+            "  if(typeof v.requestVideoFrameCallback!=='function')return 'unsupported';" +
+            "  if(window.__captionRvfVideo===v)return 'already_attached';" +
+            "  const token=(window.__captionRvfToken||0)+1;" +
+            "  window.__captionRvfToken=token;" +
+            "  window.__captionRvfVideo=v;" +
+            "  let sent=-1000000;" +
+            "  const observe=(now,metadata)=>{" +
+            "    if(window.__captionRvfToken!==token || window.__captionRvfVideo!==v || !document.contains(v))return;" +
+            "    if(!v.paused && !v.ended && now-sent>=170) {" +
+            "      sent=now;" +
+            "      bridge.postMessage(JSON.stringify({t:'frame',media_ms:Math.round((metadata.mediaTime||v.currentTime)*1000),presented:metadata.presentedFrames||0}));" +
+            "    }" +
+            "    v.requestVideoFrameCallback(observe);" +
+            "  };" +
+            "  v.requestVideoFrameCallback(observe);" +
+            "  return 'attached';" +
+            "})()";
     private static final Pattern JAPANESE = Pattern.compile("[\u3040-\u30ff\u3400-\u9fff]");
     // Browser-rendered CC overlays, not text burned into the video pixels.
     private static final String CC_STYLE = "video::cue{visibility:hidden!important}" +
@@ -72,7 +110,7 @@ public final class SharedPlayerActivity extends Activity {
     private final Handler main = new Handler(Looper.getMainLooper());
     private final AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
     private final RowSpeechLedger ledger = new RowSpeechLedger(60_000L);
-    private final SubtitleSpeechOrderBuffer order = new SubtitleSpeechOrderBuffer();
+    private SubtitleSpeechOrderBuffer order = new SubtitleSpeechOrderBuffer();
     private final SubtitleStabilizer.Config stableConfig = new SubtitleStabilizer.Config();
     private final Map<Integer, SubtitleStabilizer> stabilizers = new HashMap<>();
     private final Map<Integer, TemporalOcrConsensus> consensus = new HashMap<>();
@@ -113,20 +151,39 @@ public final class SharedPlayerActivity extends Activity {
                 }
                 captureEvaluationReference();
             }
-            if (!readingPaused && player != null) {
-                // Opt-in comparison telemetry. Busy polls are NOT decoded video frames.
-                if (diagnostics != null && diagnostics.isRecording()) {
-                    diagnostics.event("capture_poll", "ocr_mode", ocrMode.storedValue,
-                            "state", busy ? "busy_skip" : "requested");
+            if (diagnostics != null && diagnostics.isRecording()) {
+                if (!samplingModeRecorded) {
+                    samplingModeRecorded = true;
+                    diagnostics.event("sampling_experiment", "mode", samplingExperiment.value,
+                            "fallback_ms", samplingExperiment.pollMs,
+                            "order_wait_ms", order.getMaxWaitMs(),
+                            "frame_bridge_supported", frameBridgeSupported);
                 }
-                if (!busy) {
-                    applyCcPreference();
-                    // Also inspect the watch URL in fullscreen: YouTube can switch
-                    // videos without a full page navigation (autoplay / SPA).
-                    locateVideoAndCopy();
+                long now = SystemClock.elapsedRealtime();
+                if (now - lastSamplingStatsMs >= STATS_PERIOD_MS) {
+                    lastSamplingStatsMs = now;
+                    diagnostics.event("sampling_stats", "mode", samplingExperiment.value,
+                            "frame_busy_skips", frameBusySkips, "frame_throttle_skips", frameThrottleSkips,
+                            "frame_signal_age_ms", lastVideoFrameSignalMs < 0 ? -1 : now - lastVideoFrameSignalMs);
+                }
+            } else {
+                samplingModeRecorded = false;
+            }
+            if (!readingPaused && player != null) {
+                if (samplingExperiment == SubtitleSamplingExperiment.VIDEO_FRAME && frameBridgeSupported) {
+                    armFrameCallback();
+                }
+                long now = SystemClock.elapsedRealtime();
+                if (samplingExperiment.needsPeriodicCapture(now, lastVideoFrameSignalMs)) {
+                    if (diagnostics != null && diagnostics.isRecording()) {
+                        diagnostics.event("capture_poll", "sampling_mode", samplingExperiment.value,
+                                "state", busy ? "busy_skip" : "requested");
+                    }
+                    if (!busy) triggerCapture(samplingExperiment == SubtitleSamplingExperiment.VIDEO_FRAME
+                            ? "frame_fallback" : "poll");
                 }
             }
-            main.postDelayed(this, SAMPLE_MS);
+            main.postDelayed(this, samplingExperiment.pollMs);
         }
     };
     private final Runnable orderFlush = this::flushOrderedSpeech;
@@ -161,7 +218,20 @@ public final class SharedPlayerActivity extends Activity {
             finish();
             return;
         }
+        final boolean debugBuild = (getApplicationInfo().flags
+                & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         preferences = new AppPreferences(this);
+        // ADB override is retained for reproducible research; otherwise use
+        // persisted in-app settings (always ignored in non-debug builds).
+        String samplingValue = getIntent().hasExtra(EXTRA_SAMPLING_EXPERIMENT)
+                ? getIntent().getStringExtra(EXTRA_SAMPLING_EXPERIMENT)
+                : preferences.getExperimentSamplingMode().value;
+        samplingExperiment = SubtitleSamplingExperiment.select(samplingValue, debugBuild);
+        int orderWaitMs = getIntent().hasExtra(EXTRA_ORDER_WAIT_MS)
+                ? getIntent().getIntExtra(EXTRA_ORDER_WAIT_MS, (int) SubtitleSpeechOrderBuffer.MAX_WAIT_MS)
+                : (int) preferences.getExperimentOrderWaitMs();
+        order = new SubtitleSpeechOrderBuffer(
+                SubtitleSpeechOrderBuffer.experimentWaitMs(orderWaitMs, debugBuild));
         diagnostics = DiagnosticRecorder.get(this);
         stableConfig.stableMs = preferences.getStableMs();
         subtitleRecheckEnabled = preferences.isSubtitleRecheckEnabled();
@@ -181,6 +251,7 @@ public final class SharedPlayerActivity extends Activity {
         player.getSettings().setJavaScriptEnabled(true);
         player.getSettings().setDomStorageEnabled(true);
         player.getSettings().setMediaPlaybackRequiresUserGesture(true);
+        configureFrameBridge();
         player.setWebChromeClient(new WebChromeClient() {
             @Override public void onShowCustomView(View view, CustomViewCallback callback) {
                 showFullscreen(view, callback);
@@ -192,6 +263,7 @@ public final class SharedPlayerActivity extends Activity {
         player.setWebViewClient(new WebViewClient() {
             @Override public void onPageStarted(WebView view, String url,
                     Bitmap favicon) {
+                lastVideoFrameSignalMs = -1L;
                 captureGeneration++;
                 if (speaker != null) speaker.stop();
                 resetTracks();
@@ -210,6 +282,9 @@ public final class SharedPlayerActivity extends Activity {
                 resetTracks();
                 updateVideoContext(url);
                 applyCcPreference();
+                if (samplingExperiment == SubtitleSamplingExperiment.VIDEO_FRAME && frameBridgeSupported) {
+                    armFrameCallback();
+                }
                 if (!readingPaused) {
                     status.setText("動画をタップして再生してください。字幕領域を検出中…");
                 }
@@ -261,12 +336,14 @@ public final class SharedPlayerActivity extends Activity {
         super.onResume();
         if (player != null) player.onResume();
         sampling = true;
+        lastVideoFrameSignalMs = -1L;
         main.removeCallbacks(sampler);
         main.post(sampler);
     }
 
     @Override protected void onPause() {
         sampling = false;
+        lastVideoFrameSignalMs = -1L;
         captureGeneration++;
         main.removeCallbacks(sampler);
         if (player != null) player.onPause();
@@ -412,6 +489,35 @@ public final class SharedPlayerActivity extends Activity {
 
     private void applyLiveSettings() {
         applyOcrModeIfIdle();
+        // Changes made in the research settings screen take effect immediately.
+        // Already pending order-buffer entries keep their original deadline.
+        if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            SubtitleSamplingExperiment nextSampling = preferences.getExperimentSamplingMode();
+            if (samplingExperiment != nextSampling) {
+                if (samplingExperiment == SubtitleSamplingExperiment.VIDEO_FRAME && player != null) {
+                    // Stop the old JS loop when leaving frame mode.
+                    player.evaluateJavascript("(() => {window.__captionRvfToken="
+                            + "(window.__captionRvfToken||0)+1;window.__captionRvfVideo=null;})()", null);
+                }
+                samplingExperiment = nextSampling;
+                lastVideoFrameSignalMs = -1L;
+                lastCaptureRequestMs = -1L;
+                samplingModeRecorded = false;
+                if (nextSampling == SubtitleSamplingExperiment.VIDEO_FRAME) armFrameCallback();
+                if (sampling) {
+                    main.removeCallbacks(sampler);
+                    main.post(sampler);
+                }
+                diagnostics.event("sampling_mode_changed", "mode", nextSampling.value);
+            }
+            long nextOrderWait = preferences.getExperimentOrderWaitMs();
+            if (order.getMaxWaitMs() != nextOrderWait) {
+                order.setMaxWaitMs(nextOrderWait);
+                diagnostics.event("sampling_order_wait_changed", "order_wait_ms", nextOrderWait,
+                        "pending_retained", order.pendingCount());
+                scheduleOrderFlush();
+            }
+        }
         boolean nextRecheck = preferences.isSubtitleRecheckEnabled();
         if (subtitleRecheckEnabled != nextRecheck) {
             captureGeneration++;
@@ -424,7 +530,10 @@ public final class SharedPlayerActivity extends Activity {
                 stabilizer.clearPendingCandidate();
             }
             long now = SystemClock.elapsedRealtime();
-            speakReady(now, -1, order.offer(now, new ArrayList<>(), new ArrayList<>()));
+            List<SubtitleSpeechOrderBuffer.Entry> ready =
+                    order.offer(now, new ArrayList<>(), new ArrayList<>());
+            logOrderRelease(-1L);
+            speakReady(now, -1, ready);
             scheduleOrderFlush();
             diagnostics.event("subtitle_recheck_changed", "enabled", nextRecheck,
                     "generation", captureGeneration);
@@ -448,6 +557,71 @@ public final class SharedPlayerActivity extends Activity {
                           "t.mode='disabled';}"
                         : "if(s)s.remove();") + "})()";
         player.evaluateJavascript(script, null);
+    }
+
+    /**
+     * A YouTube-origin, main-frame-only bridge. JS transmits frame timing metadata
+     * only; it cannot send image pixels or request arbitrary Android actions.
+     */
+    private void configureFrameBridge() {
+        // Must install before WebView.loadUrl so the user can select frame mode
+        // later from the in-app settings without reloading the YouTube page.
+        if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) == 0
+                || !WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) return;
+        WebViewCompat.addWebMessageListener(player, "captionReaderFrame",
+                new HashSet<>(java.util.Arrays.asList(
+                        "https://youtube.com", "https://m.youtube.com", "https://www.youtube.com")),
+                (webView, message, sourceOrigin, isMainFrame, replyProxy) -> {
+                    if (webView != player || !isMainFrame || sourceOrigin == null
+                            || !"https".equalsIgnoreCase(sourceOrigin.getScheme())) return;
+                    String host = sourceOrigin.getHost();
+                    if (!"youtube.com".equals(host) && !"m.youtube.com".equals(host)
+                            && !"www.youtube.com".equals(host)) return;
+                    try {
+                        JSONObject value = new JSONObject(message.getData());
+                        if (!"frame".equals(value.optString("t"))) return;
+                        if (!sampling || readingPaused || isDestroyed()
+                                || samplingExperiment != SubtitleSamplingExperiment.VIDEO_FRAME) return;
+                        long now = SystemClock.elapsedRealtime();
+                        lastVideoFrameSignalMs = now;
+                        if (!samplingExperiment.acceptsFrameSignal(now, lastCaptureRequestMs, busy)) {
+                            if (busy) frameBusySkips++; else frameThrottleSkips++;
+                            return;
+                        }
+                        if (diagnostics != null && diagnostics.isRecording()) {
+                            diagnostics.event("sampling_video_frame", "media_ms", value.optLong("media_ms", -1L),
+                                    "presented", value.optLong("presented", -1L));
+                        }
+                        triggerCapture("video_frame");
+                    } catch (JSONException ignored) {
+                        // Ignore untrusted/malformed messages without affecting playback.
+                    }
+                });
+        frameBridgeSupported = true;
+    }
+
+    private void armFrameCallback() {
+        if (player == null || !frameBridgeSupported) return;
+        player.evaluateJavascript(FRAME_CALLBACK_SCRIPT, result -> {
+            if (diagnostics != null && diagnostics.isRecording()
+                    && ("\"unsupported\"".equals(result) || "\"not_ready\"".equals(result))) {
+                diagnostics.event("frame_callback_availability", "result", result);
+            }
+        });
+    }
+
+    private void triggerCapture(String source) {
+        if (!sampling || readingPaused || player == null || busy) return;
+        lastCaptureRequestMs = SystemClock.elapsedRealtime();
+        captureRequestAtMs = lastCaptureRequestMs;
+        captureRequestSource = source;
+        if (diagnostics != null && diagnostics.isRecording()) {
+            diagnostics.event("sampling_trigger", "source", source,
+                    "mode", samplingExperiment.value, "trigger_ms", lastCaptureRequestMs);
+        }
+        applyCcPreference();
+        // Copy only the currently visible region. Never seek, fetch or decode video data.
+        locateVideoAndCopy();
     }
 
     private void copyFullscreenVideo() {
@@ -531,6 +705,9 @@ public final class SharedPlayerActivity extends Activity {
         evaluationRect = new Rect(rect);
         busy = true;
         final int generation = captureGeneration;
+        final long triggerAt = captureRequestAtMs;
+        final String triggerSource = captureRequestSource;
+        final long copyRequestedAt = SystemClock.elapsedRealtime();
         try {
             Bitmap frame = Bitmap.createBitmap(rect.width(), rect.height(), Bitmap.Config.ARGB_8888);
             PixelCopy.request(getWindow(), rect, frame, result -> {
@@ -543,7 +720,7 @@ public final class SharedPlayerActivity extends Activity {
                     busy = false;
                     return;
                 }
-                recognizeFrame(frame, generation);
+                recognizeFrame(frame, generation, triggerSource, triggerAt, copyRequestedAt);
             }, main);
         } catch (RuntimeException error) {
             busy = false;
@@ -596,9 +773,15 @@ public final class SharedPlayerActivity extends Activity {
         busy = false;
     }
 
-    private void recognizeFrame(Bitmap frame, int generation) {
+    private void recognizeFrame(Bitmap frame, int generation,
+            String source, long captureRequestedAt, long copyRequestedAt) {
         long timestamp = SystemClock.elapsedRealtime();
         long frameId = ++frameSequence;
+        diagnostics.event("sampling_captured", "frame_id", frameId,
+                "mode", samplingExperiment.value, "source", source,
+                "trigger_to_frame_ms", captureRequestedAt < 0 ? -1 : timestamp - captureRequestedAt,
+                "pixelcopy_ms", timestamp - copyRequestedAt,
+                "frame_mono_ms", timestamp);
         diagnostics.image("video_frame", frame, "frame_id", frameId,
                 "generation", generation, "video_id", videoId, "ocr_mode", ocrMode.storedValue);
         // Broad detection is bounded; refinement always uses this original frame.
@@ -743,6 +926,8 @@ public final class SharedPlayerActivity extends Activity {
     }
 
     private void processResult(long timestamp, long frameId, List<BandText> bands) {
+        diagnostics.event("sampling_ocr_completed", "frame_id", frameId,
+                "ocr_elapsed_ms", SystemClock.elapsedRealtime() - timestamp, "bands", bands.size());
         Set<Integer> visible = new HashSet<>();
         List<SubtitleSpeechOrderBuffer.Entry> committed = new ArrayList<>();
         List<SubtitleSpeechOrderBuffer.Band> waiting = new ArrayList<>();
@@ -789,7 +974,9 @@ public final class SharedPlayerActivity extends Activity {
             consensus.remove(entry.getKey());
             return true;
         });
-        List<SubtitleSpeechOrderBuffer.Entry> ready = order.offer(timestamp, committed, waiting);
+        List<SubtitleSpeechOrderBuffer.Entry> ready =
+                order.offer(timestamp, committed, waiting, SystemClock.elapsedRealtime());
+        logOrderRelease(frameId);
         if (!bands.isEmpty()) {
             StringBuilder current = new StringBuilder();
             for (BandText band : bands) {
@@ -807,8 +994,26 @@ public final class SharedPlayerActivity extends Activity {
     private void flushOrderedSpeech() {
         if (!sampling || readingPaused || isDestroyed()) return;
         long now = SystemClock.elapsedRealtime();
-        speakReady(now, -1, order.drain(now));
+        List<SubtitleSpeechOrderBuffer.Entry> ready = order.drain(now);
+        logOrderRelease(-1L);
+        speakReady(now, -1, ready);
         scheduleOrderFlush();
+    }
+
+    private void logOrderRelease(long frameId) {
+        List<SubtitleSpeechOrderBuffer.Release> releases = order.takeReleases();
+        if (diagnostics == null || !diagnostics.isRecording()) return;
+        for (SubtitleSpeechOrderBuffer.Release release : releases) {
+            diagnostics.event("sampling_order_release", "frame_id", frameId,
+                    "max_wait_ms", order.getMaxWaitMs(), "held_ms", release.heldMs,
+                    "upper_blocked", release.wasBlockedByUpper,
+                    "reason", release.reason);
+        }
+        if (order.pendingCount() > 0) {
+            diagnostics.event("sampling_order_pending", "frame_id", frameId,
+                    "max_wait_ms", order.getMaxWaitMs(),
+                    "pending_count", order.pendingCount());
+        }
     }
 
     private void scheduleOrderFlush() {
@@ -843,8 +1048,13 @@ public final class SharedPlayerActivity extends Activity {
         final float requestedRate = preferences.getSpeechRate();
         diagnostics.event("speech_rate_selection",
                 "base_rate", requestedRate, "requested_rate", requestedRate);
+        diagnostics.event("sampling_tts_requested", "frame_id", frameId,
+                "since_ocr_start_ms", SystemClock.elapsedRealtime() - timestamp,
+                "speech_mode", mode.name());
         speaker.speak(text, mode, requestedRate, new SpeechEngine.Completion() {
             @Override public void onStart() {
+                diagnostics.event("sampling_tts_onstart", "frame_id", frameId,
+                        "since_ocr_start_ms", SystemClock.elapsedRealtime() - timestamp);
                 ledger.markInFlight(reservation.getId());
                 diagnostics.event("speech_ledger", "reservation_id", reservation.getId(), "state", "in_flight");
             }

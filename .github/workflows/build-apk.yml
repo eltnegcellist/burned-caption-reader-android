@@ -264,6 +264,38 @@ jobs:
               --notes "URLを共有・入力してアプリ内でYouTubeを再生し、動画内の日本語字幕をローカルOCRとTTSで読み上げます。読み上げのみ一時停止、再生中の設定変更、専用のアプリアイコンを追加。Androidテストとビルドは成功。URL入力と共有の使い方を図解した案内ページを搭載。動画によってOCRの読み間違い・読み飛ばしがあります。APKはデバッグ署名のため以前のAPKと署名が異なる場合は上書きインストールできません。" \
               --repo "$GITHUB_REPOSITORY"
           fi
+      - name: Publish direct APK for PR 66 mobile timing controls
+        if: github.event_name == 'pull_request' && github.head_ref == 'experiment/youtube-frame-sampling-latency-20261027' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CAPTION_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          APK_NAME="caption-reader-speed-settings-experiment-20261027.apk"
+          cp app/build/outputs/apk/debug/app-debug.apk "$APK_NAME"
+          python3 - "$APK_NAME" <<'PY'
+          import os, sys, zipfile
+          apk = sys.argv[1]
+          size = os.path.getsize(apk)
+          assert size > 50_000_000, f"Unexpectedly small APK: {size}"
+          with zipfile.ZipFile(apk) as z:
+              assert z.testzip() is None, "Corrupt APK archive"
+              assert "AndroidManifest.xml" in z.namelist()
+              assert any(x.startswith("classes") and x.endswith(".dex") for x in z.namelist())
+          print(f"Verified APK: {apk} ({size} bytes)")
+          PY
+          sha256sum "$APK_NAME" > "$APK_NAME.sha256"
+          TAG="sampling-settings-experiment-20261027-1"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Research prerelease already exists; preserving original."
+          else
+            gh release create "$TAG" "$APK_NAME" "$APK_NAME.sha256" \
+              --prerelease \
+              --target "$CAPTION_HEAD_SHA" \
+              --title "速度実験：スマホ設定画面付き APK (PR #66)" \
+              --notes "Experimental debug APK, distinct application ID jp.hidemaru.burnedcaptionreader.samplingresearch. In-app controls: 480/240ms/video-frame sampling and 700/300/0ms upper-row wait. Current YouTube WebView visible frames only. Unit tests passed; Galaxy S25 real-device TTS timing unverified. Unmerged PR #66; production E untouched." \
+              --repo "$GITHUB_REPOSITORY"
+          fi
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         with:

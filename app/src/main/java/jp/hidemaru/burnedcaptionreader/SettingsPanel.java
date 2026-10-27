@@ -150,6 +150,60 @@ final class SettingsPanel extends ScrollView {
             onChanged.run();
         });
 
+        // The production app must never expose or apply experimental timing controls.
+        if ((context.getApplicationInfo().flags
+                & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            section = ReaderUi.card(context);
+            page.addView(section, ReaderUi.block(context, 16));
+            section.addView(ReaderUi.text(context, "速度実験（試験版のみ）",
+                    20, ReaderUi.INK, true));
+            note("YouTubeの画面に表示された動画だけを読み取ります。"
+                    + "動画ファイルや未来のフレームは取得しません。");
+            heading("字幕画像の取得方式");
+            Spinner samplingChoice = spinner(new String[]{
+                    "480ms周期（従来）", "240ms周期", "フレーム更新に連動"
+            });
+            samplingChoice.setTag("experiment_sampling_mode");
+            samplingChoice.setContentDescription("字幕画像の取得方式");
+            SubtitleSamplingExperiment currentMode = preferences.getExperimentSamplingMode();
+            samplingChoice.setSelection(currentMode == SubtitleSamplingExperiment.VIDEO_FRAME
+                    ? 2 : currentMode == SubtitleSamplingExperiment.POLL_240 ? 1 : 0);
+            samplingChoice.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override public void onItemSelected(AdapterView<?> parent, View view, int index, long id) {
+                    SubtitleSamplingExperiment selected = index == 2
+                            ? SubtitleSamplingExperiment.VIDEO_FRAME
+                            : index == 1 ? SubtitleSamplingExperiment.POLL_240
+                            : SubtitleSamplingExperiment.POLL_480;
+                    if (preferences.getExperimentSamplingMode() == selected) return;
+                    preferences.setExperimentSamplingMode(selected);
+                    onChanged.run();
+                }
+                @Override public void onNothingSelected(AdapterView<?> parent) {}
+            });
+            note("フレーム連動に対応していない場合は480ms周期に戻ります。"
+                    + "画面更新の通知を使う方式で、字幕の先読みではありません。");
+
+            heading("上段字幕の最大待機時間");
+            Spinner orderChoice = spinner(new String[]{
+                    "700ms（従来）", "300ms（短縮）", "0ms（待たない）"
+            });
+            orderChoice.setTag("experiment_order_wait_ms");
+            orderChoice.setContentDescription("上段字幕の最大待機時間");
+            long selectedWait = preferences.getExperimentOrderWaitMs();
+            orderChoice.setSelection(selectedWait == 0 ? 2 : selectedWait == 300 ? 1 : 0);
+            orderChoice.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override public void onItemSelected(AdapterView<?> parent, View view, int index, long id) {
+                    int selected = index == 2 ? 0 : index == 1 ? 300 : 700;
+                    if (preferences.getExperimentOrderWaitMs() == selected) return;
+                    preferences.setExperimentOrderWaitMs(selected);
+                    onChanged.run();
+                }
+                @Override public void onNothingSelected(AdapterView<?> parent) {}
+            });
+            note("上の行が認識途中の場合だけ待ちます。0msでは3行字幕の順番が"
+                    + "崩れる可能性があります。変更後、新しい字幕から反映します。");
+        }
+
         section = ReaderUi.card(context);
         page.addView(section, ReaderUi.block(context, 16));
         section.addView(ReaderUi.text(context, "診断データ", 20, ReaderUi.INK, true));

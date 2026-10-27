@@ -19,6 +19,9 @@ public final class AppPreferences {
     private static final String SUBTITLE_RECHECK_ENABLED = "subtitle_recheck_enabled";
     private static final String KEEP_SCREEN_ON = "keep_screen_on";
     private static final String HIDE_YOUTUBE_CC = "hide_youtube_cc";
+    // Research settings are used only by the debuggable, side-by-side experiment app.
+    private static final String EXPERIMENT_SAMPLING_MODE = "research_sampling_mode";
+    private static final String EXPERIMENT_ORDER_WAIT_MS = "research_order_wait_ms";
 
     public static final String MODE_BALANCED = "balanced";
     public static final String MODE_CONTINUOUS = "continuous";
@@ -126,6 +129,27 @@ public final class AppPreferences {
 
     public void setStableMs(long stableMs) {
         preferences.edit().putLong(STABLE_MS, Math.max(250L, Math.min(1_000L, stableMs))).apply();
+    }
+
+    public SubtitleSamplingExperiment getExperimentSamplingMode() {
+        return SubtitleSamplingExperiment.select(
+                preferences.getString(EXPERIMENT_SAMPLING_MODE,
+                        SubtitleSamplingExperiment.POLL_480.value), true);
+    }
+
+    public void setExperimentSamplingMode(SubtitleSamplingExperiment mode) {
+        if (mode == null) throw new IllegalArgumentException("Missing sampling mode");
+        preferences.edit().putString(EXPERIMENT_SAMPLING_MODE, mode.value).apply();
+    }
+
+    public long getExperimentOrderWaitMs() {
+        return jp.hidemaru.burnedcaptionreader.subtitle.SubtitleSpeechOrderBuffer.experimentWaitMs(
+                preferences.getInt(EXPERIMENT_ORDER_WAIT_MS, 700), true);
+    }
+
+    public void setExperimentOrderWaitMs(int waitMs) {
+        long selected = jp.hidemaru.burnedcaptionreader.subtitle.SubtitleSpeechOrderBuffer.experimentWaitMs(waitMs, true);
+        preferences.edit().putInt(EXPERIMENT_ORDER_WAIT_MS, (int) selected).apply();
     }
 
     public boolean isYouTubeCcHidden() {

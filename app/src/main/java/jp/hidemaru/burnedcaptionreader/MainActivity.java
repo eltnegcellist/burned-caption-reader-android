@@ -111,8 +111,21 @@ public final class MainActivity extends Activity {
 
     private void openVideo(String id) {
         urlInput.setText("https://www.youtube.com/watch?v=" + id);
-        startActivity(new Intent(this, SharedPlayerActivity.class)
-                .putExtra(SharedPlayerActivity.EXTRA_VIDEO_ID, id));
+        Intent playerIntent = new Intent(this, SharedPlayerActivity.class)
+                .putExtra(SharedPlayerActivity.EXTRA_VIDEO_ID, id);
+        // Research launch mode is never forwarded by a non-debuggable APK.
+        if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            if (getIntent().hasExtra(SharedPlayerActivity.EXTRA_SAMPLING_EXPERIMENT)) {
+                playerIntent.putExtra(SharedPlayerActivity.EXTRA_SAMPLING_EXPERIMENT,
+                        getIntent().getStringExtra(SharedPlayerActivity.EXTRA_SAMPLING_EXPERIMENT));
+            }
+            if (getIntent().hasExtra(SharedPlayerActivity.EXTRA_ORDER_WAIT_MS)) {
+                playerIntent.putExtra(SharedPlayerActivity.EXTRA_ORDER_WAIT_MS,
+                        getIntent().getIntExtra(SharedPlayerActivity.EXTRA_ORDER_WAIT_MS,
+                                (int) jp.hidemaru.burnedcaptionreader.subtitle.SubtitleSpeechOrderBuffer.MAX_WAIT_MS));
+            }
+        }
+        startActivity(playerIntent);
     }
 
     private void openPendingVideo() {

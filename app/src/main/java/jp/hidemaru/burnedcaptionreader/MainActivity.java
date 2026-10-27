@@ -115,8 +115,10 @@ public final class MainActivity extends Activity {
                 .putExtra(SharedPlayerActivity.EXTRA_VIDEO_ID, id);
         // Research launch mode is never forwarded by a non-debuggable APK.
         if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-            playerIntent.putExtra(SharedPlayerActivity.EXTRA_SAMPLING_EXPERIMENT,
-                    getIntent().getStringExtra(SharedPlayerActivity.EXTRA_SAMPLING_EXPERIMENT));
+            if (getIntent().hasExtra(SharedPlayerActivity.EXTRA_SAMPLING_EXPERIMENT)) {
+                playerIntent.putExtra(SharedPlayerActivity.EXTRA_SAMPLING_EXPERIMENT,
+                        getIntent().getStringExtra(SharedPlayerActivity.EXTRA_SAMPLING_EXPERIMENT));
+            }
             if (getIntent().hasExtra(SharedPlayerActivity.EXTRA_ORDER_WAIT_MS)) {
                 playerIntent.putExtra(SharedPlayerActivity.EXTRA_ORDER_WAIT_MS,
                         getIntent().getIntExtra(SharedPlayerActivity.EXTRA_ORDER_WAIT_MS,

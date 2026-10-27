@@ -38,6 +38,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Install side-by-side with the user's existing E app; no data deletion needed.
+            applicationIdSuffix = ".samplingresearch"
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(

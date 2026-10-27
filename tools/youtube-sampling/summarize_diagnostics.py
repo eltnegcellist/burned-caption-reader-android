@@ -50,12 +50,21 @@ def analyze(records):
             end=item.get("mono_ms")
             if isinstance(start,(int,float)) and isinstance(end,(int,float)) and end>=start:
                 groups["tts_request_to_onstart_ms"].append(end-start)
+    order_releases=[r for r in records if r.get("type") == "sampling_order_release"]
+    order_held_ms=[r["held_ms"] for r in order_releases
+                   if isinstance(r.get("held_ms"), (int,float)) and r["held_ms"]>=0]
+    blocked_held_ms=[r["held_ms"] for r in order_releases
+                     if r.get("upper_blocked") is True
+                     and isinstance(r.get("held_ms"),(int,float)) and r["held_ms"]>=0]
+    order_wait_ms=next((r.get("order_wait_ms") for r in records
+                        if r.get("type") == "sampling_experiment"), None)
     busy = next((item.get("frame_busy_skips") for item in reversed(records)
                  if item.get("type") == "sampling_stats"), None)
     throttle = next((item.get("frame_throttle_skips") for item in reversed(records)
                  if item.get("type") == "sampling_stats"), None)
     return {
        "mode":mode,
+       "order_max_wait_ms":order_wait_ms,
        "raw_events":len(records),
        "captured_frames":counts["sampling_captured"],
        "completed_ocr_frames":counts["sampling_ocr_completed"],
@@ -66,7 +75,14 @@ def analyze(records):
        "video_frame_signals_accepted":counts["sampling_video_frame"],
        "frame_signals_busy_skipped":busy,
        "frame_signals_throttled":throttle,
-       "metrics":{key:stats(groups[key]) for key in [*MEASURES,"tts_request_to_onstart_ms"]},
+       "order_released_total":len(order_releases),
+       "order_released_after_deadline":sum(r.get("reason")=="deadline" for r in order_releases),
+       "order_released_on_upper_cleared":sum(r.get("reason")=="upper_cleared" for r in order_releases),
+       "order_released_without_upper_wait":sum(r.get("reason")=="no_upper" for r in order_releases),
+       "order_pending_snapshots":counts["sampling_order_pending"],
+       "metrics":{**{key:stats(groups[key]) for key in [*MEASURES,"tts_request_to_onstart_ms"]},
+                  "order_buffer_held_ms":stats(order_held_ms),
+                  "order_buffer_blocked_held_ms":stats(blocked_held_ms)},
        "not_measured":["true_on_screen_subtitle_onset","audible_TTS_onset",
                        "Galaxy_S25_latency_if_not_run_on_device"],
        "caution":"TTS onStart is an engine callback, not microphone-confirmed audible onset."

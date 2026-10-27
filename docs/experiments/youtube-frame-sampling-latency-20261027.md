@@ -23,7 +23,7 @@ WebMessageListenerはYouTubeの3つのHTTPS originかつmain frameに限定、�
 
 ## MacとGalaxy S25で手動比較する方法
 
-1. 安全のため、まずGitHub ActionsのPR側ビルドとunit testを確認。試験APKはデバッグ署名なので、**既存アプリを消さずに署名の互換性を事前確認**。必要なら別端末／エミュレーターで実験。既存データが消える可能性がある場合はインストール中止。
+1. 安全のため、まずGitHub ActionsのPR側ビルドとunit testを確認。試験用debug APKはパッケージID `jp.hidemaru.burnedcaptionreader.samplingresearch` を使用し、通常Eアプリと別のアイコン名で併存できる。既存の通常アプリをアンインストール／上書きする必要はない。ダウンロードしたZIPから `app-debug.apk` を取り出し、試験版としてインストール。
 2. Mac側で `adb devices -l` にGalaxy S25の**許可済みシリアル**が現れることを確認。adbがない場合はGitHub上のソース検証までで止め、実機値を捏造しない。
 3. Galaxy S25のAndroid WebViewバージョン、APK SHA、電源・発熱・画質・画面向き、Eモード、TTSエンジン/速度/音量を記録する。動画URL・再生区間は3方式で揃える。
 4. 各方式は、Macの `adb shell am start` で既存の公開YouTube動画URLを共有する方法で起動できる。デバッグAPKのMainActivityは `ACTION_SEND` を受け、extraをSharedPlayerActivityに渡す。
@@ -32,11 +32,11 @@ WebMessageListenerはYouTubeの3つのHTTPS originかつmain frameに限定、�
 ADB="${ANDROID_HOME:-$HOME/Library/Android/sdk}/platform-tools/adb"
 SERIAL="YOUR_AUTHORIZED_DEVICE_SERIAL"
 VIDEO_URL="https://www.youtube.com/watch?v=YOUR_PUBLIC_VIDEO_ID"
-PACKAGE="jp.hidemaru.burnedcaptionreader"
+PACKAGE="jp.hidemaru.burnedcaptionreader.samplingresearch"
 # それぞれ poll480, poll240, frame に置換して3種類を測定。
 MODE="poll480"
 "$ADB" -s "$SERIAL" shell am force-stop "$PACKAGE"
-"$ADB" -s "$SERIAL" shell am start -W -n "$PACKAGE/.MainActivity" \
+"$ADB" -s "$SERIAL" shell am start -W -n "$PACKAGE/jp.hidemaru.burnedcaptionreader.MainActivity" \
   -a android.intent.action.SEND -t text/plain \
   --es android.intent.extra.TEXT "$VIDEO_URL" \
   --es caption_sampling_mode "$MODE"

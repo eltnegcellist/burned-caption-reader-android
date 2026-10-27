@@ -59,19 +59,23 @@ public final class SubtitleSpeechOrderBuffer {
         }
     }
 
-    private final long maxWaitMs;
+    private long maxWaitMs;
     private final List<Pending> pending = new ArrayList<>();
     private final List<Release> lastReleases = new ArrayList<>();
     private List<Band> waiting = new ArrayList<>();
 
     public SubtitleSpeechOrderBuffer() { this(MAX_WAIT_MS); }
     public SubtitleSpeechOrderBuffer(long maxWaitMs) {
-        if (maxWaitMs != MAX_WAIT_MS && maxWaitMs != SHORT_WAIT_MS && maxWaitMs != NO_WAIT_MS) {
-            throw new IllegalArgumentException("Unsupported order wait experiment: " + maxWaitMs);
-        }
-        this.maxWaitMs = maxWaitMs;
+        setMaxWaitMs(maxWaitMs);
     }
-    public long getMaxWaitMs() { return maxWaitMs; }
+    /** New entries use the updated wait; entries already pending retain their deadline. */
+    public synchronized void setMaxWaitMs(long nextWaitMs) {
+        if (nextWaitMs != MAX_WAIT_MS && nextWaitMs != SHORT_WAIT_MS && nextWaitMs != NO_WAIT_MS) {
+            throw new IllegalArgumentException("Unsupported order wait experiment: " + nextWaitMs);
+        }
+        this.maxWaitMs = nextWaitMs;
+    }
+    public synchronized long getMaxWaitMs() { return maxWaitMs; }
 
     /** Historical API: logical timestamp is also the observed timestamp. */
     public synchronized List<Entry> offer(long now, List<Entry> committed, List<Band> stabilizing) {

@@ -67,6 +67,7 @@ import jp.hidemaru.burnedcaptionreader.tts.SpeechEngine;
 public final class SharedPlayerActivity extends Activity {
     public static final String EXTRA_VIDEO_ID = "video_id";
     public static final String EXTRA_SAMPLING_EXPERIMENT = "caption_sampling_mode";
+    public static final String EXTRA_ORDER_WAIT_MS = "caption_order_wait_ms";
     // The experimental mode is accepted only in debuggable builds and via explicit intent extra.
     // Production defaults to the original 480ms cadence.
     private SubtitleSamplingExperiment samplingExperiment = SubtitleSamplingExperiment.POLL_480;
@@ -109,7 +110,7 @@ public final class SharedPlayerActivity extends Activity {
     private final Handler main = new Handler(Looper.getMainLooper());
     private final AutoSubtitleRegionTracker tracker = new AutoSubtitleRegionTracker();
     private final RowSpeechLedger ledger = new RowSpeechLedger(60_000L);
-    private final SubtitleSpeechOrderBuffer order = new SubtitleSpeechOrderBuffer();
+    private SubtitleSpeechOrderBuffer order = new SubtitleSpeechOrderBuffer();
     private final SubtitleStabilizer.Config stableConfig = new SubtitleStabilizer.Config();
     private final Map<Integer, SubtitleStabilizer> stabilizers = new HashMap<>();
     private final Map<Integer, TemporalOcrConsensus> consensus = new HashMap<>();
@@ -155,6 +156,7 @@ public final class SharedPlayerActivity extends Activity {
                     samplingModeRecorded = true;
                     diagnostics.event("sampling_experiment", "mode", samplingExperiment.value,
                             "fallback_ms", samplingExperiment.pollMs,
+                            "order_wait_ms", order.getMaxWaitMs(),
                             "frame_bridge_supported", frameBridgeSupported);
                 }
                 long now = SystemClock.elapsedRealtime();
@@ -212,9 +214,13 @@ public final class SharedPlayerActivity extends Activity {
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
         videoId = getIntent().getStringExtra(EXTRA_VIDEO_ID);
+        final boolean debugBuild = (getApplicationInfo().flags
+                & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         samplingExperiment = SubtitleSamplingExperiment.select(
-                getIntent().getStringExtra(EXTRA_SAMPLING_EXPERIMENT),
-                (getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0);
+                getIntent().getStringExtra(EXTRA_SAMPLING_EXPERIMENT), debugBuild);
+        order = new SubtitleSpeechOrderBuffer(SubtitleSpeechOrderBuffer.experimentWaitMs(
+                getIntent().getIntExtra(EXTRA_ORDER_WAIT_MS, (int) SubtitleSpeechOrderBuffer.MAX_WAIT_MS),
+                debugBuild));
         if (videoId == null || !videoId.matches("[A-Za-z0-9_-]{11}")) {
             finish();
             return;
@@ -489,7 +495,10 @@ public final class SharedPlayerActivity extends Activity {
                 stabilizer.clearPendingCandidate();
             }
             long now = SystemClock.elapsedRealtime();
-            speakReady(now, -1, order.offer(now, new ArrayList<>(), new ArrayList<>()));
+            List<SubtitleSpeechOrderBuffer.Entry> ready =
+                    order.offer(now, new ArrayList<>(), new ArrayList<>());
+            logOrderRelease(-1L);
+            speakReady(now, -1, ready);
             scheduleOrderFlush();
             diagnostics.event("subtitle_recheck_changed", "enabled", nextRecheck,
                     "generation", captureGeneration);
@@ -927,7 +936,9 @@ public final class SharedPlayerActivity extends Activity {
             consensus.remove(entry.getKey());
             return true;
         });
-        List<SubtitleSpeechOrderBuffer.Entry> ready = order.offer(timestamp, committed, waiting);
+        List<SubtitleSpeechOrderBuffer.Entry> ready =
+                order.offer(timestamp, committed, waiting, SystemClock.elapsedRealtime());
+        logOrderRelease(frameId);
         if (!bands.isEmpty()) {
             StringBuilder current = new StringBuilder();
             for (BandText band : bands) {
@@ -945,8 +956,26 @@ public final class SharedPlayerActivity extends Activity {
     private void flushOrderedSpeech() {
         if (!sampling || readingPaused || isDestroyed()) return;
         long now = SystemClock.elapsedRealtime();
-        speakReady(now, -1, order.drain(now));
+        List<SubtitleSpeechOrderBuffer.Entry> ready = order.drain(now);
+        logOrderRelease(-1L);
+        speakReady(now, -1, ready);
         scheduleOrderFlush();
+    }
+
+    private void logOrderRelease(long frameId) {
+        List<SubtitleSpeechOrderBuffer.Release> releases = order.takeReleases();
+        if (diagnostics == null || !diagnostics.isRecording()) return;
+        for (SubtitleSpeechOrderBuffer.Release release : releases) {
+            diagnostics.event("sampling_order_release", "frame_id", frameId,
+                    "max_wait_ms", order.getMaxWaitMs(), "held_ms", release.heldMs,
+                    "upper_blocked", release.wasBlockedByUpper,
+                    "reason", release.reason);
+        }
+        if (order.pendingCount() > 0) {
+            diagnostics.event("sampling_order_pending", "frame_id", frameId,
+                    "max_wait_ms", order.getMaxWaitMs(),
+                    "pending_count", order.pendingCount());
+        }
     }
 
     private void scheduleOrderFlush() {

@@ -37,6 +37,7 @@ jobs:
           gradle-version: '8.13'
       - name: Build pinned OCR models and run JVM tests
         run: |
+          python -m pip install PyYAML==6.0.3
           python tools/models/prepare_v6.py
           gradle :app:testDebugUnitTest :app:assembleDebug --no-daemon --stacktrace
       - name: Upload research APK (not Galaxy tested)

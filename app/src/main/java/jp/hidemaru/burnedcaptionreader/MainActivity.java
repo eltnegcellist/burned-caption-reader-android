@@ -117,6 +117,11 @@ public final class MainActivity extends Activity {
         if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
             playerIntent.putExtra(SharedPlayerActivity.EXTRA_SAMPLING_EXPERIMENT,
                     getIntent().getStringExtra(SharedPlayerActivity.EXTRA_SAMPLING_EXPERIMENT));
+            if (getIntent().hasExtra(SharedPlayerActivity.EXTRA_ORDER_WAIT_MS)) {
+                playerIntent.putExtra(SharedPlayerActivity.EXTRA_ORDER_WAIT_MS,
+                        getIntent().getIntExtra(SharedPlayerActivity.EXTRA_ORDER_WAIT_MS,
+                                (int) jp.hidemaru.burnedcaptionreader.subtitle.SubtitleSpeechOrderBuffer.MAX_WAIT_MS));
+            }
         }
         startActivity(playerIntent);
     }

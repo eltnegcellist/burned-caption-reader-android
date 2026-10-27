@@ -33,7 +33,8 @@ public class SubtitleSpeechOrderBufferTest {
         // The existing caption must not vanish or have its deadline changed.
         assertEquals(1700L, buffer.nextDeadline());
         assertTrue(buffer.offer(1100L, List.of(entry("別の下段", .60f, .66f)),
-                List.of(new SubtitleSpeechOrderBuffer.Band(.50f, .56f))).isEmpty());
+                List.of(new SubtitleSpeechOrderBuffer.Band(.20f, .26f),
+                        new SubtitleSpeechOrderBuffer.Band(.50f, .56f))).isEmpty());
         // New rows observe the new limit; old rows keep their original limit.
         assertEquals(1400L, buffer.nextDeadline());
         var ready = buffer.drain(1400L);

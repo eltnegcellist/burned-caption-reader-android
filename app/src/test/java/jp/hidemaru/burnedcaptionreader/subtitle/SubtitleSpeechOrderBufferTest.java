@@ -81,13 +81,13 @@ public class SubtitleSpeechOrderBufferTest {
 
     @Test public void longerThreeRowVersionCarriesOriginalDeadlineAndHoldTimestamp() {
         var buffer = new SubtitleSpeechOrderBuffer(300L);
-        buffer.offer(1000, List.of(entry("中段の字幕\\n下段の字幕", .30f, .46f)),
+        buffer.offer(1000, List.of(entry("中段の字幕\n下段の字幕", .30f, .46f)),
                 List.of(new SubtitleSpeechOrderBuffer.Band(.20f, .26f)), 1100);
         assertEquals(1300L, buffer.nextDeadline());
-        var complete = buffer.offer(1280, List.of(entry("上段の字幕\\n中段の字幕\\n下段の字幕", .20f, .46f)),
+        var complete = buffer.offer(1280, List.of(entry("上段の字幕\n中段の字幕\n下段の字幕", .20f, .46f)),
                 List.of(), 1280);
         assertEquals(1, complete.size());
-        assertEquals("上段の字幕\\n中段の字幕\\n下段の字幕", complete.get(0).event.getText());
+        assertEquals("上段の字幕\n中段の字幕\n下段の字幕", complete.get(0).event.getText());
         assertEquals(180L, buffer.takeReleases().get(0).heldMs);
         assertEquals(Long.MAX_VALUE, buffer.nextDeadline());
     }

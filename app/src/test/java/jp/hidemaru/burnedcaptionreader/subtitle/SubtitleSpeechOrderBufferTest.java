@@ -22,6 +22,42 @@ public class SubtitleSpeechOrderBufferTest {
         assertEquals(1, buffer.drain(700).size());
     }
 
+    @Test public void liveSettingsChangePreservesAlreadyPendingCaptions() {
+        var buffer = new SubtitleSpeechOrderBuffer(700L);
+        var upper = List.of(new SubtitleSpeechOrderBuffer.Band(.20f, .26f));
+        assertTrue(buffer.offer(1000L, List.of(entry("先の下段", .30f, .36f)),
+                upper).isEmpty());
+        assertEquals(1700L, buffer.nextDeadline());
+        buffer.setMaxWaitMs(300L);
+        assertEquals(300L, buffer.getMaxWaitMs());
+        // The existing caption must not vanish or have its deadline changed.
+        assertEquals(1700L, buffer.nextDeadline());
+        assertTrue(buffer.offer(1100L, List.of(entry("別の下段", .60f, .66f)),
+                List.of(new SubtitleSpeechOrderBuffer.Band(.50f, .56f))).isEmpty());
+        // New rows observe the new limit; old rows keep their original limit.
+        assertEquals(1400L, buffer.nextDeadline());
+        var ready = buffer.drain(1400L);
+        assertEquals(1, ready.size());
+        assertEquals("別の下段", ready.get(0).event.getText());
+        assertEquals(1700L, buffer.nextDeadline());
+        assertEquals("先の下段", buffer.drain(1700L).get(0).event.getText());
+        assertEquals(Long.MAX_VALUE, buffer.nextDeadline());
+
+        buffer.setMaxWaitMs(0L);
+        var released = buffer.offer(1800L, List.of(entry("即時", .30f, .36f)), upper);
+        assertEquals(1, released.size());
+    }
+
+    @Test public void invalidWaitCannotCorruptLiveSettings() {
+        var buffer = new SubtitleSpeechOrderBuffer(700L);
+        try {
+            buffer.setMaxWaitMs(220L);
+            fail("Unsupported timing must be rejected");
+        } catch (IllegalArgumentException expected) {
+            assertEquals(700L, buffer.getMaxWaitMs());
+        }
+    }
+
     @Test public void productionWaitIsAlways700WithoutExplicitDebugSelection() {
         assertEquals(700L, SubtitleSpeechOrderBuffer.experimentWaitMs(0, false));
         assertEquals(700L, SubtitleSpeechOrderBuffer.experimentWaitMs(300, false));

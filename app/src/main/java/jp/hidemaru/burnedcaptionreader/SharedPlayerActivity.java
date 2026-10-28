@@ -59,7 +59,8 @@ import jp.hidemaru.burnedcaptionreader.tts.AndroidTtsSpeaker;
 import jp.hidemaru.burnedcaptionreader.tts.SpeechEngine;
 
 /**
- * The shared URL opens as a watch page in our own WebView. Only pixels inside
+ * The shared URL opens the official embedded YouTube player in our WebView.
+ * Only pixels inside
  * the visible HTML video element are copied. No screen capture permission is
  * involved. If the player is absent or protected, fail closed rather than
  * reading the surrounding YouTube page as a subtitle.
@@ -186,8 +187,6 @@ public final class SharedPlayerActivity extends Activity {
     private TextView status;
     private TextView lastRead;
     private Button speechToggle;
-    private Button playbackLayoutToggle;
-    private boolean embeddedPlayback = true;
     private boolean reembedPending;
     private SettingsPanel settingsPanel;
     private View fullView;
@@ -233,8 +232,8 @@ public final class SharedPlayerActivity extends Activity {
         player.setBackgroundColor(Color.BLACK);
         player.getSettings().setJavaScriptEnabled(true);
         player.getSettings().setDomStorageEnabled(true);
-        // Trial only: request audible autoplay without muting video or faking a tap.
-        // YouTube/Chromium may still reject autoplay (their policy takes precedence).
+        // Request YouTube's ordinary audible autoplay, subject to the browser's
+        // policy. Never force muted autoplay or simulate a user tap.
         player.getSettings().setMediaPlaybackRequiresUserGesture(false);
         configureFrameBridge();
         player.setWebChromeClient(new WebChromeClient() {
@@ -277,9 +276,7 @@ public final class SharedPlayerActivity extends Activity {
                 applyCcPreference();
                 if (frameBridgeSupported) armFrameCallback();
                 if (!readingPaused) {
-                    status.setText(embeddedPlayback
-                            ? "自動再生を試行中…始まらなければ動画の再生ボタンをタップしてください"
-                            : "動画をタップして再生してください。字幕領域を検出中…");
+                    status.setText("自動再生を試行中…始まらなければ動画の再生ボタンをタップしてください");
                 }
             }
         });
@@ -318,17 +315,11 @@ public final class SharedPlayerActivity extends Activity {
         settingsParams.leftMargin = ReaderUi.dp(this, 10);
         actions.addView(settings, settingsParams);
         settings.setOnClickListener(v -> showSettings());
-        playbackLayoutToggle = ReaderUi.button(this,
-                "再生できない場合：従来のYouTube表示に切り替える", false);
-        playbackLayoutToggle.setContentDescription("YouTubeプレーヤー表示を切り替える");
-        controls.addView(playbackLayoutToggle, ReaderUi.block(this, 10));
-        playbackLayoutToggle.setOnClickListener(v -> loadVideoPage(!embeddedPlayback));
-
         Button home = ReaderUi.button(this, "トップ画面に戻る", false);
         controls.addView(home, ReaderUi.block(this, 10));
         home.setOnClickListener(v -> finish());
         setContentView(root);
-        loadVideoPage(true);
+        loadVideoPage();
     }
 
     @Override protected void onResume() {
@@ -522,53 +513,39 @@ public final class SharedPlayerActivity extends Activity {
      * calls updateVideoContext and can trigger this same routing path.
      */
     private boolean redirectSuggestedVideo(String destinationUrl) {
-        if (!embeddedPlayback || isDestroyed() || player == null) return false;
+        if (isDestroyed() || player == null) return false;
         String selectedId = YouTubeEmbeddedPlayback.suggestedVideoId(destinationUrl);
         if (selectedId == null) return false;
         if (!reembedPending) {
             reembedPending = true;
             main.post(() -> {
-                if (player == null || isDestroyed() || !embeddedPlayback) {
+                if (player == null || isDestroyed()) {
                     reembedPending = false;
                     return;
                 }
                 updateVideoId(selectedId);
-                loadVideoPage(true);
+                loadVideoPage();
             });
         }
         return true;
     }
 
     /**
-     * Prefer the official embedded player over the mobile watch page. The
-     * mobile watch page can show an app-install interstitial that covers the
-     * video and burned-in captions. YouTube's embedded player can be blocked
-     * on some videos/WebView versions; the user can revert explicitly.
+     * The official YouTube embedded player is the only player layout.
+     * If embedding is disabled by a video's owner, do not switch to the
+     * mobile watch page which can obscure burned-in subtitles.
      */
-    private void loadVideoPage(boolean useEmbeddedPlayer) {
+    private void loadVideoPage() {
         if (player == null) return;
         reembedPending = false;
-        embeddedPlayback = useEmbeddedPlayer;
-        if (playbackLayoutToggle != null) {
-            playbackLayoutToggle.setText(useEmbeddedPlayer
-                    ? "再生できない場合：従来のYouTube表示に切り替える"
-                    : "埋め込みプレーヤーに戻る");
-        }
         lastVideoFrameSignalMs = -1L;
         captureGeneration++;
         if (speaker != null) speaker.stop();
         resetTracks();
-        status.setText(useEmbeddedPlayer
-                ? "YouTubeプレーヤーを読み込み中…音声付き自動再生を試行します"
-                : "従来のYouTube表示を読み込み中…");
-        if (useEmbeddedPlayer) {
-            player.loadUrl(YouTubeEmbeddedPlayback.embedUrl(videoId),
-                    YouTubeEmbeddedPlayback.identityHeaders(getPackageName()));
-        } else {
-            player.loadUrl(YouTubeEmbeddedPlayback.watchUrl(videoId));
-        }
-        diagnostics.event("youtube_player_layout", "type",
-                useEmbeddedPlayer ? "embed" : "watch");
+        status.setText("YouTubeプレーヤーを読み込み中…音声付き自動再生を試行します");
+        player.loadUrl(YouTubeEmbeddedPlayback.embedUrl(videoId),
+                YouTubeEmbeddedPlayback.identityHeaders(getPackageName()));
+        diagnostics.event("youtube_player_layout", "type", "embed");
     }
 
     private void applyCcPreference() {

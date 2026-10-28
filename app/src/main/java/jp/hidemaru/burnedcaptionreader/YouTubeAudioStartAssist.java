@@ -20,11 +20,18 @@ public final class YouTubeAudioStartAssist {
               window.__captionAudioStartAssist = state;
               const video = () => document.querySelector('video.html5-main-video')
                                || document.querySelector('video');
+              const markStable = (v) => {
+                // YouTube's own play handler may momentarily re-mute after the tap.
+                // Do not mark success until the audio setting has stayed stable.
+                setTimeout(() => {
+                  if (!v.muted && v.volume > 0) state.activated.add(v);
+                }, 800);
+              };
               const unmute = (v) => {
                 if (!v || state.activated.has(v)) return;
                 // Do not override the user's subsequent volume/mute decisions.
                 if (!v.muted && v.volume > 0) {
-                  state.activated.add(v);
+                  markStable(v);
                   return;
                 }
                 if (state.attempts >= 3) return;
@@ -33,7 +40,7 @@ public final class YouTubeAudioStartAssist {
                   v.muted = false;
                   v.defaultMuted = false;
                   if (v.volume === 0) v.volume = 1;
-                  if (!v.muted && v.volume > 0) state.activated.add(v);
+                  if (!v.muted && v.volume > 0) markStable(v);
                 } catch (ignored) {
                   // YouTube / WebView may reject unmuting outside trusted activation.
                 }

@@ -10,8 +10,8 @@ android {
         applicationId = "jp.hidemaru.burnedcaptionreader"
         minSdk = 26
         targetSdk = 36
-        versionCode = 37
-        versionName = "1.0.6-e-fixed"
+        versionCode = 38
+        versionName = "1.0.7-embedded"
 
         testInstrumentationRunner = "jp.hidemaru.burnedcaptionreader.evaluation.ImageEvaluationInstrumentation"
     }
@@ -38,10 +38,6 @@ android {
     }
 
     buildTypes {
-        debug {
-            // Install the audio-unmute trial alongside the ordinary caption reader.
-            applicationIdSuffix = ".audioresearch"
-        }
         release {
             isMinifyEnabled = false
             proguardFiles(

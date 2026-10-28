@@ -26,6 +26,25 @@ public final class YouTubeEmbeddedPlaybackTest {
                         "jp.hidemaru.burnedcaptionreader.audioresearch").get("Referer"));
     }
 
+    @Test public void rejectsRetiredWatchAndOtherPagesAsMainWebViewDocument() {
+        assertTrue(YouTubeEmbeddedPlayback.isEmbeddedPlayerUrl(
+                YouTubeEmbeddedPlayback.embedUrl(ID)));
+        assertTrue(YouTubeEmbeddedPlayback.isEmbeddedPlayerUrl(
+                "https://youtube.com/embed/" + ID + "?autoplay=1"));
+        for (String forbidden : new String[] {
+                "https://www.youtube.com/watch?v=" + ID,
+                "https://m.youtube.com/watch?v=" + ID,
+                "https://www.youtube.com/shorts/" + ID,
+                "https://www.youtube.com/channel/" + ID,
+                "https://www.youtube.com/embed/BAD",
+                "http://www.youtube.com/embed/" + ID,
+                "https://youtube.com.evil.example/embed/" + ID,
+                "about:blank"
+        }) {
+            assertFalse(forbidden, YouTubeEmbeddedPlayback.isEmbeddedPlayerUrl(forbidden));
+        }
+    }
+
     @Test public void suggestedVideoLinksAreRoutedBackToEmbed() {
         assertEquals(ID, YouTubeEmbeddedPlayback.suggestedVideoId(
                 "https://www.youtube.com/watch?v=" + ID + "&t=10"));

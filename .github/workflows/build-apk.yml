@@ -272,7 +272,7 @@ jobs:
           CAPTION_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          APK_NAME="caption-reader-youtube-embedded-player-test.apk"
+          APK_NAME="caption-reader-embed-autoplay-routing-test.apk"
           cp app/build/outputs/apk/debug/app-debug.apk "$APK_NAME"
           python3 - "$APK_NAME" <<'PY'
           import os, sys, zipfile
@@ -286,14 +286,14 @@ jobs:
           print(f"Verified APK: {size} bytes")
           PY
           sha256sum "$APK_NAME" > "$APK_NAME.sha256"
-          TAG="youtube-embedded-player-test-20261028-1"
+          TAG="youtube-embedded-autoplay-routing-20261028-1"
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "Existing test release preserved"
           else
             gh release create "$TAG" "$APK_NAME" "$APK_NAME.sha256" \
               --prerelease --target "$CAPTION_HEAD_SHA" \
-              --title "YouTube公式埋め込みプレーヤー試験版APK" \
-              --notes "Experiment: use YouTube official embed with user-initiated sound-enabled playback; avoid mobile watch-page app-promotion overlay. A button returns to the legacy mobile watch page when embedding is unsupported. Not guaranteed to remove all YouTube overlays or fix sound on every device/video. Galaxy S25 unverified. Different debug package jp.hidemaru.burnedcaptionreader.audioresearch; main unchanged. APK is directly downloadable (not Actions ZIP)." \
+              --title "YouTube埋め込み自動再生＋おすすめ遷移試験APK" \
+              --notes "Trial: YouTube official embed uses autoplay=1 with normal audio and native controls. Audible autoplay can be blocked by browser policy, so a play tap may remain necessary. Suggested video clicks that navigate to YouTube /watch are routed back into the embedded player. Legacy watch-page fallback button remains. Galaxy S25 confirmation pending. Different debug package jp.hidemaru.burnedcaptionreader.audioresearch; main unchanged. Direct APK (not Actions ZIP)." \
               --repo "$GITHUB_REPOSITORY"
           fi
       - uses: actions/upload-artifact@v4

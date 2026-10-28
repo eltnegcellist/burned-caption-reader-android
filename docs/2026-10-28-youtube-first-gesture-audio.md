@@ -1,36 +1,34 @@
-# YouTube公式埋め込みプレーヤー実験：音声とアプリ誘導画面
+# YouTube埋め込みプレーヤー継続・音声付き自動再生実験
 
-日付: 2026-10-28。**Galaxy S25では実機未検証。PR #68はDraftのまま。**
+日付: 2026-10-28。**Galaxy S25での最終検証前。PR #68はDraft。**
 
-## ユーザーの実機報告
+## Galaxy S25からのフィードバック
 
-前の試験版（WebViewに`m.youtube.com/watch`を開き、最初のタップで`video.muted=false`を設定する方式）では音声のミュート解除に失敗。さらにYouTube側の「YouTube の機能を最大限利用しましょう」「YouTube アプリで視聴」というアプリ誘導モーダルが表示され、焼き込み字幕を覆った。**前のJavaScript音声補助方式は撤回**し、テスト用ブランチから除去した。
+1. `m.youtube.com/watch`上でJavaScriptから`video.muted=false`にした最初の試験は**失敗**。アプリ誘導モーダル「YouTube の機能を最大限利用しましょう」も字幕を隠した。
+2. 次の公式埋め込み試験版は、**▶を一度タップすればミュート解除なしで音声付き再生できた**。ただし初期読み込み時に▶が必要で、YouTubeのおすすめ動画を選択すると`/watch`画面へ遷移し、再びミュート解除が必要になった。
 
-## 今回の実験実装
+## 今回の修正
 
-- 通常のYouTube**モバイル視聴ページ全体**を表示せず、公式プレーヤーのURL `https://www.youtube.com/embed/VIDEO_ID?playsinline=1&autoplay=0&controls=1` をWebViewのメイン画面に表示する。
-- YouTubeの公開仕様に従い、Android WebViewの`loadUrl(url, headers)`で`Referer: https://<Android application id>/`を送る。省略すると Error 153 が表示される場合がある。参照元IDの偽装はしない。
-- autoplayをせず、**ユーザーがYouTubeの通常の再生ボタンを一回タップする**。音声を強制的にONにするための疑似クリックや`video.muted`の手動上書きはしない。YouTube標準コントロールは表示したまま。
-- この埋め込みプレーヤー方式で、視聴ページ固有の「YouTubeアプリで視聴」誘導画面を回避できるか実機で観察する。YouTubeの仕様変更や動画ごとの埋め込み不可により、**必ず表示されないとは保証しない**。
-- 埋め込み再生できない場合に備え、アプリ下部の「再生できない場合：従来のYouTube表示に切り替える」ボタンで元の`m.youtube.com/watch`に戻せる。再度埋め込みへ戻すことも可能。
-- WebView内に現在表示中のHTML video要素がある場合、`requestVideoFrameCallback`→`PixelCopy`→既存E方式OCR→TTSのパイプラインを維持する。YouTube動画ファイル・ストリーム・字幕トラックにはアクセスしない。
-- debug APKのIDは`jp.hidemaru.burnedcaptionreader.audioresearch`のままで通常版と併存。PR #67でmainにマージしたフレーム連動と300ms待機は変更しない。
+- `https://www.youtube.com/embed/VIDEO_ID?playsinline=1&autoplay=1&controls=1` で**音声付き自動再生を試みる**。`WebSettings.setMediaPlaybackRequiresUserGesture(false)`を**検証用APKのみ**で指定する。`mute=1`は指定せず、音声をオフにして「見かけ上の自動再生」を成立させることはしない。ブラウザの自動再生ポリシーは優先されるため、音声付き自動再生は失敗する場合がある。この場合は**YouTubeの通常の▶を一度タップ**する。
+- YouTubeのおすすめ動画が`/watch?v=...`、`/shorts/...`、`/live/...`または`youtu.be/...`へ遷移したとき、`WebViewClient.shouldOverrideUrlLoading`、`onPageStarted/onPageFinished`、通常フレーム処理でのURL検査により新しいIDを認識し、**公式埋め込みURLへ戻す**。これによりモバイル視聴ページの「アプリで視聴」案内やミュート表示へ遷移しないように試す。
+- 旧`/embed/` URL、チャンネル画面、アカウント/利用規約などの非動画URLはリダイレクト対象外にして、無限リダイレクトを防ぐ。選択動画が変わると、OCRトラック、TTS予約/行重複防止記録は動画ごとにリセットする。
+- 埋め込みエラー153/150、YouTubeが許可しない動画、動かないWebView向けに、**「従来のYouTube表示に切り替える」**ボタンを維持する。その表示に戻した場合はYouTube独自のミュート操作が発生し得る。
+- Android WebViewから公式プレーヤーへ移る時はアプリ固有のReferer `https://<実際のapplicationId>/`を送る。信頼された操作の偽装、YouTube標準UIの削除、動画ファイルへのアクセスは行わない。
+- `requestVideoFrameCallback`→画面PixelCopy→E方式OCR→TTS、および上段待ち300msはmainの実装を維持。debug APKのみ別ID `jp.hidemaru.burnedcaptionreader.audioresearch`、**mainは変更しない**。
 
-## Galaxy S25での試験項目
+## Galaxy S25実機チェック
 
-1. 新しい埋め込み試験APKをインストールして、**前の試験版と同じ公開YouTube動画**をURLから開く。
-2. 初期画面がYouTubeの通常の再生ボタン付きプレーヤーになり、**アプリ誘導モーダルが表示されないか**を確認する。
-3. 再生ボタンを一回タップする。**追加でミュート解除を要求されず、動画音が出るか**と、読み上げ音声が適切に聞こえるかを確認する。
-4. 数分再生して字幕OCR/TTSが引き続き動くか、3行字幕の読み順が崩れないかを確認する。フレームイベントが届かない場合は480ms fallbackが働く。
-5. **再生エラー（153, 150等）、黒画面、音が出ない、ショート・ライブなど**があれば、下の「従来のYouTube表示」ボタンに切り替えて再生できるか確認する。元のWebページにはアプリ誘導モーダルが出る可能性が残る。
-6. ユーザーが明示的に音声をミュートした後、勝手に解除されないかも確認する。
-
-## 公開仕様
-
-- [YouTube IFrame Player API](https://developers.google.com/youtube/iframe_api_reference)
-- [YouTube 必要な最低限の機能：WebView Referer](https://developers.google.com/youtube/terms/required-minimum-functionality)
-- [Android WebSettings user gesture](https://developer.android.com/reference/android/webkit/WebSettings#setMediaPlaybackRequiresUserGesture(boolean))
+1. 同じ公開YouTube動画のURLを開き、**▶を押さなくても音声付きで再生が始まるか**、それとも初期の▶が残るかを確認する。自動再生の制約により残る可能性がある。
+2. 再生された（または▶をタップした）あと、**動画音と読み上げ音**が出ているかを確認。
+3. YouTube埋め込みプレーヤーのおすすめ動画をタップして、**次の動画も埋め込み画面のままで、ミュート解除の画面に戻らないか**確認。おすすめタップ後に▶が必要かも見る。
+4. 全画面、動画終了後のおすすめ、動画間の戻る、縦動画、広告、字幕OCR精度・行順と負荷を観察する。
+5. 埋め込み禁止や動画再生失敗では、下のボタンで従来表示に戻して再生できるか確認する。
+6. 読み上げの下に「動画が画面外です」が残る場合、動画再生中か／字幕を読んでいるかを併記する。これはDOM動画矩形認識の別問題で、今回のURL移動改善だけで解消を保証しない。
 
 ## 採否
 
-**まだ本番mainへマージしない。** YouTube側表示の解消・音声付き再生・字幕OCRの動作がGalaxy S25で確認できた場合にのみ統合を検討する。埋め込みが拒否された動画を強制的に再生したり、YouTubeの表示要件を迂回したりしない。
+**実機で自動再生、音声とおすすめ遷移、字幕OCRの挙動を確認するまでmainへマージしない。** 公式APIの`autoplay=1`が許可されないことは正常なブラウザの動作であり、無断ミュート、自動クリック、第三者の制限回避で押し通さない。
+
+- [YouTube埋め込みプレーヤー パラメータ](https://developers.google.com/youtube/player_parameters)
+- [YouTube IFrame Player API / onAutoplayBlocked](https://developers.google.com/youtube/iframe_api_reference)
+- [WebViewのメディア再生設定](https://developer.android.com/reference/android/webkit/WebSettings#setMediaPlaybackRequiresUserGesture(boolean))

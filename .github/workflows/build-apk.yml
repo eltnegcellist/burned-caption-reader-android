@@ -265,14 +265,14 @@ jobs:
               --notes "URLを共有・入力してアプリ内でYouTubeを再生し、動画内の日本語字幕をローカルOCRとTTSで読み上げます。読み上げのみ一時停止、再生中の設定変更、専用のアプリアイコンを追加。Androidテストとビルドは成功。URL入力と共有の使い方を図解した案内ページを搭載。動画によってOCRの読み間違い・読み飛ばしがあります。APKはデバッグ署名のため以前のAPKと署名が異なる場合は上書きインストールできません。" \
               --repo "$GITHUB_REPOSITORY"
           fi
-      - name: Publish direct audio-start research APK (separate debug app)
+      - name: Publish direct embedded-player research APK (separate debug app)
         if: github.event_name == 'push' && github.ref == 'refs/heads/feature/youtube-first-gesture-unmute'
         env:
           GH_TOKEN: ${{ github.token }}
           CAPTION_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          APK_NAME="caption-reader-youtube-audio-start-research.apk"
+          APK_NAME="caption-reader-youtube-embedded-player-test.apk"
           cp app/build/outputs/apk/debug/app-debug.apk "$APK_NAME"
           python3 - "$APK_NAME" <<'PY'
           import os, sys, zipfile
@@ -286,14 +286,14 @@ jobs:
           print(f"Verified APK: {size} bytes")
           PY
           sha256sum "$APK_NAME" > "$APK_NAME.sha256"
-          TAG="youtube-audio-first-tap-experiment-20261028-3"
+          TAG="youtube-embedded-player-test-20261028-1"
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "Existing test release preserved"
           else
             gh release create "$TAG" "$APK_NAME" "$APK_NAME.sha256" \
               --prerelease --target "$CAPTION_HEAD_SHA" \
-              --title "YouTube初回タップ音声解除・検証専用APK" \
-              --notes "Trial: attempt unmute on the user's first trusted YouTube play tap. This is NOT a synthetic click and does not guarantee automatic sound or the disappearance of YouTube's own overlay. Galaxy S25 verification pending. Distinct debug package jp.hidemaru.burnedcaptionreader.audioresearch; usual production app is unaffected." \
+              --title "YouTube公式埋め込みプレーヤー試験版APK" \
+              --notes "Experiment: use YouTube official embed with user-initiated sound-enabled playback; avoid mobile watch-page app-promotion overlay. A button returns to the legacy mobile watch page when embedding is unsupported. Not guaranteed to remove all YouTube overlays or fix sound on every device/video. Galaxy S25 unverified. Different debug package jp.hidemaru.burnedcaptionreader.audioresearch; main unchanged. APK is directly downloadable (not Actions ZIP)." \
               --repo "$GITHUB_REPOSITORY"
           fi
       - uses: actions/upload-artifact@v4

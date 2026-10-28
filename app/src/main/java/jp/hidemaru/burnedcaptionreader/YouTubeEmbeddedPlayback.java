@@ -20,9 +20,10 @@ public final class YouTubeEmbeddedPlayback {
         if (videoId == null || !VIDEO_ID.matcher(videoId).matches()) {
             throw new IllegalArgumentException("Invalid YouTube video ID");
         }
-        // Keep YouTube's native controls; do not start in muted autoplay mode.
+        // Ask YouTube to start with its normal audio and controls. WebView or
+        // YouTube may block audible autoplay; never force muted autoplay.
         return "https://www.youtube.com/embed/" + videoId
-                + "?playsinline=1&autoplay=0&controls=1";
+                + "?playsinline=1&autoplay=1&controls=1";
     }
 
     public static String watchUrl(String videoId) {
@@ -30,6 +31,35 @@ public final class YouTubeEmbeddedPlayback {
             throw new IllegalArgumentException("Invalid YouTube video ID");
         }
         return "https://m.youtube.com/watch?v=" + videoId;
+    }
+
+    /**
+     * The embedded player's suggestions sometimes navigate to /watch instead
+     * of keeping the player embedded. Route YouTube video links back to embed.
+     * Embedded-player URLs are deliberately excluded to avoid redirect loops.
+     * Non-video YouTube links (terms, accounts, channels) are not rewritten.
+     */
+    public static String suggestedVideoId(String destinationUrl) {
+        if (destinationUrl == null) return null;
+        try {
+            java.net.URI uri = java.net.URI.create(destinationUrl);
+            if (!"https".equalsIgnoreCase(uri.getScheme())) return null;
+            String host = uri.getHost();
+            if (host == null) return null;
+            host = host.toLowerCase(java.util.Locale.ROOT);
+            String path = uri.getPath();
+            if (path == null) return null;
+            boolean youtubeHost = host.equals("www.youtube.com")
+                    || host.equals("m.youtube.com") || host.equals("youtube.com");
+            boolean shortHost = host.equals("youtu.be") || host.equals("www.youtu.be");
+            if (youtubeHost && !(path.equals("/watch") || path.startsWith("/shorts/")
+                    || path.startsWith("/live/"))) return null;
+            if (shortHost && (path.length() < 2 || !path.startsWith("/"))) return null;
+            if (!youtubeHost && !shortHost) return null;
+            return YouTubeShareUrl.videoId(destinationUrl);
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
     }
 
     /**

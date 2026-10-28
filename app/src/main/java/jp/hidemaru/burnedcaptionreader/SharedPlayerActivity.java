@@ -532,7 +532,7 @@ public final class SharedPlayerActivity extends Activity {
                     reembedPending = false;
                     return;
                 }
-                updateVideoContext(YouTubeEmbeddedPlayback.watchUrl(selectedId));
+                updateVideoId(selectedId);
                 loadVideoPage(true);
             });
         }
@@ -1095,7 +1095,10 @@ public final class SharedPlayerActivity extends Activity {
 
     private boolean updateVideoContext(String url) {
         if (redirectSuggestedVideo(url)) return true;
-        String nextVideoId = YouTubeShareUrl.videoId(url);
+        return updateVideoId(YouTubeShareUrl.videoId(url));
+    }
+
+    private boolean updateVideoId(String nextVideoId) {
         if (nextVideoId == null || nextVideoId.equals(videoId)) return false;
         if (speaker != null) speaker.stop();
         // Identical dialogue in two different videos is new content.

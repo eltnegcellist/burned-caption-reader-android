@@ -18,8 +18,9 @@ public class SubtitleSpeechOrderBufferTest {
         var buffer = new SubtitleSpeechOrderBuffer();
         var waiting = List.of(new SubtitleSpeechOrderBuffer.Band(.2f, .26f));
         buffer.offer(0, List.of(entry("下段の字幕", .3f, .36f)), waiting);
-        buffer.offer(480, List.of(entry("下段の字幕", .3f, .36f)), waiting);
-        assertEquals(1, buffer.drain(700).size());
+        assertTrue(buffer.offer(180, List.of(entry("下段の字幕", .3f, .36f)), waiting).isEmpty());
+        assertEquals(1, buffer.drain(300).size());
+        assertTrue(buffer.drain(480).isEmpty());
     }
 
     @Test public void liveSettingsChangePreservesAlreadyPendingCaptions() {

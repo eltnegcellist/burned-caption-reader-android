@@ -59,7 +59,8 @@ import jp.hidemaru.burnedcaptionreader.tts.AndroidTtsSpeaker;
 import jp.hidemaru.burnedcaptionreader.tts.SpeechEngine;
 
 /**
- * The shared URL opens as a watch page in our own WebView. Only pixels inside
+ * The shared URL opens the official embedded YouTube player in our WebView.
+ * Only pixels inside
  * the visible HTML video element are copied. No screen capture permission is
  * involved. If the player is absent or protected, fail closed rather than
  * reading the surrounding YouTube page as a subtitle.
@@ -186,6 +187,7 @@ public final class SharedPlayerActivity extends Activity {
     private TextView status;
     private TextView lastRead;
     private Button speechToggle;
+    private boolean reembedPending;
     private SettingsPanel settingsPanel;
     private View fullView;
     private WebChromeClient.CustomViewCallback fullCallback;
@@ -230,7 +232,9 @@ public final class SharedPlayerActivity extends Activity {
         player.setBackgroundColor(Color.BLACK);
         player.getSettings().setJavaScriptEnabled(true);
         player.getSettings().setDomStorageEnabled(true);
-        player.getSettings().setMediaPlaybackRequiresUserGesture(true);
+        // Request YouTube's ordinary audible autoplay, subject to the browser's
+        // policy. Never force muted autoplay or simulate a user tap.
+        player.getSettings().setMediaPlaybackRequiresUserGesture(false);
         configureFrameBridge();
         player.setWebChromeClient(new WebChromeClient() {
             @Override public void onShowCustomView(View view, CustomViewCallback callback) {
@@ -243,6 +247,18 @@ public final class SharedPlayerActivity extends Activity {
         player.setWebViewClient(new WebViewClient() {
             @Override public void onPageStarted(WebView view, String url,
                     Bitmap favicon) {
+                if (redirectSuggestedVideo(url)) {
+                    // An embedded recommendation escaped to the mobile watch page;
+                    // avoid displaying the mute interstitial while redirecting.
+                    view.stopLoading();
+                    return;
+                }
+                if (!YouTubeEmbeddedPlayback.isEmbeddedPlayerUrl(url)) {
+                    view.stopLoading();
+                    if (status != null) status.setText(
+                            "埋め込みプレーヤー以外の画面への移動を停止しました");
+                    return;
+                }
                 lastVideoFrameSignalMs = -1L;
                 captureGeneration++;
                 if (speaker != null) speaker.stop();
@@ -251,20 +267,22 @@ public final class SharedPlayerActivity extends Activity {
             }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 if (!request.isForMainFrame()) return false;
-                Uri uri = request.getUrl();
-                String host = uri.getHost();
-                // Never launch another app and never navigate to an untrusted origin.
-                return !"https".equalsIgnoreCase(uri.getScheme()) || host == null
-                        || !(host.equals("youtube.com") || host.endsWith(".youtube.com"));
+                String requestedUrl = request.getUrl().toString();
+                if (redirectSuggestedVideo(requestedUrl)) return true;
+                // The user chose to retire the full watch page. Never navigate
+                // the WebView main document to YouTube /watch or other layouts.
+                return !YouTubeEmbeddedPlayback.isEmbeddedPlayerUrl(requestedUrl);
             }
             @Override public void onPageFinished(WebView view, String url) {
+                if (redirectSuggestedVideo(url)) return;
+                if (!YouTubeEmbeddedPlayback.isEmbeddedPlayerUrl(url)) return;
                 captureGeneration++;
                 resetTracks();
                 updateVideoContext(url);
                 applyCcPreference();
                 if (frameBridgeSupported) armFrameCallback();
                 if (!readingPaused) {
-                    status.setText("動画をタップして再生してください。字幕領域を検出中…");
+                    status.setText("自動再生を試行中…始まらなければ動画の再生ボタンをタップしてください");
                 }
             }
         });
@@ -307,7 +325,7 @@ public final class SharedPlayerActivity extends Activity {
         controls.addView(home, ReaderUi.block(this, 10));
         home.setOnClickListener(v -> finish());
         setContentView(root);
-        player.loadUrl("https://m.youtube.com/watch?v=" + videoId);
+        loadVideoPage();
     }
 
     @Override protected void onResume() {
@@ -491,6 +509,49 @@ public final class SharedPlayerActivity extends Activity {
         hideCc = preferences.isYouTubeCcHidden();
         getWindow().getDecorView().setKeepScreenOn(preferences.isKeepScreenOn());
         applyCcPreference();
+    }
+
+    /**
+     * Clicking YouTube's end-screen recommendations can escape from /embed/
+     * to /watch, which reintroduces both the mobile-page promotion and its
+     * mute prompt. Keep the user-selected video within the official player.
+     * If YouTube changes URL via history.pushState, the OCR page probe also
+     * calls updateVideoContext and can trigger this same routing path.
+     */
+    private boolean redirectSuggestedVideo(String destinationUrl) {
+        if (isDestroyed() || player == null) return false;
+        String selectedId = YouTubeEmbeddedPlayback.suggestedVideoId(destinationUrl);
+        if (selectedId == null) return false;
+        if (!reembedPending) {
+            reembedPending = true;
+            main.post(() -> {
+                if (player == null || isDestroyed()) {
+                    reembedPending = false;
+                    return;
+                }
+                updateVideoId(selectedId);
+                loadVideoPage();
+            });
+        }
+        return true;
+    }
+
+    /**
+     * The official YouTube embedded player is the only player layout.
+     * If embedding is disabled by a video's owner, do not switch to the
+     * mobile watch page which can obscure burned-in subtitles.
+     */
+    private void loadVideoPage() {
+        if (player == null) return;
+        reembedPending = false;
+        lastVideoFrameSignalMs = -1L;
+        captureGeneration++;
+        if (speaker != null) speaker.stop();
+        resetTracks();
+        status.setText("YouTubeプレーヤーを読み込み中…音声付き自動再生を試行します");
+        player.loadUrl(YouTubeEmbeddedPlayback.embedUrl(videoId),
+                YouTubeEmbeddedPlayback.identityHeaders(getPackageName()));
+        diagnostics.event("youtube_player_layout", "type", "embed");
     }
 
     private void applyCcPreference() {
@@ -1016,7 +1077,11 @@ public final class SharedPlayerActivity extends Activity {
     }
 
     private boolean updateVideoContext(String url) {
-        String nextVideoId = YouTubeShareUrl.videoId(url);
+        if (redirectSuggestedVideo(url)) return true;
+        return updateVideoId(YouTubeShareUrl.videoId(url));
+    }
+
+    private boolean updateVideoId(String nextVideoId) {
         if (nextVideoId == null || nextVideoId.equals(videoId)) return false;
         if (speaker != null) speaker.stop();
         // Identical dialogue in two different videos is new content.

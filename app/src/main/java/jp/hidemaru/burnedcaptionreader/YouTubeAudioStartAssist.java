@@ -31,6 +31,7 @@ public final class YouTubeAudioStartAssist {
                 state.attempts++;
                 try {
                   v.muted = false;
+                  v.defaultMuted = false;
                   if (v.volume === 0) v.volume = 1;
                   if (!v.muted && v.volume > 0) state.activated.add(v);
                 } catch (ignored) {

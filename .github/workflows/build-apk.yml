@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - feature/youtube-first-gesture-unmute
     paths:
       - "app/**"
       - "tools/**"
@@ -265,35 +264,34 @@ jobs:
               --notes "URLを共有・入力してアプリ内でYouTubeを再生し、動画内の日本語字幕をローカルOCRとTTSで読み上げます。読み上げのみ一時停止、再生中の設定変更、専用のアプリアイコンを追加。Androidテストとビルドは成功。URL入力と共有の使い方を図解した案内ページを搭載。動画によってOCRの読み間違い・読み飛ばしがあります。APKはデバッグ署名のため以前のAPKと署名が異なる場合は上書きインストールできません。" \
               --repo "$GITHUB_REPOSITORY"
           fi
-      - name: Publish direct embedded-player research APK (separate debug app)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/feature/youtube-first-gesture-unmute'
+      - name: Publish production v1.0.7 embedded-player APK
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
-          CAPTION_HEAD_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          APK_NAME="caption-reader-embed-autoplay-routing-test.apk"
+          APK_NAME="in-video-caption-reader-v1.0.7.apk"
           cp app/build/outputs/apk/debug/app-debug.apk "$APK_NAME"
           python3 - "$APK_NAME" <<'PY'
           import os, sys, zipfile
           apk = sys.argv[1]
           size = os.path.getsize(apk)
-          assert size > 50_000_000, f"Unexpected APK size: {size}"
+          assert size > 50_000_000, f"Unexpectedly small APK: {size}"
           with zipfile.ZipFile(apk) as z:
-              assert z.testzip() is None, "APK damaged"
+              assert z.testzip() is None, "Corrupt Android APK"
               assert "AndroidManifest.xml" in z.namelist()
               assert any(x.startswith("classes") and x.endswith(".dex") for x in z.namelist())
-          print(f"Verified APK: {size} bytes")
+          print(f"Verified APK: {apk}, {size} bytes")
           PY
           sha256sum "$APK_NAME" > "$APK_NAME.sha256"
-          TAG="youtube-embedded-autoplay-routing-20261028-2"
+          TAG="v1.0.7"
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "Existing test release preserved"
+            echo "Stable v1.0.7 already exists; preserving released binary."
           else
             gh release create "$TAG" "$APK_NAME" "$APK_NAME.sha256" \
-              --prerelease --target "$CAPTION_HEAD_SHA" \
-              --title "YouTube埋め込み自動再生＋おすすめ遷移試験APK" \
-              --notes "Trial: YouTube official embed uses autoplay=1 with normal audio and native controls. Audible autoplay can be blocked by browser policy, so a play tap may remain necessary. Suggested video clicks that navigate to YouTube /watch are routed back into the embedded player. Legacy watch-page fallback button remains. Galaxy S25 confirmation pending. Different debug package jp.hidemaru.burnedcaptionreader.audioresearch; main unchanged. Direct APK (not Actions ZIP)." \
+              --target "$GITHUB_SHA" \
+              --title "動画内字幕リーダー v1.0.7：YouTube埋め込みプレーヤー正式採用" \
+              --notes "通常のモバイル視聴ページを廃止し、YouTube公式埋め込みプレーヤーを標準採用。音声付き自動再生を試みる（WebViewやYouTubeの制限で再生ボタンが必要な場合あり）。おすすめ動画も埋め込み表示へ誘導。従来表示への切り替えボタンは削除。画面フレーム連動OCRと上段待機300msは維持。Galaxy S25で試験版の操作性が改善したとの利用者報告を受けて採用。APKはデバッグ署名のため既存アプリと署名が異なる場合は更新できません。ビルドと自動テスト成功。" \
               --repo "$GITHUB_REPOSITORY"
           fi
       - uses: actions/upload-artifact@v4

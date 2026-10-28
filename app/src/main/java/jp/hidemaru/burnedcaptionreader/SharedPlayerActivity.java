@@ -186,6 +186,8 @@ public final class SharedPlayerActivity extends Activity {
     private TextView status;
     private TextView lastRead;
     private Button speechToggle;
+    private Button playbackLayoutToggle;
+    private boolean embeddedPlayback = true;
     private SettingsPanel settingsPanel;
     private View fullView;
     private WebChromeClient.CustomViewCallback fullCallback;
@@ -262,7 +264,6 @@ public final class SharedPlayerActivity extends Activity {
                 resetTracks();
                 updateVideoContext(url);
                 applyCcPreference();
-                installAudioStartAssist();
                 if (frameBridgeSupported) armFrameCallback();
                 if (!readingPaused) {
                     status.setText("動画をタップして再生してください。字幕領域を検出中…");
@@ -304,11 +305,17 @@ public final class SharedPlayerActivity extends Activity {
         settingsParams.leftMargin = ReaderUi.dp(this, 10);
         actions.addView(settings, settingsParams);
         settings.setOnClickListener(v -> showSettings());
+        playbackLayoutToggle = ReaderUi.button(this,
+                "再生できない場合：従来のYouTube表示に切り替える", false);
+        playbackLayoutToggle.setContentDescription("YouTubeプレーヤー表示を切り替える");
+        controls.addView(playbackLayoutToggle, ReaderUi.block(this, 10));
+        playbackLayoutToggle.setOnClickListener(v -> loadVideoPage(!embeddedPlayback));
+
         Button home = ReaderUi.button(this, "トップ画面に戻る", false);
         controls.addView(home, ReaderUi.block(this, 10));
         home.setOnClickListener(v -> finish());
         setContentView(root);
-        player.loadUrl("https://m.youtube.com/watch?v=" + videoId);
+        loadVideoPage(true);
     }
 
     @Override protected void onResume() {
@@ -494,13 +501,35 @@ public final class SharedPlayerActivity extends Activity {
         applyCcPreference();
     }
 
-    private void installAudioStartAssist() {
+    /**
+     * Prefer the official embedded player over the mobile watch page. The
+     * mobile watch page can show an app-install interstitial that covers the
+     * video and burned-in captions. YouTube's embedded player can be blocked
+     * on some videos/WebView versions; the user can revert explicitly.
+     */
+    private void loadVideoPage(boolean useEmbeddedPlayer) {
         if (player == null) return;
-        // Installed in the page, not triggered from Java as a synthetic click.
-        // A trusted touch on YouTube's existing play surface activates audio.
-        player.evaluateJavascript(YouTubeAudioStartAssist.INSTALL_SCRIPT, result -> {
-            diagnostics.event("youtube_audio_start_assist", "result", result);
-        });
+        embeddedPlayback = useEmbeddedPlayer;
+        if (playbackLayoutToggle != null) {
+            playbackLayoutToggle.setText(useEmbeddedPlayer
+                    ? "再生できない場合：従来のYouTube表示に切り替える"
+                    : "埋め込みプレーヤーに戻る");
+        }
+        lastVideoFrameSignalMs = -1L;
+        captureGeneration++;
+        if (speaker != null) speaker.stop();
+        resetTracks();
+        status.setText(useEmbeddedPlayer
+                ? "YouTubeプレーヤーを読み込み中… 画面の再生ボタンをタップしてください"
+                : "従来のYouTube表示を読み込み中…");
+        if (useEmbeddedPlayer) {
+            player.loadUrl(YouTubeEmbeddedPlayback.embedUrl(videoId),
+                    YouTubeEmbeddedPlayback.identityHeaders(getPackageName()));
+        } else {
+            player.loadUrl(YouTubeEmbeddedPlayback.watchUrl(videoId));
+        }
+        diagnostics.event("youtube_player_layout", "type",
+                useEmbeddedPlayer ? "embed" : "watch");
     }
 
     private void applyCcPreference() {

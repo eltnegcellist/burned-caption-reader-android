@@ -26,13 +26,6 @@ public final class YouTubeEmbeddedPlayback {
                 + "?playsinline=1&autoplay=1&controls=1";
     }
 
-    public static String watchUrl(String videoId) {
-        if (videoId == null || !VIDEO_ID.matcher(videoId).matches()) {
-            throw new IllegalArgumentException("Invalid YouTube video ID");
-        }
-        return "https://m.youtube.com/watch?v=" + videoId;
-    }
-
     /**
      * The embedded player's suggestions sometimes navigate to /watch instead
      * of keeping the player embedded. Route YouTube video links back to embed.

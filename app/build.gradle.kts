@@ -62,5 +62,6 @@ android {
 dependencies {
     implementation("com.google.mlkit:text-recognition-japanese:16.0.1")
     implementation("com.microsoft.onnxruntime:onnxruntime-android:1.30.0")
+    implementation("androidx.webkit:webkit:1.17.1")
     testImplementation("junit:junit:4.13.2")
 }

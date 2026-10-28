@@ -1,34 +1,31 @@
-# YouTube埋め込みプレーヤー継続・音声付き自動再生実験
+# YouTube公式埋め込みプレーヤー正式採用（v1.0.7）
 
-日付: 2026-10-28。**Galaxy S25での最終検証前。PR #68はDraft。**
+2026-10-29。利用者のGalaxy S25実機フィードバックに基づき、PR #68を通常版へ統合。
 
-## Galaxy S25からのフィードバック
+## 背景と採用判断
 
-1. `m.youtube.com/watch`上でJavaScriptから`video.muted=false`にした最初の試験は**失敗**。アプリ誘導モーダル「YouTube の機能を最大限利用しましょう」も字幕を隠した。
-2. 次の公式埋め込み試験版は、**▶を一度タップすればミュート解除なしで音声付き再生できた**。ただし初期読み込み時に▶が必要で、YouTubeのおすすめ動画を選択すると`/watch`画面へ遷移し、再びミュート解除が必要になった。
+- 最初の「YouTubeモバイル視聴ページ + JSで最初のタップ時にミュート解除」方式は、ミュート解除に失敗した。また「YouTube の機能を最大限利用しましょう」というアプリ誘導モーダルが焼き込み字幕を隠した。
+- 次のYouTube**公式埋め込みプレーヤー**は、再生ボタンを一度押すと音声付きで再生できた。ただし初回ボタンが必要で、おすすめ動画選択後にモバイル視聴ページへ戻る問題があった。
+- それらを改善した**自動再生の試行＋おすすめ動画の埋め込み維持**について、利用者から「良いです。これを採用して、今までの表示はやめよう」との実機承認を受けた。
 
-## 今回の修正
+## 通常版での動作
 
-- `https://www.youtube.com/embed/VIDEO_ID?playsinline=1&autoplay=1&controls=1` で**音声付き自動再生を試みる**。`WebSettings.setMediaPlaybackRequiresUserGesture(false)`を**検証用APKのみ**で指定する。`mute=1`は指定せず、音声をオフにして「見かけ上の自動再生」を成立させることはしない。ブラウザの自動再生ポリシーは優先されるため、音声付き自動再生は失敗する場合がある。この場合は**YouTubeの通常の▶を一度タップ**する。
-- YouTubeのおすすめ動画が`/watch?v=...`、`/shorts/...`、`/live/...`または`youtu.be/...`へ遷移したとき、`WebViewClient.shouldOverrideUrlLoading`、`onPageStarted/onPageFinished`、通常フレーム処理でのURL検査により新しいIDを認識し、**公式埋め込みURLへ戻す**。これによりモバイル視聴ページの「アプリで視聴」案内やミュート表示へ遷移しないように試す。
-- 旧`/embed/` URL、チャンネル画面、アカウント/利用規約などの非動画URLはリダイレクト対象外にして、無限リダイレクトを防ぐ。選択動画が変わると、OCRトラック、TTS予約/行重複防止記録は動画ごとにリセットする。
-- 埋め込みエラー153/150、YouTubeが許可しない動画、動かないWebView向けに、**「従来のYouTube表示に切り替える」**ボタンを維持する。その表示に戻した場合はYouTube独自のミュート操作が発生し得る。
-- Android WebViewから公式プレーヤーへ移る時はアプリ固有のReferer `https://<実際のapplicationId>/`を送る。信頼された操作の偽装、YouTube標準UIの削除、動画ファイルへのアクセスは行わない。
-- `requestVideoFrameCallback`→画面PixelCopy→E方式OCR→TTS、および上段待ち300msはmainの実装を維持。debug APKのみ別ID `jp.hidemaru.burnedcaptionreader.audioresearch`、**mainは変更しない**。
+1. URL入力またはYouTubeリンクの共有では、`https://www.youtube.com/embed/VIDEO_ID?playsinline=1&autoplay=1&controls=1` でYouTube公式プレーヤーを表示する。
+2. Android WebViewは、実際のAndroidアプリケーションIDを元にした`Referer: https://<application-id>/`を送る。`WebSettings.setMediaPlaybackRequiresUserGesture(false)`により音声付き自動再生を**試みる**が、YouTube/Chromiumによって阻止される場合は公式の再生ボタンを利用する。音声を強制ミュートしてまで自動再生はしない。疑似クリックはしない。
+3. おすすめ動画を選択した際、`/watch`、`/shorts`、`/live`、`youtu.be`への遷移を捕捉し、IDを引き継いで公式埋め込みプレーヤーを再度開く。動画変更時にはOCRトラック・読み上げ重複防止情報をリセットする。
+4. **従来の`m.youtube.com/watch`表示と切り替えボタンを削除**。WebView主文書で`/watch`などの画面を開かず、公式`/embed/VIDEO_ID`のみ許可する（許可されない動画はそのままエラー/再生不可として扱う）。
+5. `requestVideoFrameCallback`→可視画面の`PixelCopy`→E方式OCR→TTS、上段字幕の最大待機300msを維持する。動画ファイル/ストリームを直接取得しない。
+6. プロダクションのアプリケーションID`jp.hidemaru.burnedcaptionreader`に復帰。実験用の`.audioresearch`サフィックスとデバッグ専用の別名ラベルは削除した。
 
-## Galaxy S25実機チェック
+## 留保・確認項目
 
-1. 同じ公開YouTube動画のURLを開き、**▶を押さなくても音声付きで再生が始まるか**、それとも初期の▶が残るかを確認する。自動再生の制約により残る可能性がある。
-2. 再生された（または▶をタップした）あと、**動画音と読み上げ音**が出ているかを確認。
-3. YouTube埋め込みプレーヤーのおすすめ動画をタップして、**次の動画も埋め込み画面のままで、ミュート解除の画面に戻らないか**確認。おすすめタップ後に▶が必要かも見る。
-4. 全画面、動画終了後のおすすめ、動画間の戻る、縦動画、広告、字幕OCR精度・行順と負荷を観察する。
-5. 埋め込み禁止や動画再生失敗では、下のボタンで従来表示に戻して再生できるか確認する。
-6. 読み上げの下に「動画が画面外です」が残る場合、動画再生中か／字幕を読んでいるかを併記する。これはDOM動画矩形認識の別問題で、今回のURL移動改善だけで解消を保証しない。
+- 音声付きのゼロタップ再生は環境やYouTubeのポリシーで制限されるため、常に保証されない。
+- 埋め込み禁止動画・WebView内部のエラー153/150などは、従来視聴ページへの強制切り替えでは回避しない。画面にエラーが出た場合は別の再生可能な動画を利用する。
+- おすすめ動画の遷移は通常ページリンクのほか、YouTubeがページ内部で変更する形式にも対処するが、YouTube側の将来の仕様変更では再検証が必要。
+- Galaxy S25で確認したのは**利用者による体感・操作の成功**。この版のAndroid CIテストと実機での定量的なレイテンシ計測は別物。
 
-## 採否
+## 参照
 
-**実機で自動再生、音声とおすすめ遷移、字幕OCRの挙動を確認するまでmainへマージしない。** 公式APIの`autoplay=1`が許可されないことは正常なブラウザの動作であり、無断ミュート、自動クリック、第三者の制限回避で押し通さない。
-
-- [YouTube埋め込みプレーヤー パラメータ](https://developers.google.com/youtube/player_parameters)
-- [YouTube IFrame Player API / onAutoplayBlocked](https://developers.google.com/youtube/iframe_api_reference)
-- [WebViewのメディア再生設定](https://developer.android.com/reference/android/webkit/WebSettings#setMediaPlaybackRequiresUserGesture(boolean))
+- https://developers.google.com/youtube/iframe_api_reference
+- https://developers.google.com/youtube/terms/required-minimum-functionality
+- https://developer.android.com/reference/android/webkit/WebSettings#setMediaPlaybackRequiresUserGesture(boolean)

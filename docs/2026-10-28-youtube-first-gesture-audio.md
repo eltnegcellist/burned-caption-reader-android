@@ -1,27 +1,36 @@
-# YouTube再生開始のミュート解除補助（実機検証前）
+# YouTube公式埋め込みプレーヤー実験：音声とアプリ誘導画面
 
-## 解決したい問題
-Galaxy S25でアプリ内YouTube動画を再生したとき、左上に「ミュートを解除する」操作が現れて字幕が隠れる。動画をタップして再生した後、音声のために追加でもう一回タップする必要をなくしたい。
+日付: 2026-10-28。**Galaxy S25では実機未検証。PR #68はDraftのまま。**
 
-## 試験実装
-- WebView内のYouTube視聴ページに、実際のユーザー操作（`event.isTrusted`）の `pointerup` / `click` を**capture**段階で受ける小さなJavaScriptを挿入する。
-- タップ位置が現在の動画矩形に入っていた場合だけ、既存の動画再生操作と同じタップを利用して `video.muted=false`、`video.defaultMuted=false`、必要時 `video.volume=1` を試行。再生イベント直後も短時間・最大3回だけ再試行する。
-- 他の場所へのタップでは動作しない。YouTubeのボタンを `click()` で疑似タップしたり、合成イベントでユーザー操作を偽装したり、YouTube標準音量UI・字幕などをCSSで非表示にすることはしない。
-- 一度正常に解除された動画について、ユーザーのその後のミュート操作を上書きしない。
-- WebViewの「メディア再生にはユーザー操作が必要」は**trueのまま**で、初回の再生を無断で始めたり、非表示で自動再生したりしない。
-- 通常版と別パッケージID `jp.hidemaru.burnedcaptionreader.audioresearch` のdebug APKで試験する。フレーム連動および上段待機300msは統合済みのmainから継承。
+## ユーザーの実機報告
 
-## 限界
-**自動クリックだけでミュートを解除する保証はない。** Android WebView/ChromiumやYouTubeが、音声付き再生の許可を実際のユーザー操作に限定する場合がある。JSの自動 `click()` はその操作として認められない。この試験では「従来の最初の再生タップと同じ操作で音声を有効にする」ことを目標にする。YouTubeページがネイティブ動画と分離したmute状態を保持する場合、左上のUIが残る可能性がある。実機未検証のため「表示が消える」とは報告しない。
+前の試験版（WebViewに`m.youtube.com/watch`を開き、最初のタップで`video.muted=false`を設定する方式）では音声のミュート解除に失敗。さらにYouTube側の「YouTube の機能を最大限利用しましょう」「YouTube アプリで視聴」というアプリ誘導モーダルが表示され、焼き込み字幕を覆った。**前のJavaScript音声補助方式は撤回**し、テスト用ブランチから除去した。
 
-## Galaxy S25検証
+## 今回の実験実装
 
-1. テストAPKを通常版と**別アプリ**としてインストールする。普段使うメインアプリはアンインストールしない。
-2. 同じ公開YouTube動画（1本は長尺、可能ならもう1本は短い動画）を通常版・試験版でそれぞれ開き、最初の画面の「タップしてミュート解除」表示の有無、動画の再生可否、動画音が実際に鳴るかを記録。
-3. 動画の中央や標準再生ボタンを1回だけタップして、**追加の左上タップが不要か**確認。前の動画→別動画→戻る、全画面、縦横切替、再生一時停止／再開、YouTube広告のケースも試す。
-4. 動画音をユーザーが明示的にミュートしたとき、勝手に戻らないことを確認。TTSの字幕読み上げが止まらず、フレーム連動・300ms待機にも劣化がないか確認。
-5. デバッグ診断をオンにしたときの `youtube_audio_start_assist` イベントは「JSの注入が成功したか」だけを記録し、**実際にミュート解除された証明ではない**。
+- 通常のYouTube**モバイル視聴ページ全体**を表示せず、公式プレーヤーのURL `https://www.youtube.com/embed/VIDEO_ID?playsinline=1&autoplay=0&controls=1` をWebViewのメイン画面に表示する。
+- YouTubeの公開仕様に従い、Android WebViewの`loadUrl(url, headers)`で`Referer: https://<Android application id>/`を送る。省略すると Error 153 が表示される場合がある。参照元IDの偽装はしない。
+- autoplayをせず、**ユーザーがYouTubeの通常の再生ボタンを一回タップする**。音声を強制的にONにするための疑似クリックや`video.muted`の手動上書きはしない。YouTube標準コントロールは表示したまま。
+- この埋め込みプレーヤー方式で、視聴ページ固有の「YouTubeアプリで視聴」誘導画面を回避できるか実機で観察する。YouTubeの仕様変更や動画ごとの埋め込み不可により、**必ず表示されないとは保証しない**。
+- 埋め込み再生できない場合に備え、アプリ下部の「再生できない場合：従来のYouTube表示に切り替える」ボタンで元の`m.youtube.com/watch`に戻せる。再度埋め込みへ戻すことも可能。
+- WebView内に現在表示中のHTML video要素がある場合、`requestVideoFrameCallback`→`PixelCopy`→既存E方式OCR→TTSのパイプラインを維持する。YouTube動画ファイル・ストリーム・字幕トラックにはアクセスしない。
+- debug APKのIDは`jp.hidemaru.burnedcaptionreader.audioresearch`のままで通常版と併存。PR #67でmainにマージしたフレーム連動と300ms待機は変更しない。
 
-成功条件: **初回再生タップのみ**でYouTube音声が出て、追加のミュート解除タップが不要。失敗時やミュートが解除できない環境では既存YouTube操作を残し、再生や字幕認識を壊さないこと。
+## Galaxy S25での試験項目
 
-参考：<https://developer.chrome.com/blog/autoplay/>、<https://developer.android.com/reference/android/webkit/WebSettings#setMediaPlaybackRequiresUserGesture(boolean)>、<https://developers.google.com/youtube/terms/developer-policies-guide>。
+1. 新しい埋め込み試験APKをインストールして、**前の試験版と同じ公開YouTube動画**をURLから開く。
+2. 初期画面がYouTubeの通常の再生ボタン付きプレーヤーになり、**アプリ誘導モーダルが表示されないか**を確認する。
+3. 再生ボタンを一回タップする。**追加でミュート解除を要求されず、動画音が出るか**と、読み上げ音声が適切に聞こえるかを確認する。
+4. 数分再生して字幕OCR/TTSが引き続き動くか、3行字幕の読み順が崩れないかを確認する。フレームイベントが届かない場合は480ms fallbackが働く。
+5. **再生エラー（153, 150等）、黒画面、音が出ない、ショート・ライブなど**があれば、下の「従来のYouTube表示」ボタンに切り替えて再生できるか確認する。元のWebページにはアプリ誘導モーダルが出る可能性が残る。
+6. ユーザーが明示的に音声をミュートした後、勝手に解除されないかも確認する。
+
+## 公開仕様
+
+- [YouTube IFrame Player API](https://developers.google.com/youtube/iframe_api_reference)
+- [YouTube 必要な最低限の機能：WebView Referer](https://developers.google.com/youtube/terms/required-minimum-functionality)
+- [Android WebSettings user gesture](https://developer.android.com/reference/android/webkit/WebSettings#setMediaPlaybackRequiresUserGesture(boolean))
+
+## 採否
+
+**まだ本番mainへマージしない。** YouTube側表示の解消・音声付き再生・字幕OCRの動作がGalaxy S25で確認できた場合にのみ統合を検討する。埋め込みが拒否された動画を強制的に再生したり、YouTubeの表示要件を迂回したりしない。

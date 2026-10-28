@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - feature/youtube-first-gesture-unmute
     paths:
       - "app/**"
       - "tools/**"
@@ -90,7 +91,7 @@ jobs:
         if: github.event_name == 'pull_request' && github.head_ref == 'v0.3.15-speech-boost' && github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}
-          CAPTION_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          CAPTION_HEAD_SHA: ${{ github.sha }}
         run: |
           cp app/build/outputs/apk/debug/app-debug.apk burned-caption-reader-v0.3.15-debug.apk
           sha256sum burned-caption-reader-v0.3.15-debug.apk > burned-caption-reader-v0.3.15-debug.apk.sha256
@@ -265,7 +266,7 @@ jobs:
               --repo "$GITHUB_REPOSITORY"
           fi
       - name: Publish direct audio-start research APK (separate debug app)
-        if: github.event_name == 'pull_request' && github.head_ref == 'feature/youtube-first-gesture-unmute' && github.event.pull_request.head.repo.full_name == github.repository
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feature/youtube-first-gesture-unmute'
         env:
           GH_TOKEN: ${{ github.token }}
           CAPTION_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -285,7 +286,7 @@ jobs:
           print(f"Verified APK: {size} bytes")
           PY
           sha256sum "$APK_NAME" > "$APK_NAME.sha256"
-          TAG="youtube-audio-first-tap-experiment-20261028-2"
+          TAG="youtube-audio-first-tap-experiment-20261028-3"
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "Existing test release preserved"
           else

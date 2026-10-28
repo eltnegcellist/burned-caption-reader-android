@@ -27,6 +27,29 @@ public final class YouTubeEmbeddedPlayback {
     }
 
     /**
+     * Allow only the player surface to be shown as WebView's main document.
+     * A navigation to /watch (or another YouTube page) must never restore
+     * the retired full mobile watch-page interface.
+     */
+    public static boolean isEmbeddedPlayerUrl(String targetUrl) {
+        if (targetUrl == null) return false;
+        try {
+            java.net.URI uri = java.net.URI.create(targetUrl);
+            if (!"https".equalsIgnoreCase(uri.getScheme())) return false;
+            String host = uri.getHost();
+            if (host == null) return false;
+            host = host.toLowerCase(java.util.Locale.ROOT);
+            if (!host.equals("www.youtube.com") && !host.equals("youtube.com")) return false;
+            String path = uri.getPath();
+            if (path == null || !path.startsWith("/embed/")) return false;
+            String id = path.substring("/embed/".length());
+            return VIDEO_ID.matcher(id).matches();
+        } catch (IllegalArgumentException ignored) {
+            return false;
+        }
+    }
+
+    /**
      * The embedded player's suggestions sometimes navigate to /watch instead
      * of keeping the player embedded. Route YouTube video links back to embed.
      * Embedded-player URLs are deliberately excluded to avoid redirect loops.

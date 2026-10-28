@@ -6,9 +6,9 @@ import static org.junit.Assert.*;
 public final class YouTubeEmbeddedPlaybackTest {
     private static final String ID = "NylG8K2abcD";
 
-    @Test public void officialEmbedStartsPausedAndKeepsStandardControls() {
+    @Test public void officialEmbedRequestsAudibleAutoplayAndKeepsStandardControls() {
         assertEquals("https://www.youtube.com/embed/" + ID
-                + "?playsinline=1&autoplay=0&controls=1",
+                + "?playsinline=1&autoplay=1&controls=1",
                 YouTubeEmbeddedPlayback.embedUrl(ID));
         assertEquals("https://m.youtube.com/watch?v=" + ID,
                 YouTubeEmbeddedPlayback.watchUrl(ID));
@@ -18,6 +18,35 @@ public final class YouTubeEmbeddedPlaybackTest {
         assertEquals("https://jp.hidemaru.burnedcaptionreader.audioresearch/",
                 YouTubeEmbeddedPlayback.identityHeaders(
                         "jp.hidemaru.burnedcaptionreader.audioresearch").get("Referer"));
+    }
+
+    @Test public void suggestedVideoLinksAreRoutedBackToEmbed() {
+        assertEquals(ID, YouTubeEmbeddedPlayback.suggestedVideoId(
+                "https://www.youtube.com/watch?v=" + ID + "&t=10"));
+        assertEquals(ID, YouTubeEmbeddedPlayback.suggestedVideoId(
+                "https://m.youtube.com/watch?v=" + ID));
+        assertEquals(ID, YouTubeEmbeddedPlayback.suggestedVideoId(
+                "https://youtu.be/" + ID + "?feature=share"));
+        assertEquals(ID, YouTubeEmbeddedPlayback.suggestedVideoId(
+                "https://www.youtube.com/shorts/" + ID));
+        assertEquals(ID, YouTubeEmbeddedPlayback.suggestedVideoId(
+                "https://www.youtube.com/live/" + ID));
+    }
+
+    @Test public void cannotRewritePlayerItselfOrUnrelatedYouTubeNavigation() {
+        assertNull(YouTubeEmbeddedPlayback.suggestedVideoId(
+                YouTubeEmbeddedPlayback.embedUrl(ID)));
+        assertNull(YouTubeEmbeddedPlayback.suggestedVideoId(
+                "https://www.youtube.com/channel/" + ID));
+        assertNull(YouTubeEmbeddedPlayback.suggestedVideoId(
+                "https://www.youtube.com/account"));
+        assertNull(YouTubeEmbeddedPlayback.suggestedVideoId(
+                "https://youtube.com.evil.example/watch?v=" + ID));
+        assertNull(YouTubeEmbeddedPlayback.suggestedVideoId(
+                "http://www.youtube.com/watch?v=" + ID));
+        assertNull(YouTubeEmbeddedPlayback.suggestedVideoId(
+                "https://www.youtube.com/watch?v=BAD"));
+        assertNull(YouTubeEmbeddedPlayback.suggestedVideoId(null));
     }
 
     @Test public void validatesUntrustedIdentifiersBeforeBuildingUrlsOrHeaders() {

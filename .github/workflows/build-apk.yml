@@ -285,7 +285,7 @@ jobs:
           print(f"Verified APK: {size} bytes")
           PY
           sha256sum "$APK_NAME" > "$APK_NAME.sha256"
-          TAG="youtube-audio-first-tap-experiment-20261028-1"
+          TAG="youtube-audio-first-tap-experiment-20261028-2"
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "Existing test release preserved"
           else

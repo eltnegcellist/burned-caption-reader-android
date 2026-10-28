@@ -253,6 +253,12 @@ public final class SharedPlayerActivity extends Activity {
                     view.stopLoading();
                     return;
                 }
+                if (!YouTubeEmbeddedPlayback.isEmbeddedPlayerUrl(url)) {
+                    view.stopLoading();
+                    if (status != null) status.setText(
+                            "埋め込みプレーヤー以外の画面への移動を停止しました");
+                    return;
+                }
                 lastVideoFrameSignalMs = -1L;
                 captureGeneration++;
                 if (speaker != null) speaker.stop();
@@ -261,15 +267,15 @@ public final class SharedPlayerActivity extends Activity {
             }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 if (!request.isForMainFrame()) return false;
-                Uri uri = request.getUrl();
-                if (redirectSuggestedVideo(uri.toString())) return true;
-                String host = uri.getHost();
-                // Never launch another app and never navigate to an untrusted origin.
-                return !"https".equalsIgnoreCase(uri.getScheme()) || host == null
-                        || !(host.equals("youtube.com") || host.endsWith(".youtube.com"));
+                String requestedUrl = request.getUrl().toString();
+                if (redirectSuggestedVideo(requestedUrl)) return true;
+                // The user chose to retire the full watch page. Never navigate
+                // the WebView main document to YouTube /watch or other layouts.
+                return !YouTubeEmbeddedPlayback.isEmbeddedPlayerUrl(requestedUrl);
             }
             @Override public void onPageFinished(WebView view, String url) {
                 if (redirectSuggestedVideo(url)) return;
+                if (!YouTubeEmbeddedPlayback.isEmbeddedPlayerUrl(url)) return;
                 captureGeneration++;
                 resetTracks();
                 updateVideoContext(url);

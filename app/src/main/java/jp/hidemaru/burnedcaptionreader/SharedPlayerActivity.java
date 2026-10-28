@@ -188,6 +188,7 @@ public final class SharedPlayerActivity extends Activity {
     private Button speechToggle;
     private Button playbackLayoutToggle;
     private boolean embeddedPlayback = true;
+    private boolean reembedPending;
     private SettingsPanel settingsPanel;
     private View fullView;
     private WebChromeClient.CustomViewCallback fullCallback;
@@ -232,7 +233,9 @@ public final class SharedPlayerActivity extends Activity {
         player.setBackgroundColor(Color.BLACK);
         player.getSettings().setJavaScriptEnabled(true);
         player.getSettings().setDomStorageEnabled(true);
-        player.getSettings().setMediaPlaybackRequiresUserGesture(true);
+        // Trial only: request audible autoplay without muting video or faking a tap.
+        // YouTube/Chromium may still reject autoplay (their policy takes precedence).
+        player.getSettings().setMediaPlaybackRequiresUserGesture(false);
         configureFrameBridge();
         player.setWebChromeClient(new WebChromeClient() {
             @Override public void onShowCustomView(View view, CustomViewCallback callback) {
@@ -245,6 +248,12 @@ public final class SharedPlayerActivity extends Activity {
         player.setWebViewClient(new WebViewClient() {
             @Override public void onPageStarted(WebView view, String url,
                     Bitmap favicon) {
+                if (redirectSuggestedVideo(url)) {
+                    // An embedded recommendation escaped to the mobile watch page;
+                    // avoid displaying the mute interstitial while redirecting.
+                    view.stopLoading();
+                    return;
+                }
                 lastVideoFrameSignalMs = -1L;
                 captureGeneration++;
                 if (speaker != null) speaker.stop();
@@ -254,19 +263,23 @@ public final class SharedPlayerActivity extends Activity {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 if (!request.isForMainFrame()) return false;
                 Uri uri = request.getUrl();
+                if (redirectSuggestedVideo(uri.toString())) return true;
                 String host = uri.getHost();
                 // Never launch another app and never navigate to an untrusted origin.
                 return !"https".equalsIgnoreCase(uri.getScheme()) || host == null
                         || !(host.equals("youtube.com") || host.endsWith(".youtube.com"));
             }
             @Override public void onPageFinished(WebView view, String url) {
+                if (redirectSuggestedVideo(url)) return;
                 captureGeneration++;
                 resetTracks();
                 updateVideoContext(url);
                 applyCcPreference();
                 if (frameBridgeSupported) armFrameCallback();
                 if (!readingPaused) {
-                    status.setText("動画をタップして再生してください。字幕領域を検出中…");
+                    status.setText(embeddedPlayback
+                            ? "自動再生を試行中…始まらなければ動画の再生ボタンをタップしてください"
+                            : "動画をタップして再生してください。字幕領域を検出中…");
                 }
             }
         });
@@ -502,6 +515,31 @@ public final class SharedPlayerActivity extends Activity {
     }
 
     /**
+     * Clicking YouTube's end-screen recommendations can escape from /embed/
+     * to /watch, which reintroduces both the mobile-page promotion and its
+     * mute prompt. Keep the user-selected video within the official player.
+     * If YouTube changes URL via history.pushState, the OCR page probe also
+     * calls updateVideoContext and can trigger this same routing path.
+     */
+    private boolean redirectSuggestedVideo(String destinationUrl) {
+        if (!embeddedPlayback || isDestroyed() || player == null) return false;
+        String selectedId = YouTubeEmbeddedPlayback.suggestedVideoId(destinationUrl);
+        if (selectedId == null) return false;
+        if (!reembedPending) {
+            reembedPending = true;
+            main.post(() -> {
+                if (player == null || isDestroyed() || !embeddedPlayback) {
+                    reembedPending = false;
+                    return;
+                }
+                updateVideoContext(YouTubeEmbeddedPlayback.watchUrl(selectedId));
+                loadVideoPage(true);
+            });
+        }
+        return true;
+    }
+
+    /**
      * Prefer the official embedded player over the mobile watch page. The
      * mobile watch page can show an app-install interstitial that covers the
      * video and burned-in captions. YouTube's embedded player can be blocked
@@ -509,6 +547,7 @@ public final class SharedPlayerActivity extends Activity {
      */
     private void loadVideoPage(boolean useEmbeddedPlayer) {
         if (player == null) return;
+        reembedPending = false;
         embeddedPlayback = useEmbeddedPlayer;
         if (playbackLayoutToggle != null) {
             playbackLayoutToggle.setText(useEmbeddedPlayer
@@ -520,7 +559,7 @@ public final class SharedPlayerActivity extends Activity {
         if (speaker != null) speaker.stop();
         resetTracks();
         status.setText(useEmbeddedPlayer
-                ? "YouTubeプレーヤーを読み込み中… 画面の再生ボタンをタップしてください"
+                ? "YouTubeプレーヤーを読み込み中…音声付き自動再生を試行します"
                 : "従来のYouTube表示を読み込み中…");
         if (useEmbeddedPlayer) {
             player.loadUrl(YouTubeEmbeddedPlayback.embedUrl(videoId),
@@ -1055,6 +1094,7 @@ public final class SharedPlayerActivity extends Activity {
     }
 
     private boolean updateVideoContext(String url) {
+        if (redirectSuggestedVideo(url)) return true;
         String nextVideoId = YouTubeShareUrl.videoId(url);
         if (nextVideoId == null || nextVideoId.equals(videoId)) return false;
         if (speaker != null) speaker.stop();

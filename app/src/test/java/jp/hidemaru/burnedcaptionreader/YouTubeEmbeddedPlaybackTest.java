@@ -21,9 +21,9 @@ public final class YouTubeEmbeddedPlaybackTest {
     }
 
     @Test public void providesDocumentedRefererIdentityForAndroidWebView() {
-        assertEquals("https://jp.hidemaru.burnedcaptionreader.audioresearch/",
+        assertEquals("https://jp.hidemaru.burnedcaptionreader/",
                 YouTubeEmbeddedPlayback.identityHeaders(
-                        "jp.hidemaru.burnedcaptionreader.audioresearch").get("Referer"));
+                        "jp.hidemaru.burnedcaptionreader").get("Referer"));
     }
 
     @Test public void rejectsRetiredWatchAndOtherPagesAsMainWebViewDocument() {

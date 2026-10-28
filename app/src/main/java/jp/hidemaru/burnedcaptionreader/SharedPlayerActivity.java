@@ -262,6 +262,7 @@ public final class SharedPlayerActivity extends Activity {
                 resetTracks();
                 updateVideoContext(url);
                 applyCcPreference();
+                installAudioStartAssist();
                 if (frameBridgeSupported) armFrameCallback();
                 if (!readingPaused) {
                     status.setText("動画をタップして再生してください。字幕領域を検出中…");
@@ -491,6 +492,15 @@ public final class SharedPlayerActivity extends Activity {
         hideCc = preferences.isYouTubeCcHidden();
         getWindow().getDecorView().setKeepScreenOn(preferences.isKeepScreenOn());
         applyCcPreference();
+    }
+
+    private void installAudioStartAssist() {
+        if (player == null) return;
+        // Installed in the page, not triggered from Java as a synthetic click.
+        // A trusted touch on YouTube's existing play surface activates audio.
+        player.evaluateJavascript(YouTubeAudioStartAssist.INSTALL_SCRIPT, result -> {
+            diagnostics.event("youtube_audio_start_assist", "result", result);
+        });
     }
 
     private void applyCcPreference() {

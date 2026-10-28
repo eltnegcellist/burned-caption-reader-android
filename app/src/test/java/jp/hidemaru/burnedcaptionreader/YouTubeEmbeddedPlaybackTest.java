@@ -10,8 +10,14 @@ public final class YouTubeEmbeddedPlaybackTest {
         assertEquals("https://www.youtube.com/embed/" + ID
                 + "?playsinline=1&autoplay=1&controls=1",
                 YouTubeEmbeddedPlayback.embedUrl(ID));
-        assertEquals("https://m.youtube.com/watch?v=" + ID,
-                YouTubeEmbeddedPlayback.watchUrl(ID));
+    }
+
+    @Test public void embeddedPlaybackAlwaysUsesUserVisibleControls() {
+        String url = YouTubeEmbeddedPlayback.embedUrl(ID);
+        assertTrue(url.contains("autoplay=1"));
+        assertTrue(url.contains("controls=1"));
+        assertFalse(url.contains("mute=1"));
+        assertFalse(url.contains("autoplay=1&mute=1"));
     }
 
     @Test public void providesDocumentedRefererIdentityForAndroidWebView() {

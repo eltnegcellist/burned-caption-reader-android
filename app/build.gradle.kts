@@ -38,6 +38,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Install the audio-unmute trial alongside the ordinary caption reader.
+            applicationIdSuffix = ".audioresearch"
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(

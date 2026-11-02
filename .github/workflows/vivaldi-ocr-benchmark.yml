@@ -1,4 +1,4 @@
-name: Build Vivaldi OCR Benchmark v0.3
+name: Build Vivaldi OCR Benchmark v0.3.1
 on:
   push:
     branches:
@@ -34,7 +34,7 @@ jobs:
           node --check src/content.js
           node --check src/ui.js
           node --check src/paddle-entry.js
-          python3 -m py_compile scripts/build.py
+          python3 -m py_compile scripts/build.py scripts/patch_opencv_csp.py
       - name: Install OCR dependencies
         run: npm install --no-audit --no-fund
       - name: Bundle JS/WASM and official Japanese OCR models
@@ -43,7 +43,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import zipfile, json
-          p='dist/Vivaldi_YouTube_OCR_Benchmark_v0.3.0.zip'
+          p='dist/Vivaldi_YouTube_OCR_Benchmark_v0.3.1.zip'
           with zipfile.ZipFile(p) as z:
               files=set(z.namelist())
               assert z.testzip() is None
@@ -57,12 +57,21 @@ jobs:
               ]
               for name in required:
                   assert any(f.endswith('/'+name) for f in files),name
+              bundle = next(f for f in files if f.endswith('/paddle.js'))
+              data = z.read(bundle).decode('utf-8')
+              assert 'new Function(' not in data, 'MV3 extension CSP incompatible code in paddle bundle'
+              assert 'function cspSafeNamedFunction()' in data
+              assert 'function cspSafeDynCaller()' in data
+              manifest_path = next(f for f in files if f.endswith('/manifest.json'))
+              manifest = json.loads(z.read(manifest_path))
+              assert manifest['version'] == '0.3.1'
+              assert "'unsafe-eval'" not in manifest['content_security_policy']['extension_pages'].replace('wasm-unsafe-eval','')
           print('All required packaged assets found')
           PY
       - name: Upload installable ZIP
         uses: actions/upload-artifact@v4
         with:
-          name: Vivaldi-YouTube-OCR-Benchmark-v0.3
-          path: experiments/vivaldi-ocr-benchmark/dist/Vivaldi_YouTube_OCR_Benchmark_v0.3.0.zip
+          name: Vivaldi-YouTube-OCR-Benchmark-v0.3.1
+          path: experiments/vivaldi-ocr-benchmark/dist/Vivaldi_YouTube_OCR_Benchmark_v0.3.1.zip
           retention-days: 1
           if-no-files-found: error

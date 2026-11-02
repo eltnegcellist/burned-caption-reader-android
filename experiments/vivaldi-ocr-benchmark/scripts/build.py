@@ -54,7 +54,7 @@ def main():
     ASSETS.mkdir(parents=True)
     copy(BASE/'manifest.json',DST/'manifest.json')
     for name in ('content.js','ui.html','ui.js'):copy(BASE/'src'/name,DST/name)
-    subprocess.run([str(NODE/'.bin'/'esbuild'),str(BASE/'src'/'paddle-entry.js'),'--bundle','--platform=browser','--format=esm','--target=es2022','--log-level=warning','--outfile='+str(DST/'paddle.js')],check=True,cwd=BASE)
+    subprocess.run([str(NODE/'.bin'/'esbuild'),str(BASE/'src'/'paddle-entry.js'),'--bundle','--platform=browser','--format=esm','--target=es2022','--external:fs','--external:path','--log-level=warning','--outfile='+str(DST/'paddle.js')],check=True,cwd=BASE)
     copy(NODE/'tesseract.js'/'dist'/'tesseract.min.js',ASSETS/'tesseract.min.js')
     copy(NODE/'tesseract.js'/'dist'/'worker.min.js',ASSETS/'worker.min.js')
     for item in (NODE/'tesseract.js-core').glob('tesseract-core*'):

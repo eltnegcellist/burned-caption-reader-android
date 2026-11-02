@@ -55,6 +55,10 @@ def main():
     copy(BASE/'manifest.json',DST/'manifest.json')
     for name in ('content.js','ui.html','ui.js'):copy(BASE/'src'/name,DST/name)
     subprocess.run([str(NODE/'.bin'/'esbuild'),str(BASE/'src'/'paddle-entry.js'),'--bundle','--platform=browser','--format=esm','--target=es2022','--external:fs','--external:path','--log-level=warning','--outfile='+str(DST/'paddle.js')],check=True,cwd=BASE)
+    # PaddleOCR.js/OpenCV.js uses new Function() in embind; MV3 forbids unsafe-eval.
+    # Patch local generated output, preserving the strict extension CSP.
+    subprocess.run(['python3',str(BASE/'scripts'/'patch_opencv_csp.py'),str(DST/'paddle.js')],check=True,cwd=BASE)
+    subprocess.run(['node','--check',str(DST/'paddle.js')],check=True,cwd=BASE)
     copy(NODE/'tesseract.js'/'dist'/'tesseract.min.js',ASSETS/'tesseract.min.js')
     copy(NODE/'tesseract.js'/'dist'/'worker.min.js',ASSETS/'worker.min.js')
     for item in (NODE/'tesseract.js-core').glob('tesseract-core*'):
@@ -83,7 +87,7 @@ def main():
     for f in sorted(DST.rglob('*')):
         if f.is_file():checks[str(f.relative_to(DST))]={'bytes':f.stat().st_size,'sha256':hashlib.sha256(f.read_bytes()).hexdigest()}
     (DST/'ASSET-MANIFEST.json').write_text(json.dumps(checks,indent=2,ensure_ascii=False),encoding='utf-8')
-    target=BASE/'dist'/'Vivaldi_YouTube_OCR_Benchmark_v0.3.0.zip'
+    target=BASE/'dist'/'Vivaldi_YouTube_OCR_Benchmark_v0.3.1.zip'
     with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED,compresslevel=6,allowZip64=True) as z:
         for f in sorted(DST.rglob('*')):
             if f.is_file():z.write(f,arcname=str(f.relative_to(DST.parent)))

@@ -18,7 +18,7 @@ def download(url, dst):
             req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 VivaldiOCRBenchmark/0.3'})
             with urllib.request.urlopen(req,timeout=120) as response, dst.open('wb') as handle:
                 shutil.copyfileobj(response,handle)
-            if dst.stat().st_size < 1000: raise ValueError('unexpectedly short download')
+            if dst.stat().st_size < (50 if dst.suffix in ('.yml','.yaml') else 1000): raise ValueError('unexpectedly short download')
             print('downloaded',url,dst.stat().st_size,flush=True)
             return
         except Exception as ex:

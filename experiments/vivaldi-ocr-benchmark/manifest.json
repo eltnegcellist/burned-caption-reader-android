@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube字幕 OCR ベンチマーク (Vivaldi Android)",
+  "short_name": "OCR Benchmark",
+  "version": "0.3.1",
+  "description": "YouTube動画の同一フレームでPP-OCRv6 SmallとTesseract fast/bestを比較。CSP互換修正済み。画像の外部送信なし。",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/*",
+        "https://m.youtube.com/*",
+        "https://youtube.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "ui.html",
+        "ui.js",
+        "paddle.js",
+        "assets/*",
+        "assets/ort/*",
+        "assets/tess-core/*",
+        "assets/tess-fast/*",
+        "assets/tess-best/*"
+      ],
+      "matches": [
+        "https://www.youtube.com/*",
+        "https://m.youtube.com/*",
+        "https://youtube.com/*"
+      ]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  }
+}

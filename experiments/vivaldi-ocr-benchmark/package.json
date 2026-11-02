@@ -1,0 +1,18 @@
+{
+  "name": "vivaldi-youtube-ocr-benchmark",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "python3 scripts/build.py"
+  },
+  "dependencies": {
+    "@paddleocr/paddleocr-js": "0.4.2",
+    "onnxruntime-web": "1.22.0",
+    "tesseract.js": "6.0.1",
+    "tesseract.js-core": "6.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
+  }
+}

@@ -1,0 +1,77 @@
+name: Build Vivaldi OCR Benchmark v0.3.1
+on:
+  push:
+    branches:
+      - develop/vivaldi-ocr-benchmark
+    paths:
+      - "experiments/vivaldi-ocr-benchmark/**"
+      - ".github/workflows/vivaldi-ocr-benchmark.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "experiments/vivaldi-ocr-benchmark/**"
+      - ".github/workflows/vivaldi-ocr-benchmark.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: experiments/vivaldi-ocr-benchmark
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax checks
+        run: |
+          node --check src/content.js
+          node --check src/ui.js
+          node --check src/paddle-entry.js
+          python3 -m py_compile scripts/build.py scripts/patch_opencv_csp.py
+      - name: Install OCR dependencies
+        run: npm install --no-audit --no-fund
+      - name: Bundle JS/WASM and official Japanese OCR models
+        run: python3 scripts/build.py
+      - name: Verify extension ZIP
+        run: |
+          python3 - <<'PY'
+          import zipfile, json
+          p='dist/Vivaldi_YouTube_OCR_Benchmark_v0.3.1.zip'
+          with zipfile.ZipFile(p) as z:
+              files=set(z.namelist())
+              assert z.testzip() is None
+              required=[
+                  'manifest.json','content.js','ui.html','ui.js','paddle.js',
+                  'assets/tesseract.min.js','assets/worker.min.js',
+                  'assets/PP-OCRv6_small_det.tar',
+                  'assets/PP-OCRv6_small_rec.tar',
+                  'assets/tess-fast/jpn.traineddata.gz',
+                  'assets/tess-best/jpn.traineddata.gz'
+              ]
+              for name in required:
+                  assert any(f.endswith('/'+name) for f in files),name
+              bundle = next(f for f in files if f.endswith('/paddle.js'))
+              data = z.read(bundle).decode('utf-8')
+              assert 'new Function(' not in data, 'MV3 extension CSP incompatible code in paddle bundle'
+              assert 'function cspSafeNamedFunction()' in data
+              assert 'function cspSafeDynCaller()' in data
+              manifest_path = next(f for f in files if f.endswith('/manifest.json'))
+              manifest = json.loads(z.read(manifest_path))
+              assert manifest['version'] == '0.3.1'
+              assert "'unsafe-eval'" not in manifest['content_security_policy']['extension_pages'].replace('wasm-unsafe-eval','')
+          print('All required packaged assets found')
+          PY
+      - name: Upload installable ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: Vivaldi-YouTube-OCR-Benchmark-v0.3.1
+          path: experiments/vivaldi-ocr-benchmark/dist/Vivaldi_YouTube_OCR_Benchmark_v0.3.1.zip
+          retention-days: 1
+          if-no-files-found: error

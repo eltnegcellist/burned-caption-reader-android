@@ -6,6 +6,11 @@ on:
     paths:
       - "experiments/vivaldi-ocr-benchmark/**"
       - ".github/workflows/vivaldi-ocr-benchmark.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "experiments/vivaldi-ocr-benchmark/**"
+      - ".github/workflows/vivaldi-ocr-benchmark.yml"
   workflow_dispatch:
 permissions:
   contents: read

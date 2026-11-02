@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "YouTube字幕 OCR ベンチマーク (Vivaldi Android)",
   "short_name": "OCR Benchmark",
-  "version": "0.3.0",
-  "description": "YouTube動画の同一フレームでPP-OCRv6 SmallとTesseract fast/bestの日本語OCRを比較する検証版。画像を外部送信しません。",
+  "version": "0.3.1",
+  "description": "YouTube動画の同一フレームでPP-OCRv6 SmallとTesseract fast/bestを比較。CSP互換修正済み。画像の外部送信なし。",
   "content_scripts": [
     {
       "matches": [
